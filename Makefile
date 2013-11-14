@@ -15,6 +15,40 @@
 include config/Makefile
 include stdlib/StdlibModules
 
+CAMLP4_COMMON="\
+  camlp4/Camlp4/Camlp4Ast.partial.ml \
+  camlp4/boot/camlp4boot.byte"
+CAMLP4_BYTE="$CAMLP4_COMMON \
+  camlp4/Camlp4.cmo \
+  camlp4/Camlp4Top.cmo \
+  camlp4/camlp4prof.byte$EXE \
+  camlp4/mkcamlp4.byte$EXE \
+  camlp4/camlp4.byte$EXE \
+  camlp4/camlp4fulllib.cma"
+CAMLP4_NATIVE="$CAMLP4_COMMON \
+  camlp4/Camlp4.cmx \
+  camlp4/Camlp4Top.cmx \
+  camlp4/camlp4prof.native$EXE \
+  camlp4/mkcamlp4.native$EXE \
+  camlp4/camlp4.native$EXE \
+  camlp4/camlp4fulllib.cmxa"
+
+for i in camlp4boot camlp4r camlp4rf camlp4o camlp4of camlp4oof camlp4orf; do
+  CAMLP4_BYTE="$CAMLP4_BYTE camlp4/$i.byte$EXE camlp4/$i.cma"
+  CAMLP4_NATIVE="$CAMLP4_NATIVE camlp4/$i.native$EXE"
+done
+
+cd camlp4
+for dir in Camlp4Parsers Camlp4Printers Camlp4Filters; do
+  for file in $dir/*.ml; do
+    base=camlp4/$dir/`basename $file .ml`
+    CAMLP4_BYTE="$CAMLP4_BYTE $base.cmo"
+    CAMLP4_NATIVE="$CAMLP4_NATIVE $base.cmx $base.$O"
+  done
+done
+cd ..
+
+
 CAMLC=boot/ocamlrun boot/ocamlc -nostdlib -I boot
 CAMLOPT=$(CAMLOPT_BIN) -nostdlib -I stdlib -I otherlibs/dynlink
 COMPFLAGS=-strict-sequence -w +33..39 -warn-error A $(INCLUDES)
@@ -38,65 +72,7 @@ OCAMLBUILDLIBNATIVE=$(WITH_OCAMLBUILD:=lib.native)
 
 OCAMLDOC_OPT=$(WITH_OCAMLDOC:=.opt)
 
-INCLUDES=-I utils -I parsing -I typing -I bytecomp -I asmcomp -I driver \
-	 -I toplevel
-
-UTILS=utils/misc.cmo utils/tbl.cmo utils/config.cmo \
-  utils/clflags.cmo utils/terminfo.cmo utils/ccomp.cmo utils/warnings.cmo \
-  utils/consistbl.cmo
-
-PARSING=parsing/location.cmo parsing/longident.cmo \
-  parsing/ast_helper.cmo \
-  parsing/syntaxerr.cmo parsing/parser.cmo \
-  parsing/lexer.cmo parsing/parse.cmo parsing/printast.cmo \
-  parsing/pprintast.cmo \
-  parsing/ast_mapper.cmo
-
-TYPING=typing/ident.cmo typing/path.cmo \
-  typing/primitive.cmo typing/types.cmo \
-  typing/btype.cmo typing/oprint.cmo \
-  typing/subst.cmo typing/predef.cmo \
-  typing/datarepr.cmo typing/cmi_format.cmo typing/env.cmo \
-  typing/typedtree.cmo typing/printtyped.cmo typing/ctype.cmo \
-  typing/printtyp.cmo typing/includeclass.cmo \
-  typing/mtype.cmo typing/envaux.cmo typing/includecore.cmo \
-  typing/includemod.cmo typing/typetexp.cmo typing/parmatch.cmo \
-  typing/typedtreeIter.cmo typing/typedtreeMap.cmo typing/cmt_format.cmo \
-  typing/stypes.cmo typing/typecore.cmo \
-  typing/typedecl.cmo typing/typeclass.cmo \
-  typing/typemod.cmo
-
-COMP=bytecomp/lambda.cmo bytecomp/printlambda.cmo \
-  bytecomp/typeopt.cmo bytecomp/switch.cmo bytecomp/matching.cmo \
-  bytecomp/translobj.cmo bytecomp/translcore.cmo \
-  bytecomp/translclass.cmo bytecomp/translmod.cmo \
-  bytecomp/simplif.cmo bytecomp/runtimedef.cmo \
-  driver/pparse.cmo driver/main_args.cmo \
-  driver/compenv.cmo driver/compmisc.cmo
-
-COMMON=$(UTILS) $(PARSING) $(TYPING) $(COMP)
-
-BYTECOMP=bytecomp/meta.cmo bytecomp/instruct.cmo bytecomp/bytegen.cmo \
-  bytecomp/printinstr.cmo bytecomp/opcodes.cmo bytecomp/emitcode.cmo \
-  bytecomp/bytesections.cmo bytecomp/dll.cmo bytecomp/symtable.cmo \
-  bytecomp/bytelink.cmo bytecomp/bytelibrarian.cmo bytecomp/bytepackager.cmo \
-  driver/errors.cmo driver/compile.cmo
-
-ASMCOMP=asmcomp/arch.cmo asmcomp/debuginfo.cmo \
-  asmcomp/cmm.cmo asmcomp/printcmm.cmo \
-  asmcomp/reg.cmo asmcomp/mach.cmo asmcomp/proc.cmo \
-  asmcomp/clambda.cmo asmcomp/printclambda.cmo asmcomp/compilenv.cmo \
-  asmcomp/closure.cmo asmcomp/cmmgen.cmo \
-  asmcomp/printmach.cmo asmcomp/selectgen.cmo asmcomp/selection.cmo \
-  asmcomp/comballoc.cmo asmcomp/liveness.cmo \
-  asmcomp/spill.cmo asmcomp/split.cmo \
-  asmcomp/interf.cmo asmcomp/coloring.cmo \
-  asmcomp/reloadgen.cmo asmcomp/reload.cmo \
-  asmcomp/printlinear.cmo asmcomp/linearize.cmo \
-  asmcomp/schedgen.cmo asmcomp/scheduling.cmo \
-  asmcomp/emitaux.cmo asmcomp/emit.cmo asmcomp/asmgen.cmo \
-  asmcomp/asmlink.cmo asmcomp/asmlibrarian.cmo asmcomp/asmpackager.cmo \
-  driver/opterrors.cmo driver/optcompile.cmo
+INCLUDES=-I +compiler-libs
 
 TOPLEVEL=toplevel/genprintval.cmo toplevel/toploop.cmo \
   toplevel/trace.cmo toplevel/topdirs.cmo toplevel/topmain.cmo
@@ -121,182 +97,6 @@ defaultentry:
 	@echo "	make world.opt"
 	@echo "	make install"
 	@echo "should work.  But see the file INSTALL for more details."
-
-# Recompile the system using the bootstrap compiler
-all:
-	$(MAKE) runtime
-	$(MAKE) ocamlc
-	$(MAKE) ocamllex
-	$(MAKE) ocamlyacc
-	$(MAKE) ocamltools
-	$(MAKE) library
-	$(MAKE) ocaml
-	$(MAKE) otherlibraries $(OCAMLBUILDBYTE) $(CAMLP4OUT) $(WITH_DEBUGGER) \
-	  $(WITH_OCAMLDOC)
-
-# Compile everything the first time
-world:
-	$(MAKE) coldstart
-	$(MAKE) all
-
-# Compile also native code compiler and libraries, fast
-world.opt:
-	$(MAKE) coldstart
-	$(MAKE) opt.opt
-
-# Hard bootstrap how-to:
-# (only necessary in some cases, for example if you remove some primitive)
-#
-# make coreboot     [old system -- you were in a stable state]
-# <change the source>
-# make core         [cross-compiler]
-# make partialclean [if you get "inconsistent assumptions"]
-# <debug your changes>
-# make core         [cross-compiler]
-# make coreboot     [new system -- now you are in a stable state]
-
-# Core bootstrapping cycle
-coreboot:
-# Save the original bootstrap compiler
-	$(MAKE) backup
-# Promote the new compiler but keep the old runtime
-# This compiler runs on boot/ocamlrun and produces bytecode for
-# byterun/ocamlrun
-	$(MAKE) promote-cross
-# Rebuild ocamlc and ocamllex (run on byterun/ocamlrun)
-	$(MAKE) partialclean
-	$(MAKE) ocamlc ocamllex ocamltools
-# Rebuild the library (using byterun/ocamlrun ./ocamlc)
-	$(MAKE) library-cross
-# Promote the new compiler and the new runtime
-	$(MAKE) promote
-# Rebuild the core system
-	$(MAKE) partialclean
-	$(MAKE) core
-# Check if fixpoint reached
-	$(MAKE) compare
-
-# Bootstrap and rebuild the whole system.
-# The compilation of ocaml will fail if the runtime has changed.
-# Never mind, just do make bootstrap to reach fixpoint again.
-bootstrap:
-	$(MAKE) coreboot
-	$(MAKE) all
-	$(MAKE) compare
-
-LIBFILES=stdlib.cma std_exit.cmo *.cmi camlheader
-
-# Start up the system from the distribution compiler
-coldstart:
-	cd byterun; $(MAKE) all
-	cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
-	cd yacc; $(MAKE) all
-	cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
-	cd stdlib; $(MAKE) all CAMLC="../boot/ocamlrun ../boot/ocamlc -nostdlib -I ../boot"
-	cd stdlib; cp $(LIBFILES) ../boot
-	if test -f boot/libcamlrun.a; then :; else \
-	  ln -s ../byterun/libcamlrun.a boot/libcamlrun.a; fi
-	if test -d stdlib/caml; then :; else \
-	  ln -s ../byterun stdlib/caml; fi
-
-# Build the core system: the minimum needed to make depend and bootstrap
-core:
-	$(MAKE) coldstart
-	$(MAKE) ocamlc
-	$(MAKE) ocamllex ocamlyacc ocamltools library
-
-# Recompile the core system using the bootstrap compiler
-coreall:
-	$(MAKE) ocamlc
-	$(MAKE) ocamllex ocamlyacc ocamltools library
-
-# Save the current bootstrap compiler
-MAXSAVED=boot/Saved/Saved.prev/Saved.prev/Saved.prev/Saved.prev/Saved.prev
-backup:
-	if test -d boot/Saved; then : ; else mkdir boot/Saved; fi
-	if test -d $(MAXSAVED); then rm -r $(MAXSAVED); else : ; fi
-	mv boot/Saved boot/Saved.prev
-	mkdir boot/Saved
-	mv boot/Saved.prev boot/Saved/Saved.prev
-	cp boot/ocamlrun$(EXE) boot/Saved
-	mv boot/ocamlc boot/ocamllex boot/ocamlyacc$(EXE) boot/ocamldep \
-	   boot/Saved
-	cd boot; cp $(LIBFILES) Saved
-
-# Promote the newly compiled system to the rank of cross compiler
-# (Runs on the old runtime, produces code for the new runtime)
-promote-cross:
-	cp ocamlc boot/ocamlc
-	cp lex/ocamllex boot/ocamllex
-	cp yacc/ocamlyacc$(EXE) boot/ocamlyacc$(EXE)
-	cp tools/ocamldep boot/ocamldep
-	cd stdlib; cp $(LIBFILES) ../boot
-
-# Promote the newly compiled system to the rank of bootstrap compiler
-# (Runs on the new runtime, produces code for the new runtime)
-promote: promote-cross
-	cp byterun/ocamlrun$(EXE) boot/ocamlrun$(EXE)
-
-# Restore the saved bootstrap compiler if a problem arises
-restore:
-	mv boot/Saved/* boot
-	rmdir boot/Saved
-	mv boot/Saved.prev boot/Saved
-
-# Check if fixpoint reached
-compare:
-	@if cmp boot/ocamlc ocamlc && cmp boot/ocamllex lex/ocamllex \
-	    && cmp boot/ocamldep tools/ocamldep; \
-	then echo "Fixpoint reached, bootstrap succeeded."; \
-	else echo "Fixpoint not reached, try one more bootstrapping cycle."; \
-	fi
-
-# Remove old bootstrap compilers
-cleanboot:
-	rm -rf boot/Saved/Saved.prev/*
-
-# Compile the native-code compiler
-opt-core:
-	$(MAKE) runtimeopt
-	$(MAKE) ocamlopt
-	$(MAKE) libraryopt
-
-opt:
-	$(MAKE) runtimeopt
-	$(MAKE) ocamlopt
-	$(MAKE) libraryopt
-	$(MAKE) otherlibrariesopt ocamltoolsopt $(OCAMLBUILDNATIVE)
-
-# Native-code versions of the tools
-opt.opt:
-	$(MAKE) checkstack
-	$(MAKE) runtime
-	$(MAKE) core
-	$(MAKE) ocaml
-	$(MAKE) opt-core
-	$(MAKE) ocamlc.opt
-	$(MAKE) otherlibraries $(WITH_DEBUGGER) $(WITH_OCAMLDOC) \
-	        $(OCAMLBUILDBYTE) $(CAMLP4OUT)
-	$(MAKE) ocamlopt.opt
-	$(MAKE) otherlibrariesopt
-	$(MAKE) ocamllex.opt ocamltoolsopt ocamltoolsopt.opt $(OCAMLDOC_OPT) \
-	        $(OCAMLBUILDNATIVE) $(CAMLP4OPT)
-
-base.opt:
-	$(MAKE) checkstack
-	$(MAKE) runtime
-	$(MAKE) core
-	$(MAKE) ocaml
-	$(MAKE) opt-core
-	$(MAKE) ocamlc.opt
-	$(MAKE) otherlibraries $(OCAMLBUILDBYTE) $(CAMLP4OUT) $(WITH_DEBUGGER) \
-	  $(WITH_OCAMLDOC)
-	$(MAKE) ocamlopt.opt
-	$(MAKE) otherlibrariesopt
-
-# Installation
-
-COMPLIBDIR=$(LIBDIR)/compiler-libs
 
 install:
 	if test -d $(BINDIR); then : ; else $(MKDIR) $(BINDIR); fi
@@ -334,41 +134,8 @@ install:
 	BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) PREFIX=$(PREFIX) \
 	  ./build/partial-install.sh
 
-# Installation of the native-code compiler
-installopt:
-	cd asmrun; $(MAKE) install
-	cp ocamlopt $(BINDIR)/ocamlopt$(EXE)
-	cd stdlib; $(MAKE) installopt
-	cp asmcomp/*.cmi $(COMPLIBDIR)
-	cp compilerlibs/ocamloptcomp.cma $(OPTSTART) $(COMPLIBDIR)
-	if test -n "$(WITH_OCAMLDOC)"; then (cd ocamldoc; $(MAKE) installopt); \
-		else :; fi
-	for i in $(OTHERLIBRARIES); \
-	  do (cd otherlibs/$$i; $(MAKE) installopt) || exit $$?; done
-	if test -f ocamlopt.opt ; then $(MAKE) installoptopt; fi
-	cd tools; $(MAKE) installopt
-
-installoptopt:
-	cp ocamlc.opt $(BINDIR)/ocamlc.opt$(EXE)
-	cp ocamlopt.opt $(BINDIR)/ocamlopt.opt$(EXE)
-	cp lex/ocamllex.opt $(BINDIR)/ocamllex.opt$(EXE)
-	cp compilerlibs/ocamlcommon.cmxa compilerlibs/ocamlcommon.a \
-	   compilerlibs/ocamlbytecomp.cmxa compilerlibs/ocamlbytecomp.a \
-	   compilerlibs/ocamloptcomp.cmxa compilerlibs/ocamloptcomp.a \
-	   $(BYTESTART:.cmo=.cmx) $(BYTESTART:.cmo=.o) \
-	   $(OPTSTART:.cmo=.cmx) $(OPTSTART:.cmo=.o) \
-	   $(COMPLIBDIR)
-	cd $(COMPLIBDIR) && $(RANLIB) ocamlcommon.a ocamlbytecomp.a \
-	   ocamloptcomp.a
-
-clean:: partialclean
-
-# Shared parts of the system
-
-compilerlibs/ocamlcommon.cma: $(COMMON)
-	$(CAMLC) -a -o $@ $(COMMON)
-partialclean::
-	rm -f compilerlibs/ocamlcommon.cma
+clean:
+	$(OCAMLBUILD) -clean
 
 # The bytecode compiler
 
@@ -780,40 +547,8 @@ camlp4out: ocamlc ocamlbuild.byte
 camlp4opt: ocamlopt otherlibrariesopt ocamlbuild-mixed-boot ocamlbuild.native
 	./build/camlp4-native-only.sh
 
-# Ocamlbuild
-#ifeq ($(OCAMLBUILD_NOBOOT),"yes")
-#ocamlbuild.byte: ocamlc
-#	$(MAKE) -C ocamlbuild -f Makefile.noboot
-#else
-ocamlbuild.byte: ocamlc ocamlbuild-mixed-boot
-	./build/ocamlbuild-byte-only.sh
-#endif
-
-ocamlbuild.native: ocamlopt ocamlbuild-mixed-boot otherlibrariesopt
-	./build/ocamlbuild-native-only.sh
-ocamlbuildlib.native: ocamlopt ocamlbuild-mixed-boot otherlibrariesopt
-	./build/ocamlbuildlib-native-only.sh
-
-ocamlbuild-mixed-boot: ocamlc
-	./build/mixed-boot.sh
-	touch ocamlbuild-mixed-boot
-
 partialclean::
-	rm -rf _build ocamlbuild-mixed-boot
-
-# Check that the stack limit is reasonable.
-
-checkstack:
-	@if $(BYTECC) -o tools/checkstack tools/checkstack.c; \
-	  then tools/checkstack; \
-	  else :; \
-	fi
-	@rm -f tools/checkstack
-
-# Make clean in the test suite
-
-clean::
-	cd testsuite; $(MAKE) clean
+	rm -rf _build
 
 # Make MacOS X package
 
