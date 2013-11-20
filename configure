@@ -4,5 +4,8 @@
 unset LANG
 unset LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
 
-ocamlc -config | sed 's/: / := "/;s/$/"/' > Makefile.config
+# OCaml is already installed, this means we should have everything we
+# need. Just dump its configuration.
+
+ocamlc -config | sed 's/: / := /' > Makefile.config
 ocamlc -config | sed 's/^/let /;s/: / = "/;s/$/"/' > myocamlbuild_config.ml

@@ -173,12 +173,12 @@ value of_lexing_position pos =
 
 value to_ocaml_location x =
   debug loc "to_ocaml_location: %a@\n" dump x in
-  { Camlp4_import.Location.
+  { Location.
     loc_start = pos_to_lexing_position x.start x.file_name;
     loc_end   = pos_to_lexing_position x.stop x.file_name;
     loc_ghost = x.ghost };
 
-value of_ocaml_location { Camlp4_import.Location.loc_start = a; loc_end = b; loc_ghost = g } =
+value of_ocaml_location { Location.loc_start = a; loc_end = b; loc_ghost = g } =
   let res =
     { file_name = better_file_name a.Lexing.pos_fname b.Lexing.pos_fname;
       start     = pos_of_lexing_position a;

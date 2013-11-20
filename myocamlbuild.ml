@@ -18,7 +18,7 @@ open Format
 module C = Myocamlbuild_config
 
 let () = mark_tag_used "windows"
-let windows = Sys.os_type = "Win32"
+let windows = C.os_type = "Win32"
 let () = if windows then tag_any ["windows"]
 
 let add_exe a =
@@ -79,7 +79,7 @@ let () =
     let add_extensions extensions modules =
       List.fold_right begin fun x ->
         List.fold_right begin fun ext acc ->
-          x-.-ext :: acc
+          (x^ext) :: acc
         end extensions
       end modules []
     in
@@ -103,9 +103,6 @@ let () =
       let (_include_dirs_table, _for_pack_table) = mk_tables annotated_arch in
       (* Format.eprintf "%a@." (Ocaml_arch.print_table (List.print pp_print_string)) include_dirs_table; *)
       iter_info begin fun i ->
-        Printf.eprintf "%S -> [%s]\n%!" i.current_path (String.concat "; "
-                                                          (List.map
-                                                             (Printf.sprintf "%S") i.include_dirs));
         Pathname.define_context i.current_path i.include_dirs
       end annotated_arch
     in
@@ -113,7 +110,7 @@ let () =
     let camlp4_arch =
       dir "" [
         dir "camlp4" [
-          dir "common" [];
+          dir "config" [];
           dir_pack "Camlp4" [
             dir_pack "Struct" [
               dir_pack "Grammar" [];
@@ -127,14 +124,14 @@ let () =
 
     setup_arch camlp4_arch;
 
-    Pathname.define_context "camlp4" ["camlp4/common"];
-    Pathname.define_context "camlp4/boot" ["camlp4/common"];
-    Pathname.define_context "camlp4/Camlp4Parsers" ["camlp4"; "camlp4/common"];
-    Pathname.define_context "camlp4/Camlp4Printers" ["camlp4"; "camlp4/common"];
-    Pathname.define_context "camlp4/Camlp4Filters" ["camlp4"; "camlp4/common"];
-    Pathname.define_context "camlp4/Camlp4Top" ["camlp4"; "camlp4/common"];
+    Pathname.define_context "camlp4" ["camlp4/config"];
+    Pathname.define_context "camlp4/boot" ["camlp4/config"];
+    Pathname.define_context "camlp4/Camlp4Parsers" ["camlp4"; "camlp4/config"];
+    Pathname.define_context "camlp4/Camlp4Printers" ["camlp4"; "camlp4/config"];
+    Pathname.define_context "camlp4/Camlp4Filters" ["camlp4"; "camlp4/config"];
+    Pathname.define_context "camlp4/Camlp4Top" ["camlp4"; "camlp4/config"];
 
-    let camlp4_import = [
+    let import = [
       "misc.cmi";
       "terminfo.cmi";
       "warnings.cmi";
@@ -155,11 +152,11 @@ let () =
            ~dep:"camlp4/import/.keepme"
            ~prod
            (fun _ _ -> cp (C.standard_library / "compiler-libs" / fn) prod))
-      camlp4_import;
+      import;
 
     flag ["ocaml"; "compile"; "use_import"] & S[A "-I"; A "camlp4/import"];
     dep ["ocaml"; "compile"; "use_import"]
-      (List.map (fun fn -> "camlp4" / "import" / fn) camlp4_import);
+      (List.map (fun fn -> "camlp4" / "import" / fn) import);
 
     copy_rule "% -> %.exe" ~insert:`bottom "%" "%.exe";
 
@@ -197,7 +194,7 @@ let () =
 
     let camlp4lib_cma = p4 "camlp4lib.cma" in
     let camlp4lib_cmxa = p4 "camlp4lib.cmxa" in
-    let camlp4lib_lib = p4 ("camlp4lib"-.-C.ext_lib) in
+    let camlp4lib_lib = p4 ("camlp4lib"^C.ext_lib) in
 
     let special_modules =
       if Sys.file_exists "./boot/Profiler.cmo" then [camlp4Profiler] else []
@@ -207,7 +204,7 @@ let () =
       let name = "camlp4"/name in
       let cma = name-.-"cma" in
       let deps = special_modules @ modules @ [top_top] in
-      let cmos = add_extensions ["cmo"] deps in
+      let cmos = add_extensions [".cmo"] deps in
       rule cma
         ~deps:(camlp4lib_cma::cmos)
         ~prods:[cma]
@@ -223,8 +220,8 @@ let () =
       let byte = name-.-"byte" in
       let native = name-.-"native" in
       let deps = special_modules @ modules @ [camlp4_bin] in
-      let cmos = add_extensions ["cmo"] deps in
-      let cmxs = add_extensions ["cmx"] deps in
+      let cmos = add_extensions [".cmo"] deps in
+      let cmxs = add_extensions [".cmx"] deps in
       let objs = add_extensions [C.ext_obj] deps in
       rule byte
         ~deps:(camlp4lib_cma::cmos)

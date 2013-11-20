@@ -71,6 +71,10 @@ byte:
 native:
 	$(OB) $(CAMLP4_NATIVE)
 
+.PHONY: all
+all:
+	$(OB) $(CAMLP4_BYTE) $(CAMLP4_NATIVE)
+
 .PHONY: clean
 clean:
 	$(OB) -clean
@@ -78,5 +82,3 @@ clean:
 .PHONY: distclean
 distclean: clean
 	rm -f myocamlbuild_config.ml Makefile.config
-
-all: byte native

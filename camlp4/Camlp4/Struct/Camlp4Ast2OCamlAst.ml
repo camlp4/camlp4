@@ -22,9 +22,9 @@
 
 module Make (Ast : Sig.Camlp4Ast) = struct
   open Format;
-  open Camlp4_import.Parsetree;
-  open Camlp4_import.Longident;
-  open Camlp4_import.Asttypes;
+  open Parsetree;
+  open Longident;
+  open Asttypes;
   open Ast;
 
   value error loc str = Loc.raise loc (Failure str);
@@ -53,7 +53,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   value mkloc = Loc.to_ocaml_location;
   value mkghloc loc = Loc.to_ocaml_location (Loc.ghostify loc);
 
-  value with_loc txt loc = Camlp4_import.Location.mkloc txt (mkloc loc);
+  value with_loc txt loc = Location.mkloc txt (mkloc loc);
 
   value mktyp loc d = {ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = []};
   value mkpat loc d = {ppat_desc = d; ppat_loc = mkloc loc; ppat_attributes = []};
@@ -451,7 +451,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     let (id, tpl) = type_parameters_and_type_name id_tpl [] in
     let (kind, priv, ct) = opt_private_ctyp ct in
     pwith_type id
-      { ptype_name = Camlp4_import.Location.mkloc (Camlp4_import.Longident.last id.txt) id.loc;
+      { ptype_name = Location.mkloc (Longident.last id.txt) id.loc;
         ptype_params = tpl; ptype_cstrs = [];
         ptype_kind = kind;
         ptype_private = priv;
@@ -1038,7 +1038,7 @@ value varify_constructors var_names =
     | <:module_binding@loc< $s$ : $mt$ = $me$ >> ->
         [{pmb_name=with_loc s loc;
           pmb_expr=
-          {pmod_loc=Camlp4_import.Location.none;
+          {pmod_loc=Location.none;
            pmod_desc=Pmod_constraint(module_expr me,module_type mt);
            pmod_attributes=[];
           };

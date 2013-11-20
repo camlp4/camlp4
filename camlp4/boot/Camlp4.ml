@@ -439,10 +439,10 @@ module Sig =
         val of_lexing_position : Lexing.position -> t
           
         (** Return an OCaml location. *)
-        val to_ocaml_location : t -> Camlp4_import.Location.t
+        val to_ocaml_location : t -> Location.t
           
         (** Return a location from an OCaml location. *)
-        val of_ocaml_location : Camlp4_import.Location.t -> t
+        val of_ocaml_location : Location.t -> t
           
         (** Return a location from ocamllex buffer. *)
         val of_lexbuf : Lexing.lexbuf -> t
@@ -2985,7 +2985,7 @@ module ErrorHandler :
                | x when x = Obj.string_tag ->
                    "\"" ^ ((String.escaped (Obj.magic r : string)) ^ "\"")
                | x when x = Obj.double_tag ->
-                   Camlp4_import.Oprint.float_repres (Obj.magic r : float)
+                   Oprint.float_repres (Obj.magic r : float)
                | x when x = Obj.abstract_tag -> opaque "abstract"
                | x when x = Obj.custom_tag -> opaque "custom"
                | x when x = Obj.final_tag -> opaque "final"
@@ -3203,14 +3203,14 @@ module Struct =
           
         let to_ocaml_location x =
           {
-            Camlp4_import.Location.loc_start =
+            Location.loc_start =
               pos_to_lexing_position x.start x.file_name;
             loc_end = pos_to_lexing_position x.stop x.file_name;
             loc_ghost = x.ghost;
           }
           
         let of_ocaml_location {
-                                Camlp4_import.Location.loc_start = a;
+                                Location.loc_start = a;
                                 loc_end = b;
                                 loc_ghost = g
                               } =
@@ -14410,11 +14410,11 @@ module Struct =
           sig
             open Camlp4Ast
               
-            val sig_item : sig_item -> Camlp4_import.Parsetree.signature
+            val sig_item : sig_item -> Parsetree.signature
               
-            val str_item : str_item -> Camlp4_import.Parsetree.structure
+            val str_item : str_item -> Parsetree.structure
               
-            val phrase : str_item -> Camlp4_import.Parsetree.toplevel_phrase
+            val phrase : str_item -> Parsetree.toplevel_phrase
               
           end
           
@@ -14424,11 +14424,11 @@ module Struct =
           struct
             open Format
               
-            open Camlp4_import.Parsetree
+            open Parsetree
               
-            open Camlp4_import.Longident
+            open Longident
               
-            open Camlp4_import.Asttypes
+            open Asttypes
               
             open Ast
               
@@ -14458,7 +14458,7 @@ module Struct =
             let mkghloc loc = Loc.to_ocaml_location (Loc.ghostify loc)
               
             let with_loc txt loc =
-              Camlp4_import.Location.mkloc txt (mkloc loc)
+              Location.mkloc txt (mkloc loc)
               
             let mktyp loc d =
               { ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = []; }
@@ -14977,8 +14977,8 @@ module Struct =
                 pwith_type id
                   {
                     ptype_name =
-                      Camlp4_import.Location.mkloc
-                        (Camlp4_import.Longident.last id.txt) id.loc;
+                      Location.mkloc
+                        (Longident.last id.txt) id.loc;
                     ptype_params = tpl;
                     ptype_cstrs = [];
                     ptype_kind = kind;
@@ -15757,7 +15757,7 @@ module Struct =
                     pmb_name = with_loc s loc;
                     pmb_expr =
                       {
-                        pmod_loc = Camlp4_import.Location.none;
+                        pmod_loc = Location.none;
                         pmod_desc =
                           Pmod_constraint
                             (((module_expr me), (module_type mt)));

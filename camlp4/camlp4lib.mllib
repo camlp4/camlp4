@@ -1,3 +1,2 @@
 Camlp4
-common/Camlp4_import
-common/Camlp4_config
+config/Camlp4_config

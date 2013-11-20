@@ -25,6 +25,6 @@ true: debug
 
 # The tag "camlp4boot" is for preprocessing using camlp4/boot/camlp4boot.byte
 <camlp4/**/*.ml*>: camlp4boot, warn_Z
-<camlp4/{boot,common}/*>: -camlp4boot
+<camlp4/{boot,config}/*>: -camlp4boot
 <camlp4/build/*> or <camlp4/boot/*> or "camlp4/Camlp4/Struct/Lexer.ml": -camlp4boot, -warn_Z, warn_a
 <camlp4/camlp4{,boot,o,r,of,rf,oof,orf}.byte>: -debug
