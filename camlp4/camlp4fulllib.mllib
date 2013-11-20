@@ -1,6 +1,6 @@
 Camlp4
-Camlp4_import
-Camlp4_config
+common/Camlp4_import
+common/Camlp4_config
 
 Camlp4Parsers/Camlp4AstLoader
 Camlp4Parsers/Camlp4DebugParser

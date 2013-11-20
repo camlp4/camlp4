@@ -12,21 +12,19 @@
 
 # Ocamlbuild tags file
 
-true: -traverse
-
-# Traverse only these directories
-<camlp4/**>: traverse
-
 # We want -g everywhere it's possible
 true: debug
 
+<camlp4/**/*>: use_import
+<camlp4/**/*.{byte,native}>: use_ocamlcommon, use_ocamlbytecomp, use_dynlink
+
+<camlp4/*.{byte,native}>: use_unix
+<camlp4/camlp4boot.*>: -use_unix
+
 <**/*.ml*>: warn_error_A
 
+# The tag "camlp4boot" is for preprocessing using camlp4/boot/camlp4boot.byte
 <camlp4/**/*.ml*>: camlp4boot, warn_Z
-<camlp4/Camlp4_{config,import}.ml*>: -camlp4boot
-"camlp4/Camlp4_import.ml": -warn_Z
+<camlp4/{boot,common}/*>: -camlp4boot
 <camlp4/build/*> or <camlp4/boot/*> or "camlp4/Camlp4/Struct/Lexer.ml": -camlp4boot, -warn_Z, warn_a
-<camlp4/Camlp4Bin.{byte,native}> or <camlp4/{mkcamlp4,boot/camlp4boot}.byte>: use_dynlink
-<camlp4/Camlp4Printers/**.ml>: include_unix
-<camlp4/Camlp4Top/**>: include_toplevel
 <camlp4/camlp4{,boot,o,r,of,rf,oof,orf}.byte>: -debug
