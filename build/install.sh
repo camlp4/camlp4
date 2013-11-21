@@ -15,6 +15,7 @@
 set -e
 
 cd `dirname $0`/..
+. ./config.sh
 
 not_installed=$PWD/_build/not_installed
 
@@ -57,8 +58,8 @@ installlib() {
     dest="$2/`basename $1`"
     echo "  install library $dest"
     cp -f "$1" "$2"
-    if [ "$RANLIB" != "" ]; then
-      "$RANLIB" "$dest"
+    if [ "$ranlib" != "" ]; then
+      "$ranlib" "$dest"
     fi
   else
     wontinstall "$1"
@@ -124,7 +125,7 @@ for dir in Camlp4Parsers Camlp4Printers Camlp4Filters Camlp4Top; do
   mkdir -p $CAMLP4DIR/$dir
   installdir     \
     $dir/*.cm*   \
-    $dir/*.$O    \
+    $dir/*$O    \
     $CAMLP4DIR/$dir
 done
 installdir \
@@ -132,8 +133,8 @@ installdir \
   camlp4fulllib.cma camlp4fulllib.cmxa \
   camlp4o.cma camlp4of.cma camlp4oof.cma \
   camlp4orf.cma camlp4r.cma camlp4rf.cma \
-  Camlp4Bin.cm[iox] Camlp4Bin.$O Camlp4Top.cm[io] \
-  Camlp4_config.cmi camlp4prof.cm[iox] camlp4prof.$O Camlp4_import.cmi \
+  Camlp4Bin.cm[iox] Camlp4Bin$O Camlp4Top.cm[io] \
+  config/Camlp4_config.cmi camlp4prof.cm[iox] camlp4prof$O \
   $CAMLP4DIR
-installlibdir camlp4lib.$A camlp4fulllib.$A $CAMLP4DIR
+installlibdir camlp4lib$A camlp4fulllib$A $CAMLP4DIR
 cd ..

@@ -7,5 +7,27 @@ unset LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
 # OCaml is already installed, this means we should have everything we
 # need. Just dump its configuration.
 
-ocamlc -config | sed 's/: / := /' > Makefile.config
+ocamlc -config | sed 's/: /="/;s/$/"/' > config.sh
 ocamlc -config | sed 's/^/let /;s/: / = "/;s/$/"/' > myocamlbuild_config.ml
+
+# Add a few things to config.sh
+
+. ./config.sh
+
+if [ "$os_type" = Win32 ]; then
+    ext_exe=".exe"
+else
+    ext_exe=""
+fi
+
+LIBDIR="$standard_library"
+OCAMLC=`which ocamlc`
+BINDIR=`dirname $OCAMLC`
+
+cat >> config.sh <<EOF
+A=$ext_lib
+O=$ext_obj
+EXE=$ext_exe
+LIBDIR=$LIBDIR
+BINDIR=$BINDIR
+EOF

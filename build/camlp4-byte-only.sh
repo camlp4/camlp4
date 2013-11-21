@@ -14,7 +14,8 @@
 
 set -e
 cd `dirname $0`/..
+. ./config.sh
 . build/camlp4-targets.sh
 set -x
 
-$OCAMLBUILD $CAMLP4_BYTE
+echo $CAMLP4_BYTE
