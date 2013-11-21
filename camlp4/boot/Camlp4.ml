@@ -3203,8 +3203,7 @@ module Struct =
           
         let to_ocaml_location x =
           {
-            Location.loc_start =
-              pos_to_lexing_position x.start x.file_name;
+            Location.loc_start = pos_to_lexing_position x.start x.file_name;
             loc_end = pos_to_lexing_position x.stop x.file_name;
             loc_ghost = x.ghost;
           }
@@ -14457,8 +14456,7 @@ module Struct =
               
             let mkghloc loc = Loc.to_ocaml_location (Loc.ghostify loc)
               
-            let with_loc txt loc =
-              Location.mkloc txt (mkloc loc)
+            let with_loc txt loc = Location.mkloc txt (mkloc loc)
               
             let mktyp loc d =
               { ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = []; }
@@ -14977,8 +14975,7 @@ module Struct =
                 pwith_type id
                   {
                     ptype_name =
-                      Location.mkloc
-                        (Longident.last id.txt) id.loc;
+                      Location.mkloc (Longident.last id.txt) id.loc;
                     ptype_params = tpl;
                     ptype_cstrs = [];
                     ptype_kind = kind;
