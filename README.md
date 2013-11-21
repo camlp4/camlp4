@@ -1,5 +1,5 @@
-camlp4 - A Preprocessor and Pretty-Printer for OCaml
-====================================================
+camlp4
+======
 
 Camlp4 is a software system for writing extensible parsers for
 programming languages. It provides a set of OCaml libraries that are
