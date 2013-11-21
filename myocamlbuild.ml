@@ -69,8 +69,6 @@ let () =
       else
         ".byte"
     in
-    let cold_camlp4boot = "camlp4boot" (* The installed version *) in
-    let cold_camlp4o = "camlp4o" (* The installed version *) in
 
     flag ["ocaml"; "ocamlyacc"] (A"-v");
 
@@ -136,8 +134,6 @@ let () =
        of compiler-libs we are using to a local directory. *)
 
     let import = [
-      "misc.cmi";
-      "terminfo.cmi";
       "warnings.cmi";
       "location.cmi";
       "longident.cmi";
@@ -145,7 +141,6 @@ let () =
       "parsetree.cmi";
       "outcometree.cmi";
       "oprint.cmi";
-      "config.cmi";
       "toploop.cmi";
     ] in
 
@@ -161,6 +156,14 @@ let () =
     flag ["ocaml"; "compile"; "use_import"] & S[A "-I"; A "camlp4/import"];
     dep ["ocaml"; "compile"; "use_import"]
       (List.map (fun fn -> "camlp4" / "import" / fn) import);
+
+    let gen_import = add_exe "camlp4/config/gen_import.byte" in
+    let camlp4_import = "camlp4/config/Camlp4_import.ml" in
+    rule "generate Camlp4_import.ml"
+      ~dep:gen_import
+      ~prod:camlp4_import
+      (fun _ _ ->
+         Cmd (Px gen_import));
 
     copy_rule "% -> %.exe" ~insert:`bottom "%" "%.exe";
 

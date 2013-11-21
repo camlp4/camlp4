@@ -1,3 +1,4 @@
+module Utils : sig INCLUDE "camlp4/Camlp4/Utils.mli"; end = struct INCLUDE "camlp4/Camlp4/Utils.ml"; end;
 module Debug : sig INCLUDE "camlp4/Camlp4/Debug.mli"; end = struct INCLUDE "camlp4/Camlp4/Debug.ml"; end;
 module Options : sig INCLUDE "camlp4/Camlp4/Options.mli"; end = struct INCLUDE "camlp4/Camlp4/Options.ml"; end;
 module Sig = struct INCLUDE "camlp4/Camlp4/Sig.ml"; end;

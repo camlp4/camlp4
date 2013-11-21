@@ -18,7 +18,45 @@
  * - Nicolas Pouillard: refactoring
  *)
 
+(* We copy the implementation of a few functions from OCaml to avoid depending on its
+   implementation. *)
 
+module Location = struct
+  type t = Location.t == {
+    loc_start: Lexing.position;
+    loc_end: Lexing.position;
+    loc_ghost: bool;
+  };
+
+  type loc 'a = Location.loc 'a == {
+    txt : 'a;
+    loc : t;
+  };
+
+  value none =
+    let loc = {
+      Lexing.
+      pos_fname = "_none_";
+      pos_lnum = 1;
+      pos_bol = 0;
+      pos_cnum = -1;
+    } in
+    { loc_start = loc; loc_end = loc; loc_ghost = True };
+
+  value mkloc txt loc = { txt; loc };
+end;
+
+module Longident = struct
+  type t = Longident.t ==
+           [ Lident of string
+           | Ldot of t and string
+           | Lapply of t and t ];
+
+  value last = fun
+    [ Lident s -> s
+    | Ldot _ s -> s
+    | Lapply _ _ -> failwith "Longident.last" ];
+end;
 
 module Make (Ast : Sig.Camlp4Ast) = struct
   open Format;
@@ -738,7 +776,7 @@ value varify_constructors var_names =
           (Pexp_apply (mkexp loc (Pexp_ident (array_function loc "Array" "get")))
             [("", expr e1); ("", expr e2)])
     | ExArr loc e -> mkexp loc (Pexp_array (List.map expr (list_of_expr e [])))
-    | ExAsf loc -> 
+    | ExAsf loc ->
         mkexp loc (Pexp_assert (mkexp loc (Pexp_construct {txt=Lident "false"; loc=mkloc loc} None)))
     | ExAss loc e v ->
         let e =
@@ -860,7 +898,7 @@ value varify_constructors var_names =
         let e2 = ExSeq loc el in
         mkexp loc (Pexp_while (expr e1) (expr e2))
     | ExOpI loc i ov e ->
-        let fresh = override_flag loc ov in 
+        let fresh = override_flag loc ov in
         mkexp loc (Pexp_open fresh (long_uident i) (expr e))
     | <:expr@loc< (module $me$ : $pt$) >> ->
         mkexp loc (Pexp_constraint (mkexp loc (Pexp_pack (module_expr me)),

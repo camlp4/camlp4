@@ -1,4 +1,5 @@
 Camlp4
+config/Camlp4_import
 config/Camlp4_config
 
 Camlp4Parsers/Camlp4AstLoader

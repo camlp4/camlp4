@@ -235,8 +235,15 @@ value input_file x =
     rcall_callback.val ();
   };
 
+value expand_directory alt s =
+  if String.length s > 0 && s.[0] = '+' then
+    Filename.concat alt (String.sub s 1 (String.length s - 1))
+  else
+    s
+;
+
 value initial_spec_list =
-  [("-I", Arg.String (fun x -> input_file (IncludeDir (Misc.expand_directory Camlp4_config.camlp4_standard_library x))),
+  [("-I", Arg.String (fun x -> input_file (IncludeDir (expand_directory Camlp4_config.camlp4_standard_library x))),
     "<directory>  Add directory in search patch for object files.");
   ("-where", Arg.Unit print_stdlib,
     "Print camlp4 library directory and exit.");
