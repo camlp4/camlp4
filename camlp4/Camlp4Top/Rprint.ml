@@ -325,8 +325,7 @@ and print_out_class_sig_item ppf =
 
 value rec print_out_module_type ppf =
   fun
-  [ Omty_ident id
-  | Omty_alias id -> fprintf ppf "%a" print_ident id
+  [ Omty_ident id -> fprintf ppf "%a" print_ident id
   | Omty_signature sg ->
       fprintf ppf "@[<hv 2>sig@ %a@;<1 -2>end@]"
         Toploop.print_out_signature.val sg
