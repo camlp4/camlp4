@@ -10017,8 +10017,10 @@ module Camlp4QuotationCommon =
                              Ast.ExApp (_loc,
                                (Ast.ExId (_loc,
                                   (Ast.IdAcc (_loc,
-                                     (Ast.IdUid (_loc, "Oprint")),
-                                     (Ast.IdLid (_loc, "float_repres")))))),
+                                     (Ast.IdUid (_loc, "Camlp4")),
+                                     (Ast.IdAcc (_loc,
+                                        (Ast.IdUid (_loc, "Utils")),
+                                        (Ast.IdLid (_loc, "float_repres")))))))),
                                e)
                          | "`str" ->
                              Ast.ExApp (_loc,
@@ -16025,14 +16027,18 @@ You should give the -noassert option to the ocaml compiler instead.@."
           | IncludeDir dir -> DynLoader.include_dir dyn_loader dir);
          !rcall_callback ())
       
+    let expand_directory alt s =
+      if ((String.length s) > 0) && (s.[0] = '+')
+      then Filename.concat alt (String.sub s 1 ((String.length s) - 1))
+      else s
+      
     let initial_spec_list =
       [ ("-I",
          (Arg.String
             (fun x ->
                input_file
                  (IncludeDir
-                    (Misc.expand_directory Camlp4_config.
-                       camlp4_standard_library x)))),
+                    (expand_directory Camlp4_config.camlp4_standard_library x)))),
          "<directory>  Add directory in search patch for object files.");
         ("-where", (Arg.Unit print_stdlib),
          "Print camlp4 library directory and exit.");

@@ -1,3 +1,35 @@
+module Utils : sig val float_repres : float -> string
+                      end =
+  struct
+    (* Imported from typing/oprint.ml *)
+    let valid_float_lexeme s =
+      let l = String.length s in
+      let rec loop i =
+        if i >= l
+        then s ^ "."
+        else (match s.[i] with | '0' .. '9' | '-' -> loop (i + 1) | _ -> s)
+      in loop 0
+      
+    let float_repres f =
+      match classify_float f with
+      | FP_nan -> "nan"
+      | FP_infinite -> if f < 0.0 then "neg_infinity" else "infinity"
+      | _ ->
+          let float_val =
+            let s1 = Printf.sprintf "%.12g" f
+            in
+              if f = (float_of_string s1)
+              then s1
+              else
+                (let s2 = Printf.sprintf "%.15g" f
+                 in
+                   if f = (float_of_string s2)
+                   then s2
+                   else Printf.sprintf "%.18g" f)
+          in valid_float_lexeme float_val
+      
+  end
+  
 module Debug :
   sig
     (****************************************************************************)
@@ -2985,7 +3017,7 @@ module ErrorHandler :
                | x when x = Obj.string_tag ->
                    "\"" ^ ((String.escaped (Obj.magic r : string)) ^ "\"")
                | x when x = Obj.double_tag ->
-                   Oprint.float_repres (Obj.magic r : float)
+                   Utils.float_repres (Obj.magic r : float)
                | x when x = Obj.abstract_tag -> opaque "abstract"
                | x when x = Obj.custom_tag -> opaque "custom"
                | x when x = Obj.final_tag -> opaque "final"
@@ -14419,6 +14451,44 @@ module Struct =
           
       end =
       struct
+        module Location =
+          struct
+            type t =
+              Location.t =
+                { loc_start : Lexing.position; loc_end : Lexing.position;
+                  loc_ghost : bool
+                }
+            
+            type 'a loc = ('a Location.loc) = { txt : 'a; loc : t }
+            
+            let none =
+              let loc =
+                {
+                  Lexing.pos_fname = "_none_";
+                  pos_lnum = 1;
+                  pos_bol = 0;
+                  pos_cnum = (-1);
+                }
+              in { loc_start = loc; loc_end = loc; loc_ghost = true; }
+              
+            let mkloc txt loc = { txt = txt; loc = loc; }
+              
+          end
+          
+        module Longident =
+          struct
+            type t =
+              Longident.t =
+                | Lident of string | Ldot of t * string | Lapply of t * t
+            
+            let last =
+              function
+              | Lident s -> s
+              | Ldot (_, s) -> s
+              | Lapply (_, _) -> failwith "Longident.last"
+              
+          end
+          
         module Make (Ast : Sig.Camlp4Ast) =
           struct
             open Format
