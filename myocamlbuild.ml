@@ -131,6 +131,10 @@ let () =
     Pathname.define_context "camlp4/Camlp4Filters" ["camlp4"; "camlp4/config"];
     Pathname.define_context "camlp4/Camlp4Top" ["camlp4"; "camlp4/config"];
 
+    (* Some modules of camlp4 have the same names as ones from compiler-libs. For this
+       reason we can't just -I +compiler-libs. Instead we copy the .cmi of the few modules
+       of compiler-libs we are using to a local directory. *)
+
     let import = [
       "misc.cmi";
       "terminfo.cmi";
@@ -249,42 +253,8 @@ let () =
     copy_rule "camlp4: boot/Camlp4Ast.ml -> Camlp4/Struct/Camlp4Ast.ml"
       ~insert:`top "camlp4/boot/Camlp4Ast.ml" "camlp4/Camlp4/Struct/Camlp4Ast.ml";
 
-    rule "camlp4: Camlp4/Struct/Lexer.ml -> boot/Lexer.ml"
-      ~prod:"camlp4/boot/Lexer.ml"
-      ~dep:"camlp4/Camlp4/Struct/Lexer.ml"
-      begin fun _ _ ->
-        Cmd(S[P cold_camlp4o; P"camlp4/Camlp4/Struct/Lexer.ml";
-              A"-printer"; A"r"; A"-o"; Px"camlp4/boot/Lexer.ml"])
-      end;
-
     dep ["ocaml"; "file:camlp4/Camlp4/Sig.ml"]
       ["camlp4/Camlp4/Camlp4Ast.partial.ml"];
-
-    rule "camlp4: ml4 -> ml"
-      ~prod:"%.ml"
-      ~dep:"%.ml4"
-      begin fun env build ->
-        let ml4 = env "%.ml4" and ml = env "%.ml" in
-        Camlp4deps.build_deps build ml4;
-        Cmd(S[P cold_camlp4boot; A"-impl"; P ml4; A"-printer"; A"o";
-              A"-D"; A"OPT"; A"-o"; Px ml])
-      end;
-
-    rule "camlp4: mlast -> ml"
-      ~prod:"%.ml"
-      ~deps:["%.mlast"; "camlp4/Camlp4/Camlp4Ast.partial.ml"]
-      begin fun env _ ->
-        let mlast = env "%.mlast" and ml = env "%.ml" in
-        (* Camlp4deps.build_deps build mlast; too hard to lex *)
-        Cmd(S[P cold_camlp4boot;
-              A"-printer"; A"r";
-              A"-filter"; A"map";
-              A"-filter"; A"fold";
-              A"-filter"; A"meta";
-              A"-filter"; A"trash";
-              A"-impl"; P mlast;
-              A"-o"; Px ml])
-      end;
 
     dep ["ocaml"; "compile"; "file:camlp4/Camlp4/Sig.ml"]
       ["camlp4/Camlp4/Camlp4Ast.partial.ml"];

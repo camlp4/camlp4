@@ -21,13 +21,13 @@ else
 fi
 
 LIBDIR="$standard_library"
-OCAMLC=`which ocamlc`
-BINDIR=`dirname $OCAMLC`
+OCAMLC="`which ocamlc`"
+BINDIR="`dirname $OCAMLC`"
 
 cat >> config.sh <<EOF
-A=$ext_lib
-O=$ext_obj
-EXE=$ext_exe
-LIBDIR=$LIBDIR
-BINDIR=$BINDIR
+A="$ext_lib"
+O="$ext_obj"
+EXE="$ext_exe"
+LIBDIR="$LIBDIR"
+BINDIR="$BINDIR"
 EOF

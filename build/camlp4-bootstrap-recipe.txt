@@ -10,26 +10,22 @@
 #                                                                       #
 #########################################################################
 
-=== Initial setup ===
-  make clean
-  ./build/distclean.sh
-  ./configure -prefix `pwd`/_install
-  ./build/fastworld.sh
-  # Go to "Bootstrap camlp4"
+=== Short version ===
+  # Run the following command until you see three fixpoint:
+  make clean byte install bootstrap
 
 === Install the bootstrapping camlp4 processor ===
-  ./build/install.sh
+  make install
 
 === Build camlp4 ===
-  # This step is not needed right after a "./build/world.sh byte"
-  ./build/camlp4-byte-only.sh
+  make
 
 === Bootstrap camlp4 ===
   # First "Build camlp4"
   # Then "Install the bootstrapping camlp4 processor"
   # Indeed the following bootstrapping script
   # does use the installed version!
-  ./build/camlp4-bootstrap.sh
+  make bootstrap
   # If the fixpoint not is reached yet
     # Go to "Bootstrap camlp4"
   # Otherwise
@@ -40,7 +36,7 @@
   # First "Install the bootstrapping camlp4 processor"
   # Indeed the following bootstrapping script
   # does use the installed version!
-  ./build/camlp4-mkCamlp4Ast.sh
+  make Camlp4Ast
 
 === Case study "let open M in e" ===
 

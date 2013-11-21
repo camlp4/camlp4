@@ -12,7 +12,7 @@
 
 # The main Makefile
 
-OB := ocamlbuild -no-ocamlfind
+OB := ocamlbuild -no-ocamlfind -classic-display
 
 .PHONY: default
 default: byte
@@ -31,6 +31,14 @@ all: byte native
 .PHONY: install
 install:
 	./build/install.sh
+
+.PHONY: bootstrap
+bootstrap:
+	./build/camlp4-bootstrap.sh
+
+.PHONY: Camlp4Ast
+Camlp4Ast:
+	./build/camlp4-mkCamlp4Ast.sh
 
 .PHONY: clean
 clean:
