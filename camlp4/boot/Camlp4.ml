@@ -14811,11 +14811,13 @@ module Struct =
             and row_field =
               function
               | Ast.TyNil _ -> []
-              | Ast.TyVrn (_, i) -> [ Rtag (i, true, []) ]
+              | Ast.TyVrn (_, i) -> [ Rtag ((conv_con i), true, []) ]
               | Ast.TyOfAmp (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag (i, true, (List.map ctyp (list_of_ctyp t []))) ]
+                  [ Rtag ((conv_con i), true,
+                      (List.map ctyp (list_of_ctyp t []))) ]
               | Ast.TyOf (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag (i, false, (List.map ctyp (list_of_ctyp t []))) ]
+                  [ Rtag ((conv_con i), false,
+                      (List.map ctyp (list_of_ctyp t []))) ]
               | Ast.TyOr (_, t1, t2) -> (row_field t1) @ (row_field t2)
               | t -> [ Rinherit (ctyp t) ]
             and name_tags =
@@ -15438,8 +15440,8 @@ module Struct =
                   let e3 = ExSeq (loc, el)
                   in
                     mkexp loc
-                      (Pexp_for ((with_loc i loc), (expr e1), (expr e2),
-                         (mkdirection df), (expr e3)))
+                      (Pexp_for ((mkpat loc (Ppat_var (with_loc i loc))),
+                         (expr e1), (expr e2), (mkdirection df), (expr e3)))
               | Ast.ExFun (loc, (Ast.McArr (_, (PaLab (_, lab, po)), w, e)))
                   -> mkfun loc lab None (patt_of_lab loc lab po) e w
               | Ast.ExFun (loc,
