@@ -325,9 +325,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         assert False ]
   and row_field = fun
     [ <:ctyp<>> -> []
-    | <:ctyp< `$i$ >> -> [Rtag i True []]
-    | <:ctyp< `$i$ of & $t$ >> -> [Rtag i True (List.map ctyp (list_of_ctyp t []))]
-    | <:ctyp< `$i$ of $t$ >> -> [Rtag i False (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ >> -> [Rtag (conv_con i) True []]
+    | <:ctyp< `$i$ of & $t$ >> -> [Rtag (conv_con i) True (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ of $t$ >> -> [Rtag (conv_con i) False (List.map ctyp (list_of_ctyp t []))]
     | <:ctyp< $t1$ | $t2$ >> -> row_field t1 @ row_field t2
     | t -> [Rinherit (ctyp t)] ]
   and name_tags = fun
