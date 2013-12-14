@@ -12,4 +12,4 @@ type u = True | False
 let g x = function | True -> () | False -> ()
 
 type v = [`True | `False]
-let h x = function | `True -> () | `False -> ()
+let h (x: v) = match x with `True -> () | `False -> ()
