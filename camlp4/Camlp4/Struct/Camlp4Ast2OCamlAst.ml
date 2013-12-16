@@ -325,9 +325,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         assert False ]
   and row_field = fun
     [ <:ctyp<>> -> []
-    | <:ctyp< `$i$ >> -> [Rtag i True []]
-    | <:ctyp< `$i$ of & $t$ >> -> [Rtag i True (List.map ctyp (list_of_ctyp t []))]
-    | <:ctyp< `$i$ of $t$ >> -> [Rtag i False (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ >> -> [Rtag (conv_con i) True []]
+    | <:ctyp< `$i$ of & $t$ >> -> [Rtag (conv_con i) True (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ of $t$ >> -> [Rtag (conv_con i) False (List.map ctyp (list_of_ctyp t []))]
     | <:ctyp< $t1$ | $t2$ >> -> row_field t1 @ row_field t2
     | t -> [Rinherit (ctyp t)] ]
   and name_tags = fun
@@ -811,7 +811,7 @@ value varify_constructors var_names =
     | ExFlo loc s -> mkexp loc (Pexp_constant (Const_float (remove_underscores s)))
     | ExFor loc i e1 e2 df el ->
         let e3 = ExSeq loc el in
-        mkexp loc (Pexp_for (with_loc i loc) (expr e1) (expr e2) (mkdirection df) (expr e3))
+        mkexp loc (Pexp_for (mkpat loc (Ppat_var (with_loc i loc))) (expr e1) (expr e2) (mkdirection df) (expr e3))
     | <:expr@loc< fun [ $PaLab _ lab po$ when $w$ -> $e$ ] >> ->
         mkfun loc lab None (patt_of_lab loc lab po) e w
     | <:expr@loc< fun [ $PaOlbi _ lab p e1$ when $w$ -> $e2$ ] >> ->
