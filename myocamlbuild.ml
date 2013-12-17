@@ -56,9 +56,12 @@ end
 
 let () =
   dispatch begin function
-  | After_options ->
-    Options.make_links := false;
+  | Before_options ->
     Options.use_ocamlfind := false
+
+  | After_options ->
+    Options.use_ocamlfind := false;
+    Options.make_links := false
 
   | After_rules ->
     let hot_camlp4boot =

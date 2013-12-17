@@ -1,4 +1,4 @@
-OB := ocamlbuild -no-ocamlfind -classic-display
+OB := ocamlbuild -classic-display
 
 .PHONY: default
 default: byte
