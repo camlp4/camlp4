@@ -15702,7 +15702,7 @@ module Struct =
               | Ast.MtId (loc, i) -> mkmty loc (Pmty_ident (long_uident i))
               | Ast.MtFun (loc, n, nt, mt) ->
                   mkmty loc
-                    (Pmty_functor ((with_loc n loc), (module_type nt),
+                    (Pmty_functor ((with_loc n loc), (Some (module_type nt)),
                        (module_type mt)))
               | Ast.MtQuo (loc, _) ->
                   error loc "module type variable not allowed here"
@@ -15844,7 +15844,7 @@ module Struct =
                     (Pmod_apply ((module_expr me1), (module_expr me2)))
               | Ast.MeFun (loc, n, mt, me) ->
                   mkmod loc
-                    (Pmod_functor ((with_loc n loc), (module_type mt),
+                    (Pmod_functor ((with_loc n loc), (Some (module_type mt)),
                        (module_expr me)))
               | Ast.MeStr (loc, sl) ->
                   mkmod loc (Pmod_structure (str_item sl []))
