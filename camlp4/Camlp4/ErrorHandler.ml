@@ -109,17 +109,22 @@ end;
 
 value default_handler ppf x = do {
   let x = Obj.repr x;
-  fprintf ppf "Camlp4: Uncaught exception: %s"
-    (Obj.obj (Obj.field (Obj.field x 0) 0) : string);
-  if Obj.size x > 1 then do {
-    pp_print_string ppf " (";
-    for i = 1 to Obj.size x - 1 do
-      if i > 1 then pp_print_string ppf ", " else ();
-      ObjTools.print ppf (Obj.field x i);
-    done;
-    pp_print_char ppf ')'
-  }
-  else ();
+  if Obj.tag x <> 0 then
+    fprintf ppf "Camlp4: Uncaught exception: %s"
+      (Obj.obj (Obj.field x 0) : string)
+  else do {
+    fprintf ppf "Camlp4: Uncaught exception: %s"
+      (Obj.obj (Obj.field (Obj.field x 0) 0) : string);
+    if Obj.size x > 1 then do {
+      pp_print_string ppf " (";
+      for i = 1 to Obj.size x - 1 do
+        if i > 1 then pp_print_string ppf ", " else ();
+        ObjTools.print ppf (Obj.field x i);
+      done;
+      pp_print_char ppf ')'
+    }
+    else ();
+  };
   fprintf ppf "@."
 };
 
