@@ -14397,7 +14397,7 @@ Added statements:
                          Gram.Sself ])
                 | None -> ());
              defined := list_remove x !defined)
-          with | Struct.Grammar.Delete.Rule_not_found _ -> ()
+          with | Not_found | Struct.Grammar.Delete.Rule_not_found _ -> ()
           
         let parse_def s =
           match Gram.parse_string expr (Loc.mk "<command line>") s with
