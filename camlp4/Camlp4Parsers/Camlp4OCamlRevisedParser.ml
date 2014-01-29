@@ -539,6 +539,7 @@ New syntax:\
         | `QUOTATION x -> Quotation.expand _loc x Quotation.DynAst.module_type_tag
         | i = module_longident_with_app -> <:module_type< $id:i$ >>
         | "'"; i = a_ident -> <:module_type< ' $i$ >>
+        | "("; "module"; i = module_longident_with_app; ")" -> Ast.MtAlias (_loc, i)
         | "("; mt = SELF; ")" -> <:module_type< $mt$ >>
         | "module"; "type"; "of"; me = module_expr ->
             <:module_type< module type of $me$ >> ] ]
@@ -555,6 +556,8 @@ New syntax:\
         | "include"; mt = module_type -> <:sig_item< include $mt$ >>
         | "module"; i = a_UIDENT; mt = module_declaration ->
             <:sig_item< module $i$ : $mt$ >>
+        | "module"; i = a_UIDENT; "="; a = module_longident_with_app ->
+            Ast.SgMod(_loc, i, Ast.MtAlias (_loc, a))
         | "module"; "rec"; mb = module_rec_declaration ->
             <:sig_item< module rec $mb$ >>
         | "module"; "type"; i = a_ident; "="; mt = module_type ->

@@ -807,6 +807,9 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       | <:sig_item< external $s$ : $t$ = $sl$ >> ->
           pp f "@[<2>external@ %a :@ %a =@ %a%(%)@]"
             o#var s o#ctyp t (meta_list o#quoted_string "@ ") sl semisep
+      | Ast.SgMod(_, name, Ast.MtAlias(_, id)) ->
+          pp f "@[<2>module %a@ =@ %a@]"
+            o#var name o#ident id
       | <:sig_item< module $s1$ ($s2$ : $mt1$) : $mt2$ >> ->
           let rec loop accu =
             fun
@@ -919,7 +922,9 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     | Ast.MtAtt _loc s str e ->
         pp f "((%a)[@@%s %a])" o#module_type e s o#str_item str
     | <:module_type< $mt$ with $wc$ >> ->
-          pp f "@[<2>%a@ with@ %a@]" o#module_type mt o#with_constraint wc ];
+          pp f "@[<2>%a@ with@ %a@]" o#module_type mt o#with_constraint wc
+    | Ast.MtAlias(_, id) ->
+          pp f "@[<2>(module@ %a@])" o#ident id ];
 
     method with_constraint f wc =
     let () = o#node f wc Ast.loc_of_with_constr in

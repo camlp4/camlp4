@@ -215,6 +215,8 @@
     [ MtNil of loc
       (* i *) (* A.B.C *)
     | MtId  of loc and ident
+      (* (module ident) *)
+    | MtAlias of loc and ident
       (* functor (s : mt) -> mt *)
     | MtFun of loc and string and module_type and module_type
       (* 's *)

@@ -1117,6 +1117,8 @@ module Sig =
           | (* i *)
           (* A.B.C *)
           MtId of loc * ident
+          | (* (module ident) *)
+          MtAlias of loc * ident
           | (* functor (s : mt) -> mt *)
           MtFun of loc * string * module_type * module_type
           | (* 's *)
@@ -1933,6 +1935,7 @@ module Sig =
           and module_type =
           | MtNil of loc
           | MtId of loc * ident
+          | MtAlias of loc * ident
           | MtFun of loc * string * module_type * module_type
           | MtQuo of loc * string
           | MtSig of loc * sig_item
@@ -9128,6 +9131,15 @@ module Struct =
                                       (meta_string _loc x1))),
                                    (meta_module_type _loc x2))),
                                 (meta_module_type _loc x3))
+                          | Ast.MtAlias (x0, x1) ->
+                              Ast.ExApp (_loc,
+                                (Ast.ExApp (_loc,
+                                   (Ast.ExId (_loc,
+                                      (Ast.IdAcc (_loc,
+                                         (Ast.IdUid (_loc, "Ast")),
+                                         (Ast.IdUid (_loc, "MtAlias")))))),
+                                   (meta_loc _loc x0))),
+                                (meta_ident _loc x1))
                           | Ast.MtId (x0, x1) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -11554,6 +11566,15 @@ module Struct =
                                       (meta_string _loc x1))),
                                    (meta_module_type _loc x2))),
                                 (meta_module_type _loc x3))
+                          | Ast.MtAlias (x0, x1) ->
+                              Ast.PaApp (_loc,
+                                (Ast.PaApp (_loc,
+                                   (Ast.PaId (_loc,
+                                      (Ast.IdAcc (_loc,
+                                         (Ast.IdUid (_loc, "Ast")),
+                                         (Ast.IdUid (_loc, "MtAlias")))))),
+                                   (meta_loc _loc x0))),
+                                (meta_ident _loc x1))
                           | Ast.MtId (x0, x1) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12637,6 +12658,9 @@ module Struct =
                   | MtId (_x, _x_i1) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#ident _x_i1 in MtId (_x, _x_i1)
+                  | MtAlias (_x, _x_i1) ->
+                      let _x = o#loc _x in
+                      let _x_i1 = o#ident _x_i1 in MtAlias (_x, _x_i1)
                   | MtFun (_x, _x_i1, _x_i2, _x_i3) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in
@@ -13564,6 +13588,8 @@ module Struct =
                   function
                   | MtNil _x -> let o = o#loc _x in o
                   | MtId (_x, _x_i1) ->
+                      let o = o#loc _x in let o = o#ident _x_i1 in o
+                  | MtAlias (_x, _x_i1) ->
                       let o = o#loc _x in let o = o#ident _x_i1 in o
                   | MtFun (_x, _x_i1, _x_i2, _x_i3) ->
                       let o = o#loc _x in
@@ -15725,6 +15751,8 @@ module Struct =
                       pmty_attributes =
                         e.pmty_attributes @ [ attribute loc s str ];
                     }
+              | Ast.MtAlias ((loc, id)) ->
+                  mkmty loc (Pmty_alias (long_uident id))
               | Ast.MtAnt (_, _) -> assert false
             and sig_item s l =
               match s with
@@ -20365,6 +20393,9 @@ module Printers =
                           pp f "@[<2>external@ %a :@ %a =@ %a%(%)@]" 
                             o#var s o#ctyp t (meta_list o#quoted_string "@ ")
                             sl semisep
+                      | Ast.SgMod ((_, name, Ast.MtAlias ((_, id)))) ->
+                          pp f "@[<2>module %a@ =@ %a@]" o#var name o#ident
+                            id
                       | Ast.SgMod (_, s1, (Ast.MtFun (_, s2, mt1, mt2))) ->
                           let rec loop accu =
                             (function
@@ -20496,6 +20527,8 @@ module Printers =
                       | Ast.MtWit (_, mt, wc) ->
                           pp f "@[<2>%a@ with@ %a@]" o#module_type mt
                             o#with_constraint wc
+                      | Ast.MtAlias ((_, id)) ->
+                          pp f "@[<2>(module@ %a@])" o#ident id
                 method with_constraint =
                   fun f wc ->
                     let () = o#node f wc Ast.loc_of_with_constr

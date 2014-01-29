@@ -1497,6 +1497,16 @@ New syntax:\
                             (Gram.Action.mk
                                (fun _ (mt : 'module_type) _
                                   (_loc : Gram.Loc.t) -> (mt : 'module_type))));
+                           ([ Gram.Skeyword "("; Gram.Skeyword "module";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (module_longident_with_app :
+                                     'module_longident_with_app Gram.Entry.t));
+                              Gram.Skeyword ")" ],
+                            (Gram.Action.mk
+                               (fun _ (i : 'module_longident_with_app) _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MtAlias ((_loc, i)) : 'module_type))));
                            ([ Gram.Skeyword "'";
                               Gram.Snterm
                                 (Gram.Entry.obj
@@ -1627,6 +1637,21 @@ New syntax:\
                                (fun (mb : 'module_rec_declaration) _ _
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.SgRecMod (_loc, mb) : 'sig_item))));
+                           ([ Gram.Skeyword "module";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (a_UIDENT : 'a_UIDENT Gram.Entry.t));
+                              Gram.Skeyword "=";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (module_longident_with_app :
+                                     'module_longident_with_app Gram.Entry.t)) ],
+                            (Gram.Action.mk
+                               (fun (a : 'module_longident_with_app) _
+                                  (i : 'a_UIDENT) _ (_loc : Gram.Loc.t) ->
+                                  (Ast.SgMod
+                                     ((_loc, i, (Ast.MtAlias ((_loc, a))))) :
+                                    'sig_item))));
                            ([ Gram.Skeyword "module";
                               Gram.Snterm
                                 (Gram.Entry.obj

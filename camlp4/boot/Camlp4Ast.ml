@@ -1970,6 +1970,14 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                               (meta_string _loc x1))
                            (meta_module_type _loc x2))
                         (meta_module_type _loc x3)
+                  | Ast.MtAlias x0 x1 ->
+                      Ast.ExApp _loc
+                        (Ast.ExApp _loc
+                           (Ast.ExId _loc
+                              (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                                 (Ast.IdUid _loc "MtAlias")))
+                           (meta_loc _loc x0))
+                        (meta_ident _loc x1)
                   | Ast.MtId x0 x1 ->
                       Ast.ExApp _loc
                         (Ast.ExApp _loc
@@ -4165,6 +4173,14 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                               (meta_string _loc x1))
                            (meta_module_type _loc x2))
                         (meta_module_type _loc x3)
+                  | Ast.MtAlias x0 x1 ->
+                      Ast.PaApp _loc
+                        (Ast.PaApp _loc
+                           (Ast.PaId _loc
+                              (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                                 (Ast.IdUid _loc "MtAlias")))
+                           (meta_loc _loc x0))
+                        (meta_ident _loc x1)
                   | Ast.MtId x0 x1 ->
                       Ast.PaApp _loc
                         (Ast.PaApp _loc
@@ -5152,6 +5168,9 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           [ MtNil _x -> let _x = o#loc _x in MtNil _x
           | MtId _x _x_i1 ->
               let _x = o#loc _x in let _x_i1 = o#ident _x_i1 in MtId _x _x_i1
+          | MtAlias _x _x_i1 ->
+              let _x = o#loc _x in
+              let _x_i1 = o#ident _x_i1 in MtAlias _x _x_i1
           | MtFun _x _x_i1 _x_i2 _x_i3 ->
               let _x = o#loc _x in
               let _x_i1 = o#string _x_i1 in
@@ -5994,6 +6013,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           fun
           [ MtNil _x -> let o = o#loc _x in o
           | MtId _x _x_i1 -> let o = o#loc _x in let o = o#ident _x_i1 in o
+          | MtAlias _x _x_i1 ->
+              let o = o#loc _x in let o = o#ident _x_i1 in o
           | MtFun _x _x_i1 _x_i2 _x_i3 ->
               let o = o#loc _x in
               let o = o#string _x_i1 in

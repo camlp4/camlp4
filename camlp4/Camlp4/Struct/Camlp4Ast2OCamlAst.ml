@@ -1030,6 +1030,8 @@ value varify_constructors var_names =
     | MtAtt loc s str e ->
         let e = module_type e in
         {(e) with pmty_attributes = e.pmty_attributes @ [attribute loc s str]}
+    | Ast.MtAlias(loc, id) ->
+        mkmty loc (Pmty_alias (long_uident id))
     | <:module_type< $anti:_$ >> -> assert False ]
   and sig_item s l =
     match s with
