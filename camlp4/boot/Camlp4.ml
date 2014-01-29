@@ -14814,6 +14814,8 @@ module Struct =
                   error loc "type1 : type2 not allowed here"
               | TySem (loc, _, _) ->
                   error loc "type1 ; type2 not allowed here"
+              | TyTypePol (loc, _, _) ->
+                  error loc "locally abstract type not allower here"
               | Ast.TyTup (loc, (Ast.TySta (_, t1, t2))) ->
                   mktyp loc
                     (Ptyp_tuple
@@ -14829,11 +14831,12 @@ module Struct =
                     (Ptyp_variant ((row_field t), Closed,
                        (Some (name_tags t'))))
               | TyAnt (loc, _) -> error loc "antiquotation not allowed here"
-              | TyOfAmp (_, _, _) | TyAmp (_, _, _) | TySta (_, _, _) |
-                  TyCom (_, _, _) | TyVrn (_, _) | TyQuM (_, _) |
-                  TyQuP (_, _) | TyDcl (_, _, _, _, _) | TyAnP _ | TyAnM _ |
-                  TyTypePol (_, _, _) | TyObj (_, _, (RvAnt _)) | TyNil _ |
-                  TyTup (_, _) -> assert false
+              | TyOfAmp (loc, _, _) | TyAmp (loc, _, _) | TySta (loc, _, _) |
+                  TyCom (loc, _, _) | TyVrn (loc, _) | TyQuM (loc, _) |
+                  TyQuP (loc, _) | TyDcl (loc, _, _, _, _) | TyAnP loc |
+                  TyAnM loc | TyObj (loc, _, (RvAnt _)) | TyNil loc |
+                  TyTup (loc, _) ->
+                  error loc "this construction is not allowed here"
             and row_field =
               function
               | Ast.TyNil _ -> []

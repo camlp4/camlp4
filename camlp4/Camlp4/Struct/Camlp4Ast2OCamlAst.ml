@@ -310,6 +310,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyOf loc _ _ -> error loc "type1 of type2 not allowed here"
     | TyCol loc _ _ -> error loc "type1 : type2 not allowed here"
     | TySem loc _ _ -> error loc "type1 ; type2 not allowed here"
+    | TyTypePol loc _ _ -> error loc "locally abstract type not allower here"
     | <:ctyp@loc< ($t1$ * $t2$) >> ->
          mktyp loc (Ptyp_tuple (List.map ctyp (list_of_ctyp t1 (list_of_ctyp t2 []))))
     | <:ctyp@loc< [ = $t$ ] >> -> mktyp loc (Ptyp_variant (row_field t) Closed None)
@@ -318,11 +319,19 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:ctyp@loc< [ < $t$ > $t'$ ] >> ->
         mktyp loc (Ptyp_variant (row_field t) Closed (Some (name_tags t')))
     | TyAnt loc _ -> error loc "antiquotation not allowed here"
-    | TyOfAmp _ _ _ |TyAmp _ _ _ |TySta _ _ _ |
-      TyCom _ _ _ |TyVrn _ _ |TyQuM _ _ |TyQuP _ _ |TyDcl _ _ _ _ _ |
-          TyAnP _ | TyAnM _ | TyTypePol _ _ _ |
-      TyObj _ _ (RvAnt _) | TyNil _ | TyTup _ _ ->
-        assert False ]
+    | TyOfAmp loc _ _
+    | TyAmp loc _ _
+    | TySta loc _ _
+    | TyCom loc _ _
+    | TyVrn loc _
+    | TyQuM loc _
+    | TyQuP loc _
+    | TyDcl loc _ _ _ _
+    | TyAnP loc
+    | TyAnM loc
+    | TyObj loc _ (RvAnt _)
+    | TyNil loc
+    | TyTup loc _ -> error loc "this construction is not allowed here" ]
   and row_field = fun
     [ <:ctyp<>> -> []
     | <:ctyp< `$i$ >> -> [Rtag (conv_con i) True []]
