@@ -1562,7 +1562,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                              (Ast.IdUid _loc "Ast")
                                              (Ast.IdUid _loc "ExFor")))
                                        (meta_loc _loc x0))
-                                    (meta_string _loc x1))
+                                    (meta_patt _loc x1))
                                  (meta_expr _loc x2))
                               (meta_expr _loc x3))
                            (meta_direction_flag _loc x4))
@@ -3757,7 +3757,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                              (Ast.IdUid _loc "Ast")
                                              (Ast.IdUid _loc "ExFor")))
                                        (meta_loc _loc x0))
-                                    (meta_string _loc x1))
+                                    (meta_patt _loc x1))
                                  (meta_expr _loc x2))
                               (meta_expr _loc x3))
                            (meta_direction_flag _loc x4))
@@ -5348,7 +5348,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let _x_i1 = o#string _x_i1 in ExFlo _x _x_i1
           | ExFor _x _x_i1 _x_i2 _x_i3 _x_i4 _x_i5 ->
               let _x = o#loc _x in
-              let _x_i1 = o#string _x_i1 in
+              let _x_i1 = o#patt _x_i1 in
               let _x_i2 = o#expr _x_i2 in
               let _x_i3 = o#expr _x_i3 in
               let _x_i4 = o#direction_flag _x_i4 in
@@ -6124,7 +6124,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           | ExFlo _x _x_i1 -> let o = o#loc _x in let o = o#string _x_i1 in o
           | ExFor _x _x_i1 _x_i2 _x_i3 _x_i4 _x_i5 ->
               let o = o#loc _x in
-              let o = o#string _x_i1 in
+              let o = o#patt _x_i1 in
               let o = o#expr _x_i2 in
               let o = o#expr _x_i3 in
               let o = o#direction_flag _x_i4 in let o = o#expr _x_i5 in o

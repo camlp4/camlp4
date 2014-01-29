@@ -473,9 +473,9 @@ New syntax:\
             <:str_item< module rec $mb$ >>
         | "module"; "type"; i = a_ident; "="; mt = module_type ->
             <:str_item< module type $i$ = $mt$ >>
-        | "open"; "!"; i = module_longident -> Ast.StOpn _loc Ast.OvOverride i                 
+        | "open"; "!"; i = module_longident -> Ast.StOpn _loc Ast.OvOverride i
         | "open"; i = module_longident ->
-            Ast.StOpn _loc Ast.OvNil i 
+            Ast.StOpn _loc Ast.OvNil i
             (* <:str_item< open $i$ >> *)
 
         | "type"; td = type_declaration ->
@@ -621,7 +621,7 @@ New syntax:\
         | "if"; e1 = SELF; "then"; e2 = SELF; "else"; e3 = SELF ->
             <:expr< if $e1$ then $e2$ else $e3$ >>
         | "do"; seq = do_sequence -> mksequence _loc seq
-        | "for"; i = a_LIDENT; "="; e1 = sequence; df = direction_flag;
+        | "for"; i = ipatt; "="; e1 = sequence; df = direction_flag;
           e2 = sequence; "do"; seq = do_sequence ->
             <:expr< for $i$ = $mksequence' _loc e1$ $to:df$ $mksequence' _loc e2$ do { $seq$ } >>
         | "while"; e = sequence; "do"; seq = do_sequence ->
@@ -707,7 +707,7 @@ New syntax:\
         | s = a_STRING -> <:expr< $str:s$ >>
         | s = a_CHAR -> <:expr< $chr:s$ >>
         | i = TRY module_longident_dot_lparen; e = sequence; ")" ->
-            <:expr< let open $i$ in $e$ >> 
+            <:expr< let open $i$ in $e$ >>
         | i = TRY val_longident -> <:expr< $id:i$ >>
         | "`"; s = a_ident -> <:expr< ` $s$ >>
         | "["; "]" -> <:expr< [] >>

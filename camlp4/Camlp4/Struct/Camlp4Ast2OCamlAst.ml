@@ -809,9 +809,9 @@ value varify_constructors var_names =
           | t -> Some (ctyp t) ] in
         mkexp loc (Pexp_coerce (expr e) t1 (ctyp t2))
     | ExFlo loc s -> mkexp loc (Pexp_constant (Const_float (remove_underscores s)))
-    | ExFor loc i e1 e2 df el ->
+    | ExFor loc p e1 e2 df el ->
         let e3 = ExSeq loc el in
-        mkexp loc (Pexp_for (mkpat loc (Ppat_var (with_loc i loc))) (expr e1) (expr e2) (mkdirection df) (expr e3))
+        mkexp loc (Pexp_for (patt p) (expr e1) (expr e2) (mkdirection df) (expr e3))
     | <:expr@loc< fun [ $PaLab _ lab po$ when $w$ -> $e$ ] >> ->
         mkfun loc lab None (patt_of_lab loc lab po) e w
     | <:expr@loc< fun [ $PaOlbi _ lab p e1$ when $w$ -> $e2$ ] >> ->

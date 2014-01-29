@@ -553,9 +553,9 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     | <:expr< ($e$ : $t$) >> ->
         pp f "@[<2>(%a :@ %a)@]" o#expr e o#ctyp t
     | <:expr< $anti:s$ >> -> o#anti f s
-    | <:expr< for $s$ = $e1$ $to:df$ $e2$ do { $e3$ } >> ->
+    | <:expr< for $p$ = $e1$ $to:df$ $e2$ do { $e3$ } >> ->
         pp f "@[<hv0>@[<hv2>@[<2>for %a =@ %a@ %a@ %a@ do@]@ %a@]@ done@]"
-          o#var s o#expr e1 o#direction_flag df o#expr e2 o#seq e3
+          o#patt p o#expr e1 o#direction_flag df o#expr e2 o#seq e3
     | <:expr< $int:s$ >> -> o#numeric f s ""
     | <:expr< $nativeint:s$ >> -> o#numeric f s "n"
     | <:expr< $int64:s$ >> -> o#numeric f s "L"

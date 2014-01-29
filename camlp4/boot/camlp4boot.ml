@@ -1958,8 +1958,7 @@ New syntax:\
                                     'expr))));
                            ([ Gram.Skeyword "for";
                               Gram.Snterm
-                                (Gram.Entry.obj
-                                   (a_LIDENT : 'a_LIDENT Gram.Entry.t));
+                                (Gram.Entry.obj (ipatt : 'ipatt Gram.Entry.t));
                               Gram.Skeyword "=";
                               Gram.Snterm
                                 (Gram.Entry.obj
@@ -1978,7 +1977,7 @@ New syntax:\
                             (Gram.Action.mk
                                (fun (seq : 'do_sequence) _ (e2 : 'sequence)
                                   (df : 'direction_flag) (e1 : 'sequence) _
-                                  (i : 'a_LIDENT) _ (_loc : Gram.Loc.t) ->
+                                  (i : 'ipatt) _ (_loc : Gram.Loc.t) ->
                                   (Ast.ExFor (_loc, i, (mksequence' _loc e1),
                                      (mksequence' _loc e2), df, seq) :
                                     'expr))));

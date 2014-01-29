@@ -66,8 +66,8 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         | <:expr< let rec $bi$ in $e$ >> ->
             (((o#add_binding bi)#expr e)#binding bi)#set_env env
 
-        | <:expr< for $s$ = $e1$ $to:_$ $e2$ do { $e3$ } >> ->
-            ((((o#expr e1)#expr e2)#add_atom s)#expr e3)#set_env env
+        | <:expr< for $p$ = $e1$ $to:_$ $e2$ do { $e3$ } >> ->
+            ((((o#expr e1)#expr e2)#patt p)#expr e3)#set_env env
 
         | <:expr< $id:_$ >> | <:expr< new $_$ >> -> o
 

@@ -1052,7 +1052,7 @@ module Sig =
           ExFlo of loc * string
           | (* 3.14 *)
           (* for s = e to/downto e do { e } *)
-          ExFor of loc * string * expr * expr * direction_flag * expr
+          ExFor of loc * patt * expr * expr * direction_flag * expr
           | ExFun of loc * match_case
           | (* fun [ mc ] *)
           ExIfe of loc * expr * expr * expr
@@ -1899,7 +1899,7 @@ module Sig =
           | ExChr of loc * string
           | ExCoe of loc * expr * ctyp * ctyp
           | ExFlo of loc * string
-          | ExFor of loc * string * expr * expr * direction_flag * expr
+          | ExFor of loc * patt * expr * expr * direction_flag * expr
           | ExFun of loc * match_case
           | ExIfe of loc * expr * expr * expr
           | ExInt of loc * string
@@ -8680,7 +8680,7 @@ module Struct =
                                                      (Ast.IdUid (_loc,
                                                         "ExFor")))))),
                                                (meta_loc _loc x0))),
-                                            (meta_string _loc x1))),
+                                            (meta_patt _loc x1))),
                                          (meta_expr _loc x2))),
                                       (meta_expr _loc x3))),
                                    (meta_direction_flag _loc x4))),
@@ -11106,7 +11106,7 @@ module Struct =
                                                      (Ast.IdUid (_loc,
                                                         "ExFor")))))),
                                                (meta_loc _loc x0))),
-                                            (meta_string _loc x1))),
+                                            (meta_patt _loc x1))),
                                          (meta_expr _loc x2))),
                                       (meta_expr _loc x3))),
                                    (meta_direction_flag _loc x4))),
@@ -12838,7 +12838,7 @@ module Struct =
                       let _x_i1 = o#string _x_i1 in ExFlo (_x, _x_i1)
                   | ExFor (_x, _x_i1, _x_i2, _x_i3, _x_i4, _x_i5) ->
                       let _x = o#loc _x in
-                      let _x_i1 = o#string _x_i1 in
+                      let _x_i1 = o#patt _x_i1 in
                       let _x_i2 = o#expr _x_i2 in
                       let _x_i3 = o#expr _x_i3 in
                       let _x_i4 = o#direction_flag _x_i4 in
@@ -13724,7 +13724,7 @@ module Struct =
                       let o = o#loc _x in let o = o#string _x_i1 in o
                   | ExFor (_x, _x_i1, _x_i2, _x_i3, _x_i4, _x_i5) ->
                       let o = o#loc _x in
-                      let o = o#string _x_i1 in
+                      let o = o#patt _x_i1 in
                       let o = o#expr _x_i2 in
                       let o = o#expr _x_i3 in
                       let o = o#direction_flag _x_i4 in
@@ -15436,12 +15436,12 @@ module Struct =
               | ExFlo (loc, s) ->
                   mkexp loc
                     (Pexp_constant (Const_float (remove_underscores s)))
-              | ExFor (loc, i, e1, e2, df, el) ->
+              | ExFor (loc, p, e1, e2, df, el) ->
                   let e3 = ExSeq (loc, el)
                   in
                     mkexp loc
-                      (Pexp_for ((mkpat loc (Ppat_var (with_loc i loc))),
-                         (expr e1), (expr e2), (mkdirection df), (expr e3)))
+                      (Pexp_for ((patt p), (expr e1), (expr e2),
+                         (mkdirection df), (expr e3)))
               | Ast.ExFun (loc, (Ast.McArr (_, (PaLab (_, lab, po)), w, e)))
                   -> mkfun loc lab None (patt_of_lab loc lab po) e w
               | Ast.ExFun (loc,
@@ -16591,9 +16591,8 @@ module Struct =
                       (((o#add_binding bi)#expr e)#set_env env)#binding bi
                   | Ast.ExLet (_, Ast.ReRecursive, bi, e) ->
                       (((o#add_binding bi)#expr e)#binding bi)#set_env env
-                  | Ast.ExFor (_, s, e1, e2, _, e3) ->
-                      ((((o#expr e1)#expr e2)#add_atom s)#expr e3)#set_env
-                        env
+                  | Ast.ExFor (_, p, e1, e2, _, e3) ->
+                      ((((o#expr e1)#expr e2)#patt p)#expr e3)#set_env env
                   | Ast.ExId (_, _) | Ast.ExNew (_, _) -> o
                   | Ast.ExObj (_, p, cst) ->
                       ((o#add_patt p)#class_str_item cst)#set_env env
@@ -20029,10 +20028,10 @@ module Printers =
                       | Ast.ExTyc (_, e, t) ->
                           pp f "@[<2>(%a :@ %a)@]" o#expr e o#ctyp t
                       | Ast.ExAnt (_, s) -> o#anti f s
-                      | Ast.ExFor (_, s, e1, e2, df, e3) ->
+                      | Ast.ExFor (_, p, e1, e2, df, e3) ->
                           pp f
                             "@[<hv0>@[<hv2>@[<2>for %a =@ %a@ %a@ %a@ do@]@ %a@]@ done@]"
-                            o#var s o#expr e1 o#direction_flag df o#expr e2
+                            o#patt p o#expr e1 o#direction_flag df o#expr e2
                             o#seq e3
                       | Ast.ExInt (_, s) -> o#numeric f s ""
                       | Ast.ExNativeInt (_, s) -> o#numeric f s "n"

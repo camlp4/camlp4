@@ -156,7 +156,7 @@
     | ExCoe of loc and expr and ctyp and ctyp (* (e : t) or (e : t :> t) *)
     | ExFlo of loc and string (* 3.14 *)
       (* for s = e to/downto e do { e } *)
-    | ExFor of loc and string and expr and expr and direction_flag and expr
+    | ExFor of loc and patt and expr and expr and direction_flag and expr
     | ExFun of loc and match_case (* fun [ mc ] *)
     | ExIfe of loc and expr and expr and expr (* if e then e else e *)
     | ExInt of loc and string (* 42 *)
