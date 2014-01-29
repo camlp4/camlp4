@@ -980,6 +980,15 @@ New syntax:\
                                (fun _ (st : 'str_items) _ (_loc : Gram.Loc.t)
                                   -> (Ast.MeStr (_loc, st) : 'module_expr))));
                            ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
+                              Gram.Skeyword ")"; Gram.Skeyword "->"; Gram.
+                              Sself ],
+                            (Gram.Action.mk
+                               (fun (me : 'module_expr) _ _ _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MeFun
+                                     ((_loc, "()", (Ast.MtNil _loc), me)) :
+                                    'module_expr))));
+                           ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_UIDENT : 'a_UIDENT Gram.Entry.t));
@@ -1294,6 +1303,14 @@ New syntax:\
                                   _ (_loc : Gram.Loc.t) ->
                                   (Ast.MeTyc (_loc, me, mt) :
                                     'module_binding0))));
+                           ([ Gram.Skeyword "("; Gram.Skeyword ")"; Gram.
+                              Sself ],
+                            (Gram.Action.mk
+                               (fun (mb : 'module_binding0) _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MeFun
+                                     ((_loc, "()", (Ast.MtNil _loc), mb)) :
+                                    'module_binding0))));
                            ([ Gram.Skeyword "(";
                               Gram.Snterm
                                 (Gram.Entry.obj
@@ -1413,6 +1430,15 @@ New syntax:\
                      (None,
                       [ ((Some "top"), None,
                          [ ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
+                              Gram.Skeyword ")"; Gram.Skeyword "->"; Gram.
+                              Sself ],
+                            (Gram.Action.mk
+                               (fun (mt : 'module_type) _ _ _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MtFun
+                                     ((_loc, "()", (Ast.MtNil _loc), mt)) :
+                                    'module_type))));
+                           ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_UIDENT : 'a_UIDENT Gram.Entry.t));
@@ -1682,7 +1708,15 @@ New syntax:\
                  ((fun () ->
                      (None,
                       [ (None, (Some Camlp4.Sig.Grammar.RightA),
-                         [ ([ Gram.Skeyword "(";
+                         [ ([ Gram.Skeyword "("; Gram.Skeyword ")"; Gram.
+                              Sself ],
+                            (Gram.Action.mk
+                               (fun (mt : 'module_declaration) _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MtFun
+                                     ((_loc, "()", (Ast.MtNil _loc), mt)) :
+                                    'module_declaration))));
+                           ([ Gram.Skeyword "(";
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_UIDENT : 'a_UIDENT Gram.Entry.t));

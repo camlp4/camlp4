@@ -441,6 +441,8 @@ New syntax:\
         [ "functor"; "("; i = a_UIDENT; ":"; t = module_type; ")"; "->";
           me = SELF ->
             <:module_expr< functor ( $i$ : $t$ ) -> $me$ >>
+        | "functor"; "("; ")"; "->"; me = SELF ->
+            Ast.MeFun (_loc, "()", Ast.MtNil _loc, me)
         | "struct"; st = str_items; "end" ->
             <:module_expr< struct $st$ end >> ]
       | "apply"
@@ -495,6 +497,8 @@ New syntax:\
       [ RIGHTA
         [ "("; m = a_UIDENT; ":"; mt = module_type; ")"; mb = SELF ->
             <:module_expr< functor ( $m$ : $mt$ ) -> $mb$ >>
+        | "("; ")"; mb = SELF ->
+            Ast.MeFun(_loc, "()", Ast.MtNil _loc, mb)
         | ":"; mt = module_type; "="; me = module_expr ->
             <:module_expr< ( $me$ : $mt$ ) >>
         | "="; me = module_expr -> <:module_expr< $me$ >> ] ]
@@ -516,7 +520,9 @@ New syntax:\
     module_type:
       [ "top"
         [ "functor"; "("; i = a_UIDENT; ":"; t = SELF; ")"; "->"; mt = SELF ->
-            <:module_type< functor ( $i$ : $t$ ) -> $mt$ >> ]
+            <:module_type< functor ( $i$ : $t$ ) -> $mt$ >>
+        | "functor"; "("; ")"; "->"; mt = SELF ->
+            Ast.MtFun(_loc, "()", Ast.MtNil _loc, mt) ]
       | "with"
         [ mt = SELF; "with"; wc = with_constr ->
             <:module_type< $mt$ with $wc$ >> ]
@@ -570,7 +576,9 @@ New syntax:\
       [ RIGHTA
         [ ":"; mt = module_type -> <:module_type< $mt$ >>
         | "("; i = a_UIDENT; ":"; t = module_type; ")"; mt = SELF ->
-            <:module_type< functor ( $i$ : $t$ ) -> $mt$ >> ] ]
+            <:module_type< functor ( $i$ : $t$ ) -> $mt$ >>
+        | "("; ")"; mt = SELF ->
+            Ast.MtFun(_loc, "()", Ast.MtNil _loc, mt) ] ]
     ;
     module_rec_declaration:
       [ LEFTA

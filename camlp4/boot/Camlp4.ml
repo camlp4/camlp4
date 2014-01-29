@@ -15700,6 +15700,10 @@ module Struct =
               | Ast.MtNil loc ->
                   error loc "abstract/nil module type not allowed here"
               | Ast.MtId (loc, i) -> mkmty loc (Pmty_ident (long_uident i))
+              | Ast.MtFun ((loc, "()", Ast.MtNil _, mt)) ->
+                  mkmty loc
+                    (Pmty_functor ((with_loc "()" loc), None,
+                       (module_type mt)))
               | Ast.MtFun (loc, n, nt, mt) ->
                   mkmty loc
                     (Pmty_functor ((with_loc n loc), (Some (module_type nt)),
@@ -15842,6 +15846,10 @@ module Struct =
               | Ast.MeApp (loc, me1, me2) ->
                   mkmod loc
                     (Pmod_apply ((module_expr me1), (module_expr me2)))
+              | Ast.MeFun ((loc, "()", Ast.MtNil _, me)) ->
+                  mkmod loc
+                    (Pmod_functor ((with_loc "()" loc), None,
+                       (module_expr me)))
               | Ast.MeFun (loc, n, mt, me) ->
                   mkmod loc
                     (Pmod_functor ((with_loc n loc), (Some (module_type mt)),
@@ -19819,7 +19827,9 @@ module Printers =
                 method functor_args = fun f -> list o#functor_arg "@ " f
                 method functor_arg =
                   fun f (s, mt) ->
-                    pp f "@[<2>(%a :@ %a)@]" o#var s o#module_type mt
+                    match mt with
+                    | Ast.MtNil _ -> o#var f s
+                    | _ -> pp f "@[<2>(%a :@ %a)@]" o#var s o#module_type mt
                 method module_rec_binding =
                   fun f ->
                     function
@@ -20472,6 +20482,8 @@ module Printers =
                           pp f "@[<2>module type of@ %a@]" o#module_expr me
                       | Ast.MtId (_, i) -> o#ident f i
                       | Ast.MtAnt (_, s) -> o#anti f s
+                      | Ast.MtFun ((_, "()", Ast.MtNil _, mt)) ->
+                          pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_type mt
                       | Ast.MtFun (_, s, mt1, mt2) ->
                           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]"
                             o#var s o#module_type mt1 o#module_type mt2
@@ -20528,6 +20540,8 @@ module Printers =
                       | Ast.MeApp (_, me1, me2) ->
                           pp f "@[<2>%a@,(%a)@]" o#module_expr me1
                             o#module_expr me2
+                      | Ast.MeFun ((_, "()", Ast.MtNil _, me)) ->
+                          pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_expr me
                       | Ast.MeFun (_, s, mt, me) ->
                           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]"
                             o#var s o#module_type mt o#module_expr me
