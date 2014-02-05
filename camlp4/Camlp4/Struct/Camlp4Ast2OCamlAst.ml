@@ -1070,8 +1070,9 @@ value varify_constructors var_names =
           | _ -> Some (module_type mt) ]
         in
         [mksig loc (Psig_modtype {pmtd_name=with_loc n loc; pmtd_type=si; pmtd_attributes=[]}) :: l]
-    | SgOpn loc id ->
-        [mksig loc (Psig_open Fresh (long_uident id) []) :: l]
+    | SgOpn loc ov id ->
+        let fresh = override_flag loc ov in
+        [mksig loc (Psig_open fresh (long_uident id) []) :: l]
     | SgTyp loc tdl -> [mksig loc (Psig_type (mktype_decl tdl [])) :: l]
     | SgVal loc n t -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t [])) :: l]
     | <:sig_item@loc< $anti:_$ >> -> error loc "antiquotation in sig_item" ]

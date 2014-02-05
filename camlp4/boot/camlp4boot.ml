@@ -1607,7 +1607,18 @@ New syntax:\
                             (Gram.Action.mk
                                (fun (i : 'module_longident) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.SgOpn (_loc, i) : 'sig_item))));
+                                  (Ast.SgOpn (_loc, Ast.OvNil, i) :
+                                    'sig_item))));
+                           ([ Gram.Skeyword "open"; Gram.Skeyword "!";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (module_longident :
+                                     'module_longident Gram.Entry.t)) ],
+                            (Gram.Action.mk
+                               (fun (i : 'module_longident) _ _
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.SgOpn (_loc, Ast.OvOverride, i) :
+                                    'sig_item))));
                            ([ Gram.Skeyword "module"; Gram.Skeyword "type";
                               Gram.Snterm
                                 (Gram.Entry.obj

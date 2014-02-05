@@ -564,8 +564,10 @@ New syntax:\
             <:sig_item< module type $i$ = $mt$ >>
         | "module"; "type"; i = a_ident ->
             <:sig_item< module type $i$ >>
+        | "open"; "!"; i = module_longident ->
+            Ast.SgOpn _loc Ast.OvOverride i
         | "open"; i = module_longident ->
-            <:sig_item< open $i$ >>
+            Ast.SgOpn _loc Ast.OvNil i
         | "type"; t = type_declaration ->
             <:sig_item< type $t$ >>
         | value_val; i = a_LIDENT; ":"; t = ctyp ->

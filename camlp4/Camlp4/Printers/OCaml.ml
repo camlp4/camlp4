@@ -827,8 +827,10 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       | <:sig_item< module type $s$ = $mt$ >> ->
           pp f "@[<2>module type %a =@ %a%(%)@]"
             o#var s o#module_type mt semisep
-      | <:sig_item< open $sl$ >> ->
-          pp f "@[<2>open@ %a%(%)@]" o#ident sl semisep
+      | Ast.SgOpn _loc ov sl ->
+          pp f "@[<2>open%a@ %a%(%)@]"
+            o#override_flag ov
+            o#ident sl semisep
       | <:sig_item< type $t$ >> ->
           pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t semisep
       | <:sig_item< value $s$ : $t$ >> ->

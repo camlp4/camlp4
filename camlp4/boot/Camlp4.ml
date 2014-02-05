@@ -1156,7 +1156,7 @@ module Sig =
           | (* module type s = mt *)
           SgMty of loc * string * module_type
           | (* open i *)
-          SgOpn of loc * ident
+          SgOpn of loc * override_flag * ident
           | (* type t *)
           SgTyp of loc * ctyp
           | (* value s : t *)
@@ -1955,7 +1955,7 @@ module Sig =
           | SgMod of loc * string * module_type
           | SgRecMod of loc * module_binding
           | SgMty of loc * string * module_type
-          | SgOpn of loc * ident
+          | SgOpn of loc * override_flag * ident
           | SgTyp of loc * ctyp
           | SgVal of loc * string * ctyp
           | SgAnt of loc * string
@@ -9559,15 +9559,17 @@ module Struct =
                                          (Ast.IdUid (_loc, "SgTyp")))))),
                                    (meta_loc _loc x0))),
                                 (meta_ctyp _loc x1))
-                          | Ast.SgOpn (x0, x1) ->
+                          | Ast.SgOpn (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
-                                   (Ast.ExId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "SgOpn")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ident _loc x1))
+                                   (Ast.ExApp (_loc,
+                                      (Ast.ExId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "SgOpn")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_override_flag _loc x1))),
+                                (meta_ident _loc x2))
                           | Ast.SgMty (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -11994,15 +11996,17 @@ module Struct =
                                          (Ast.IdUid (_loc, "SgTyp")))))),
                                    (meta_loc _loc x0))),
                                 (meta_ctyp _loc x1))
-                          | Ast.SgOpn (x0, x1) ->
+                          | Ast.SgOpn (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
-                                   (Ast.PaId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "SgOpn")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ident _loc x1))
+                                   (Ast.PaApp (_loc,
+                                      (Ast.PaId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "SgOpn")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_override_flag _loc x1))),
+                                (meta_ident _loc x2))
                           | Ast.SgMty (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12500,9 +12504,10 @@ module Struct =
                       let _x_i1 = o#string _x_i1 in
                       let _x_i2 = o#module_type _x_i2
                       in SgMty (_x, _x_i1, _x_i2)
-                  | SgOpn (_x, _x_i1) ->
+                  | SgOpn (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
-                      let _x_i1 = o#ident _x_i1 in SgOpn (_x, _x_i1)
+                      let _x_i1 = o#override_flag _x_i1 in
+                      let _x_i2 = o#ident _x_i2 in SgOpn (_x, _x_i1, _x_i2)
                   | SgTyp (_x, _x_i1) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#ctyp _x_i1 in SgTyp (_x, _x_i1)
@@ -13469,8 +13474,10 @@ module Struct =
                       let o = o#loc _x in
                       let o = o#string _x_i1 in
                       let o = o#module_type _x_i2 in o
-                  | SgOpn (_x, _x_i1) ->
-                      let o = o#loc _x in let o = o#ident _x_i1 in o
+                  | SgOpn (_x, _x_i1, _x_i2) ->
+                      let o = o#loc _x in
+                      let o = o#override_flag _x_i1 in
+                      let o = o#ident _x_i2 in o
                   | SgTyp (_x, _x_i1) ->
                       let o = o#loc _x in let o = o#ctyp _x_i1 in o
                   | SgVal (_x, _x_i1, _x_i2) ->
@@ -15837,8 +15844,11 @@ module Struct =
                             pmtd_attributes = [];
                           })) ::
                       l
-              | SgOpn (loc, id) ->
-                  (mksig loc (Psig_open (Fresh, (long_uident id), []))) :: l
+              | SgOpn (loc, ov, id) ->
+                  let fresh = override_flag loc ov
+                  in
+                    (mksig loc (Psig_open (fresh, (long_uident id), []))) ::
+                      l
               | SgTyp (loc, tdl) ->
                   (mksig loc (Psig_type (mktype_decl tdl []))) :: l
               | SgVal (loc, n, t) ->
@@ -20423,8 +20433,9 @@ module Printers =
                       | Ast.SgMty (_, s, mt) ->
                           pp f "@[<2>module type %a =@ %a%(%)@]" o#var s
                             o#module_type mt semisep
-                      | Ast.SgOpn (_, sl) ->
-                          pp f "@[<2>open@ %a%(%)@]" o#ident sl semisep
+                      | Ast.SgOpn (_loc, ov, sl) ->
+                          pp f "@[<2>open%a@ %a%(%)@]" o#override_flag ov
+                            o#ident sl semisep
                       | Ast.SgTyp (_, t) ->
                           pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t
                             semisep

@@ -252,7 +252,7 @@
       (* module type s = mt *)
     | SgMty of loc and string and module_type
       (* open i *)
-    | SgOpn of loc and ident
+    | SgOpn of loc and override_flag and ident
       (* type t *)
     | SgTyp of loc and ctyp
       (* value s : t *)
