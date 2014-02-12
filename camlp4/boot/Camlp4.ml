@@ -15822,6 +15822,7 @@ module Struct =
                   (mksig loc
                      (Psig_module
                         {
+                          pmd_loc = mkloc loc;
                           pmd_name = with_loc n loc;
                           pmd_type = module_type mt;
                           pmd_attributes = [];
@@ -15839,6 +15840,7 @@ module Struct =
                     (mksig loc
                        (Psig_modtype
                           {
+                            pmtd_loc = mkloc loc;
                             pmtd_name = with_loc n loc;
                             pmtd_type = si;
                             pmtd_attributes = [];
@@ -15862,6 +15864,7 @@ module Struct =
                   module_sig_binding x (module_sig_binding y acc)
               | Ast.MbCol (loc, s, mt) ->
                   {
+                    pmd_loc = mkloc loc;
                     pmd_name = with_loc s loc;
                     pmd_type = module_type mt;
                     pmd_attributes = [];
@@ -15873,6 +15876,7 @@ module Struct =
                   module_str_binding x (module_str_binding y acc)
               | Ast.MbColEq (loc, s, mt, me) ->
                   {
+                    pmb_loc = mkloc loc;
                     pmb_name = with_loc s loc;
                     pmb_expr =
                       {
@@ -15989,6 +15993,7 @@ module Struct =
                   (mkstr loc
                      (Pstr_module
                         {
+                          pmb_loc = mkloc loc;
                           pmb_name = with_loc n loc;
                           pmb_expr = module_expr me;
                           pmb_attributes = [];
@@ -16006,6 +16011,7 @@ module Struct =
                     (mkstr loc
                        (Pstr_modtype
                           {
+                            pmtd_loc = mkloc loc;
                             pmtd_name = with_loc n loc;
                             pmtd_type = si;
                             pmtd_attributes = [];
