@@ -310,7 +310,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyOf loc _ _ -> error loc "type1 of type2 not allowed here"
     | TyCol loc _ _ -> error loc "type1 : type2 not allowed here"
     | TySem loc _ _ -> error loc "type1 ; type2 not allowed here"
-    | TyTypePol loc _ _ -> error loc "locally abstract type not allower here"
+    | TyTypePol loc _ _ -> error loc "locally abstract type not allowed here"
     | <:ctyp@loc< ($t1$ * $t2$) >> ->
          mktyp loc (Ptyp_tuple (List.map ctyp (list_of_ctyp t1 (list_of_ctyp t2 []))))
     | <:ctyp@loc< [ = $t$ ] >> -> mktyp loc (Ptyp_variant (row_field t) Closed None)

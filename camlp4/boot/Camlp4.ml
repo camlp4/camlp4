@@ -14827,7 +14827,7 @@ module Struct =
               | TySem (loc, _, _) ->
                   error loc "type1 ; type2 not allowed here"
               | TyTypePol (loc, _, _) ->
-                  error loc "locally abstract type not allower here"
+                  error loc "locally abstract type not allowed here"
               | Ast.TyTup (loc, (Ast.TySta (_, t1, t2))) ->
                   mktyp loc
                     (Ptyp_tuple
