@@ -377,29 +377,39 @@ New syntax:\
                 [: `tok; infix_kwds_filter xs :] ]
     | [: `x; xs :] -> [: `x; infix_kwds_filter xs :] ];
 
-  (* warning: the first token in the stream has index 1, not 0 *)
-  value stream_peek_nth n strm =
-    loop n (Stream.npeek n strm) where rec loop n =
-      fun
-      [ [] -> None
-      | [(x, _)] -> if n == 1 then Some x else None
-      | [_ :: l] -> loop (n - 1) l ]
+  value rec drop n l =
+     if n <= 0 then
+       l
+     else
+       match l with
+       [ [] -> []
+       | [_ :: l] -> drop (n - 1) l ]
   ;
 
   value test_module_longident_dot_delim =
     Gram.Entry.of_parser "test_module_longident_dot_delim" (fun strm ->
-      let rec test_longident_dot n =
-        match stream_peek_nth n strm with
-        [ Some ( UIDENT _
-               | ANTIQUOT (""|"id"|"anti"|"list") _) ->
-            test_longident_dot (n+1)
-        | Some (KEYWORD ".") -> test_delim (n+1)
-        | _ -> raise Stream.Failure ]
-      and test_delim n =
-        match stream_peek_nth n strm with
-        [ Some (KEYWORD ("(" | "[" | "[|" | "{" | "{<")) -> ()
-        | _ -> raise Stream.Failure ]
-      in test_longident_dot 1
+      let rec test_longident_dot pos tokens =
+        match tokens with
+        [ [(ANTIQUOT (""|"id"|"anti"|"list") _, _) :: tokens] ->
+          test_longident_dot (pos+1) tokens
+        | [(UIDENT _, _); (KEYWORD ".", _) :: tokens] ->
+          test_longident_dot (pos+2) tokens
+        | [_ :: _] ->
+          test_delim pos tokens
+        | [] -> fetch_more test_longident_dot pos ]
+      and test_delim pos tokens =
+        if pos = 0 then
+          raise Stream.Failure
+        else
+          match tokens with
+          [ [(KEYWORD ("(" | "[" | "[|" | "{" | "{<"), _) :: _] -> ()
+          | [_ :: _] -> raise Stream.Failure
+          | [] -> fetch_more test_delim pos ]
+      and fetch_more k pos =
+        match drop pos (Stream.npeek (pos + 10) strm) with
+        [ [] -> raise Stream.Failure
+        | tokens -> k pos tokens ]
+      in fetch_more test_longident_dot 0
     );
 
   Token.Filter.define_filter (Gram.get_filter ())
@@ -745,7 +755,7 @@ New syntax:\
         | s = a_STRING -> <:expr< $str:s$ >>
         | s = a_CHAR -> <:expr< $chr:s$ >>
         | test_module_longident_dot_delim;
-          m = module_lonident; "."; e = SELF ->
+          m = module_longident; "."; e = SELF ->
             <:expr< let open $m$ in $e$ >>
         | i = TRY val_longident -> <:expr< $id:i$ >>
         | "`"; s = a_ident -> <:expr< ` $s$ >>
