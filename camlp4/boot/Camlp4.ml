@@ -15817,7 +15817,11 @@ module Struct =
                            (list_of_meta_list sl)))) ::
                     l
               | SgInc (loc, mt) ->
-                  (mksig loc (Psig_include ((module_type mt), []))) :: l
+                  (mksig loc
+                     (Psig_include
+                        { pincl_mod = module_type mt; pincl_attributes = [];
+                        })) ::
+                    l
               | SgMod (loc, n, mt) ->
                   (mksig loc
                      (Psig_module
@@ -15849,7 +15853,13 @@ module Struct =
               | SgOpn (loc, ov, id) ->
                   let fresh = override_flag loc ov
                   in
-                    (mksig loc (Psig_open (fresh, (long_uident id), []))) ::
+                    (mksig loc
+                       (Psig_open
+                          {
+                            popen_override = fresh;
+                            popen_lid = long_uident id;
+                            popen_attributes = [];
+                          })) ::
                       l
               | SgTyp (loc, tdl) ->
                   (mksig loc (Psig_type (mktype_decl tdl []))) :: l
@@ -15973,8 +15983,12 @@ module Struct =
               | Ast.StExc (loc, (Ast.TyId (_, (Ast.IdUid (_, s)))),
                   (Ast.OSome i)) ->
                   (mkstr loc
-                     (Pstr_exn_rebind ((with_loc (conv_con s) loc),
-                        (long_uident ~conv_con i), []))) ::
+                     (Pstr_exn_rebind
+                        {
+                          pexrb_name = with_loc (conv_con s) loc;
+                          pexrb_lid = long_uident ~conv_con i;
+                          pexrb_attributes = [];
+                        })) ::
                     l
               | Ast.StExc (loc,
                   (Ast.TyOf (_, (Ast.TyId (_, (Ast.IdUid (_, _)))), _)),
@@ -15988,7 +16002,11 @@ module Struct =
                            (list_of_meta_list sl)))) ::
                     l
               | StInc (loc, me) ->
-                  (mkstr loc (Pstr_include (((module_expr me), [])))) :: l
+                  (mkstr loc
+                     (Pstr_include
+                        { pincl_mod = module_expr me; pincl_attributes = [];
+                        })) ::
+                    l
               | StMod (loc, n, me) ->
                   (mkstr loc
                      (Pstr_module
@@ -16020,7 +16038,13 @@ module Struct =
               | StOpn (loc, ov, id) ->
                   let fresh = override_flag loc ov
                   in
-                    (mkstr loc (Pstr_open (fresh, (long_uident id), []))) ::
+                    (mkstr loc
+                       (Pstr_open
+                          {
+                            popen_override = fresh;
+                            popen_lid = long_uident id;
+                            popen_attributes = [];
+                          })) ::
                       l
               | StTyp (loc, tdl) ->
                   (mkstr loc (Pstr_type (mktype_decl tdl []))) :: l

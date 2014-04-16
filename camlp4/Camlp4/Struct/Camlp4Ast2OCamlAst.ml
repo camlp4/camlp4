@@ -1059,7 +1059,7 @@ value varify_constructors var_names =
         [mksig loc (Psig_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=List.map ctyp (list_of_ctyp t []); pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l]
     | SgExc _ _ -> assert False (*FIXME*)
     | SgExt loc n t sl -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t (list_of_meta_list sl))) :: l]
-    | SgInc loc mt -> [mksig loc (Psig_include (module_type mt) []) :: l]
+    | SgInc loc mt -> [mksig loc (Psig_include {pincl_mod=module_type mt; pincl_attributes=[]}) :: l]
     | SgMod loc n mt -> [mksig loc (Psig_module {pmd_loc=mkloc loc; pmd_name=with_loc n loc; pmd_type=module_type mt; pmd_attributes=[]}) :: l]
     | SgRecMod loc mb ->
         [mksig loc (Psig_recmodule (module_sig_binding mb [])) :: l]
@@ -1072,7 +1072,7 @@ value varify_constructors var_names =
         [mksig loc (Psig_modtype {pmtd_loc=mkloc loc; pmtd_name=with_loc n loc; pmtd_type=si; pmtd_attributes=[]}) :: l]
     | SgOpn loc ov id ->
         let fresh = override_flag loc ov in
-        [mksig loc (Psig_open fresh (long_uident id) []) :: l]
+        [mksig loc (Psig_open {popen_override=fresh; popen_lid=long_uident id; popen_attributes=[]}) :: l]
     | SgTyp loc tdl -> [mksig loc (Psig_type (mktype_decl tdl [])) :: l]
     | SgVal loc n t -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t [])) :: l]
     | <:sig_item@loc< $anti:_$ >> -> error loc "antiquotation in sig_item" ]
@@ -1137,13 +1137,13 @@ value varify_constructors var_names =
     | <:str_item@loc< exception $uid:s$ of $t$ >> ->
         [mkstr loc (Pstr_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=List.map ctyp (list_of_ctyp t []);pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l ]
     | <:str_item@loc< exception $uid:s$ = $i$ >> ->
-        [mkstr loc (Pstr_exn_rebind (with_loc (conv_con s) loc) (long_uident ~conv_con i) []) :: l ]
+        [mkstr loc (Pstr_exn_rebind {pexrb_name=with_loc (conv_con s) loc; pexrb_lid=long_uident ~conv_con i; pexrb_attributes=[]}) :: l ]
     | <:str_item@loc< exception $uid:_$ of $_$ = $_$ >> ->
         error loc "type in exception alias"
     | StExc _ _ _ -> assert False (*FIXME*)
     | StExp loc e -> [mkstr loc (Pstr_eval (expr e) []) :: l]
     | StExt loc n t sl -> [mkstr loc (Pstr_primitive (mkvalue_desc loc (with_loc n loc) t (list_of_meta_list sl))) :: l]
-    | StInc loc me -> [mkstr loc (Pstr_include (module_expr me, [])) :: l]
+    | StInc loc me -> [mkstr loc (Pstr_include {pincl_mod=module_expr me; pincl_attributes=[]}) :: l]
     | StMod loc n me -> [mkstr loc (Pstr_module {pmb_loc=mkloc loc; pmb_name=with_loc n loc;pmb_expr=module_expr me;pmb_attributes=[]}) :: l]
     | StRecMod loc mb ->
         [mkstr loc (Pstr_recmodule (module_str_binding mb [])) :: l]
@@ -1156,7 +1156,7 @@ value varify_constructors var_names =
         [mkstr loc (Pstr_modtype {pmtd_loc=mkloc loc; pmtd_name=with_loc n loc; pmtd_type=si; pmtd_attributes=[]}) :: l]
     | StOpn loc ov id ->
         let fresh = override_flag loc ov in
-        [mkstr loc (Pstr_open fresh (long_uident id) []) :: l]
+        [mkstr loc (Pstr_open {popen_override=fresh; popen_lid=long_uident id; popen_attributes=[]}) :: l]
     | StTyp loc tdl -> [mkstr loc (Pstr_type (mktype_decl tdl [])) :: l]
     | StVal loc rf bi ->
         [mkstr loc (Pstr_value (mkrf rf) (binding bi [])) :: l]
