@@ -377,6 +377,31 @@ New syntax:\
                 [: `tok; infix_kwds_filter xs :] ]
     | [: `x; xs :] -> [: `x; infix_kwds_filter xs :] ];
 
+  (* warning: the first token in the stream has index 1, not 0 *)
+  value stream_peek_nth n strm =
+    loop n (Stream.npeek n strm) where rec loop n =
+      fun
+      [ [] -> None
+      | [(x, _)] -> if n == 1 then Some x else None
+      | [_ :: l] -> loop (n - 1) l ]
+  ;
+
+  value test_module_longident_dot_delim =
+    Gram.Entry.of_parser "test_module_longident_dot_delim" (fun strm ->
+      let rec test_longident_dot n =
+        match stream_peek_nth n strm with
+        [ Some ( UIDENT _
+               | ANTIQUOT (""|"id"|"anti"|"list") _) ->
+            test_longident_dot (n+1)
+        | Some (KEYWORD ".") -> test_delim (n+1)
+        | _ -> raise Stream.Failure ]
+      and test_delim n =
+        match stream_peek_nth n strm with
+        [ Some (KEYWORD ("(" | "[" | "[|" | "{" | "{<")) -> ()
+        | _ -> raise Stream.Failure ]
+      in test_longident_dot 1
+    );
+
   Token.Filter.define_filter (Gram.get_filter ())
     (fun f strm -> infix_kwds_filter (f strm));
 
@@ -719,8 +744,9 @@ New syntax:\
         | s = a_FLOAT -> <:expr< $flo:s$ >>
         | s = a_STRING -> <:expr< $str:s$ >>
         | s = a_CHAR -> <:expr< $chr:s$ >>
-        | i = TRY module_longident_dot_lparen; e = sequence; ")" ->
-            <:expr< let open $i$ in $e$ >>
+        | test_module_longident_dot_delim;
+          m = module_lonident; "."; e = SELF ->
+            <:expr< let open $m$ in $e$ >>
         | i = TRY val_longident -> <:expr< $id:i$ >>
         | "`"; s = a_ident -> <:expr< ` $s$ >>
         | "["; "]" -> <:expr< [] >>
@@ -1234,7 +1260,7 @@ New syntax:\
     module_longident:
       [ [ `ANTIQUOT (""|"id"|"anti"|"list" as n) s ->
             <:ident< $anti:mk_anti ~c:"ident" n s$ >>
-        | m = a_UIDENT; "."; l = SELF -> <:ident< $uid:m$.$l$ >>
+        | m = a_UIDENT; l = TRY [ "."; l = module_longident -> l ] -> <:ident< $uid:m$.$l$ >>
         | i = a_UIDENT -> <:ident< $uid:i$ >> ] ]
     ;
     module_longident_with_app:
@@ -1247,12 +1273,6 @@ New syntax:\
             <:ident< $anti:mk_anti ~c:"ident" n s$ >>
         | i = a_UIDENT -> <:ident< $uid:i$ >>
         | "("; i = SELF; ")" -> i ] ]
-    ;
-    module_longident_dot_lparen:
-      [ [ `ANTIQUOT (""|"id"|"anti"|"list" as n) s; "."; "(" ->
-            <:ident< $anti:mk_anti ~c:"ident" n s$ >>
-        | m = a_UIDENT; "."; l = SELF -> <:ident< $uid:m$.$l$ >>
-        | i = a_UIDENT; "."; "(" -> <:ident< $uid:i$ >> ] ]
     ;
     type_longident:
       [ "apply"
