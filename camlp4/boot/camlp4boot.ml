@@ -8178,15 +8178,16 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t));
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t)));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.SgDir (_loc, n, dp) ],
+                                  (([ Ast.SgDir (_loc, n, args) ],
                                     (stopped_at _loc)) : 'interf)))) ]) ]))
                     ());
                Gram.extend (sig_items : 'sig_items Gram.Entry.t)
@@ -8279,15 +8280,16 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t));
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t)));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, dp) ],
+                                  (([ Ast.StDir (_loc, n, args) ],
                                     (stopped_at _loc)) : 'implem)))) ]) ]))
                     ());
                Gram.extend (str_items : 'str_items Gram.Entry.t)
@@ -8400,15 +8402,16 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t));
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t)));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, dp) ],
+                                  (([ Ast.StDir (_loc, n, args) ],
                                     (stopped_at _loc)) : 'use_file)))) ]) ]))
                     ());
                Gram.extend (phrase : 'phrase Gram.Entry.t)
@@ -8427,15 +8430,16 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t));
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t)));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, dp) : 'phrase)))) ]) ]))
+                                  (Ast.StDir (_loc, n, args) : 'phrase)))) ]) ]))
                     ());
                Gram.extend (a_INT : 'a_INT Gram.Entry.t)
                  ((fun () ->
@@ -9137,13 +9141,15 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t)) ],
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t))) ],
                             (Gram.Action.mk
-                               (fun (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, dp) : 'str_item_quot)))) ]) ]))
+                                  (Ast.StDir (_loc, n, args) :
+                                    'str_item_quot)))) ]) ]))
                     ());
                Gram.extend (sig_item_quot : 'sig_item_quot Gram.Entry.t)
                  ((fun () ->
@@ -9176,13 +9182,15 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (opt_expr : 'opt_expr Gram.Entry.t)) ],
+                              Gram.Slist0
+                                (Gram.Snterm
+                                   (Gram.Entry.obj
+                                      (expr : 'expr Gram.Entry.t))) ],
                             (Gram.Action.mk
-                               (fun (dp : 'opt_expr) (n : 'a_LIDENT) _
+                               (fun (args : 'expr list) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.SgDir (_loc, n, dp) : 'sig_item_quot)))) ]) ]))
+                                  (Ast.SgDir (_loc, n, args) :
+                                    'sig_item_quot)))) ]) ]))
                     ());
                Gram.extend
                  (module_type_quot : 'module_type_quot Gram.Entry.t)
@@ -15995,12 +16003,12 @@ module B =
       
     let gind =
       function
-      | Ast.SgDir (loc, n, (Ast.ExStr (_, s))) -> Some ((loc, n, s))
+      | Ast.SgDir (loc, n, ([ Ast.ExStr (_, s) ])) -> Some ((loc, n, s))
       | _ -> None
       
     let gimd =
       function
-      | Ast.StDir (loc, n, (Ast.ExStr (_, s))) -> Some ((loc, n, s))
+      | Ast.StDir (loc, n, ([ Ast.ExStr (_, s) ])) -> Some ((loc, n, s))
       | _ -> None
       
     let process_intf dyn_loader name =

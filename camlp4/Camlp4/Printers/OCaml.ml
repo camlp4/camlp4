@@ -845,7 +845,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       | <:sig_item< module rec $mb$ >> ->
           pp f "@[<2>module rec %a%(%)@]"
             o#module_rec_binding mb semisep
-      | <:sig_item< # $_$ $_$ >> -> ()
+      | Ast.SgDir _ _ _ -> ()
       | <:sig_item< $anti:s$ >> ->
           pp f "%a%(%)" o#anti s semisep ];
 
@@ -901,7 +901,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
             pp f "@[<hv2>class %a%(%)@]" o#class_declaration ce semisep
       | <:str_item< module rec $mb$ >> ->
             pp f "@[<2>module rec %a%(%)@]" o#module_rec_binding mb semisep
-      | <:str_item< # $_$ $_$ >> -> ()
+      | Ast.StDir _ _ _ -> ()
       | <:str_item< $anti:s$ >> -> pp f "%a%(%)" o#anti s semisep
       | Ast.StExc _ _ (Ast.OAnt _) -> assert False ];
 

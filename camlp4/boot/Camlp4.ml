@@ -1142,7 +1142,7 @@ module Sig =
           | (* sg ; sg *)
           SgSem of loc * sig_item * sig_item
           | (* # s or # s e *)
-          SgDir of loc * string * expr
+          SgDir of loc * string * expr list
           | (* exception t *)
           SgExc of loc * ctyp
           | (* external s : t = s ... s *)
@@ -1242,7 +1242,7 @@ module Sig =
           | (* st ; st *)
           StSem of loc * str_item * str_item
           | (* # s or # s e *)
-          StDir of loc * string * expr
+          StDir of loc * string * expr list
           | (* exception t or exception t = i *)
           StExc of loc * ctyp * (*FIXME*) ident meta_option
           | (* e *)
@@ -1948,7 +1948,7 @@ module Sig =
           | SgCls of loc * class_type
           | SgClt of loc * class_type
           | SgSem of loc * sig_item * sig_item
-          | SgDir of loc * string * expr
+          | SgDir of loc * string * expr list
           | SgExc of loc * ctyp
           | SgExt of loc * string * ctyp * string meta_list
           | SgInc of loc * module_type
@@ -2003,7 +2003,7 @@ module Sig =
           | StCls of loc * class_expr
           | StClt of loc * class_type
           | StSem of loc * str_item * str_item
-          | StDir of loc * string * expr
+          | StDir of loc * string * expr list
           | StExc of loc * ctyp * ident meta_option
           | StExp of loc * expr
           | StExt of loc * string * ctyp * string meta_list
@@ -9642,7 +9642,7 @@ module Struct =
                                             (Ast.IdUid (_loc, "SgDir")))))),
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
-                                (meta_expr _loc x2))
+                                (meta_list meta_expr _loc x2))
                           | Ast.SgSem (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -9796,7 +9796,7 @@ module Struct =
                                             (Ast.IdUid (_loc, "StDir")))))),
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
-                                (meta_expr _loc x2))
+                                (meta_list meta_expr _loc x2))
                           | Ast.StSem (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -12079,7 +12079,7 @@ module Struct =
                                             (Ast.IdUid (_loc, "SgDir")))))),
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
-                                (meta_expr _loc x2))
+                                (meta_list meta_expr _loc x2))
                           | Ast.SgSem (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12233,7 +12233,7 @@ module Struct =
                                             (Ast.IdUid (_loc, "StDir")))))),
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
-                                (meta_expr _loc x2))
+                                (meta_list meta_expr _loc x2))
                           | Ast.StSem (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12414,7 +12414,8 @@ module Struct =
                   | StDir (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in
-                      let _x_i2 = o#expr _x_i2 in StDir (_x, _x_i1, _x_i2)
+                      let _x_i2 = o#list (fun o -> o#expr) _x_i2
+                      in StDir (_x, _x_i1, _x_i2)
                   | StExc (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#ctyp _x_i1 in
@@ -12477,7 +12478,8 @@ module Struct =
                   | SgDir (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in
-                      let _x_i2 = o#expr _x_i2 in SgDir (_x, _x_i1, _x_i2)
+                      let _x_i2 = o#list (fun o -> o#expr) _x_i2
+                      in SgDir (_x, _x_i1, _x_i2)
                   | SgExc (_x, _x_i1) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#ctyp _x_i1 in SgExc (_x, _x_i1)
@@ -13405,7 +13407,8 @@ module Struct =
                       let o = o#str_item _x_i2 in o
                   | StDir (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
-                      let o = o#string _x_i1 in let o = o#expr _x_i2 in o
+                      let o = o#string _x_i1 in
+                      let o = o#list (fun o -> o#expr) _x_i2 in o
                   | StExc (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
                       let o = o#ctyp _x_i1 in
@@ -13454,7 +13457,8 @@ module Struct =
                       let o = o#sig_item _x_i2 in o
                   | SgDir (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
-                      let o = o#string _x_i1 in let o = o#expr _x_i2 in o
+                      let o = o#string _x_i1 in
+                      let o = o#list (fun o -> o#expr) _x_i2 in o
                   | SgExc (_x, _x_i1) ->
                       let o = o#loc _x in let o = o#ctyp _x_i1 in o
                   | SgExt (_x, _x_i1, _x_i2, _x_i3) ->
@@ -16258,9 +16262,8 @@ module Struct =
               
             let str_item ast = str_item ast []
               
-            let directive =
+            let directive_arg =
               function
-              | Ast.ExNil _ -> Pdir_none
               | ExStr (_, s) -> Pdir_string s
               | ExInt (_, i) -> Pdir_int (int_of_string i)
               | Ast.ExId (_, (Ast.IdUid (_, "True"))) -> Pdir_bool true
@@ -16269,7 +16272,8 @@ module Struct =
               
             let phrase =
               function
-              | StDir (_, d, dp) -> Ptop_dir (d, (directive dp))
+              | StDir (_, d, args) ->
+                  Ptop_dir (d, (List.map directive_arg args))
               | si -> Ptop_def (str_item si)
               
             let attribute loc s str =
