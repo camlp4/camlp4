@@ -238,7 +238,7 @@
       (* sg ; sg *)
     | SgSem of loc and sig_item and sig_item
       (* # s or # s e *)
-    | SgDir of loc and string and expr
+    | SgDir of loc and string and list expr
       (* exception t *)
     | SgExc of loc and ctyp
       (* external s : t = s ... s *)
@@ -327,7 +327,7 @@
       (* st ; st *)
     | StSem of loc and str_item and str_item
       (* # s or # s e *)
-    | StDir of loc and string and expr
+    | StDir of loc and string and list expr
       (* exception t or exception t = i *)
     | StExc of loc and ctyp and meta_option(*FIXME*) ident
       (* e *)

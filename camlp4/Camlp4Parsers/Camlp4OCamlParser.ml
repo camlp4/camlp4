@@ -145,7 +145,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
   DELETE_RULE Gram meth_list: meth_decl; opt_dot_dot END;
   DELETE_RULE Gram expr: "let"; opt_rec; binding; "in"; SELF END;
   DELETE_RULE Gram expr: "let"; "module"; a_UIDENT; module_binding0; "in"; SELF END;
-  DELETE_RULE Gram expr: "let"; "open"; "!"; module_longident; "in"; SELF END;      
+  DELETE_RULE Gram expr: "let"; "open"; "!"; module_longident; "in"; SELF END;
   DELETE_RULE Gram expr: "let"; "open"; module_longident; "in"; SELF END;
   DELETE_RULE Gram expr: "fun"; "["; LIST0 match_case0 SEP "|"; "]" END;
   DELETE_RULE Gram expr: "if"; SELF; "then"; SELF; "else"; SELF END;
@@ -711,8 +711,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       ] ]
     ;
     top_phrase:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr; ";;" ->
-            Some <:str_item< # $n$ $dp$ >>
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr; ";;" ->
+            Some (Ast.StDir _loc n args)
         | l = LIST1 str_item; ";;" -> Some (Ast.stSem_of_list l)
         | `EOI -> None
       ] ]

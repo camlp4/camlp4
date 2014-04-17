@@ -1699,8 +1699,8 @@ New syntax:\
       ] ]
     ;
     interf:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr; semi ->
-            ([ <:sig_item< # $n$ $dp$ >> ], stopped_at _loc)
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr; semi ->
+            ([ Ast.SgDir _loc n args ], stopped_at _loc)
         | si = sig_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None) ] ]
     ;
@@ -1713,8 +1713,8 @@ New syntax:\
       ] ]
     ;
     implem:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr; semi ->
-            ([ <:str_item< # $n$ $dp$ >> ], stopped_at _loc)
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr; semi ->
+            ([ Ast.StDir _loc n args ], stopped_at _loc)
         | si = str_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None)
       ] ]
@@ -1733,15 +1733,15 @@ New syntax:\
       ] ]
     ;
     use_file:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr; semi ->
-            ([ <:str_item< # $n$ $dp$ >> ], stopped_at _loc)
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr; semi ->
+            ([ Ast.StDir _loc n args ], stopped_at _loc)
         | si = str_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None)
       ] ]
     ;
     phrase:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr; semi ->
-            <:str_item< # $n$ $dp$ >>
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr; semi ->
+            Ast.StDir _loc n args
         | st = str_item; semi -> st
       ] ]
     ;
@@ -1852,7 +1852,7 @@ New syntax:\
       ] ]
     ;
     str_item_quot:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr -> <:str_item< # $n$ $dp$ >>
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr -> Ast.StDir _loc n args
         | st1 = str_item; semi; st2 = SELF ->
             match st2 with
             [ <:str_item<>> -> st1
@@ -1861,7 +1861,7 @@ New syntax:\
         | -> <:str_item<>> ] ]
     ;
     sig_item_quot:
-      [ [ "#"; n = a_LIDENT; dp = opt_expr -> <:sig_item< # $n$ $dp$ >>
+      [ [ "#"; n = a_LIDENT; args = LIST0 expr -> Ast.SgDir _loc n args
         | sg1 = sig_item; semi; sg2 = SELF ->
             match sg2 with
             [ <:sig_item<>> -> sg1

@@ -1308,10 +1308,9 @@ value varify_constructors var_names =
   value sig_item ast = sig_item ast [];
   value str_item ast = str_item ast [];
 
-  value directive =
+  value directive_arg =
     fun
-    [ <:expr<>> -> Pdir_none
-    | ExStr _ s -> Pdir_string s
+    [ ExStr _ s -> Pdir_string s
     | ExInt _ i -> Pdir_int (int_of_string i)
     | <:expr< True >> -> Pdir_bool True
     | <:expr< False >> -> Pdir_bool False
@@ -1320,7 +1319,7 @@ value varify_constructors var_names =
 
   value phrase =
     fun
-    [ StDir _ d dp -> Ptop_dir d (directive dp)
+    [ StDir _ d args -> Ptop_dir d (List.map directive_arg args)
     | si -> Ptop_def (str_item si) ]
   ;
 

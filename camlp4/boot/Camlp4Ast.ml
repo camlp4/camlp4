@@ -2431,7 +2431,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                     (Ast.IdUid _loc "SgDir")))
                               (meta_loc _loc x0))
                            (meta_string _loc x1))
-                        (meta_expr _loc x2)
+                        (meta_list meta_expr _loc x2)
                   | Ast.SgSem x0 x1 x2 ->
                       Ast.ExApp _loc
                         (Ast.ExApp _loc
@@ -2570,7 +2570,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                     (Ast.IdUid _loc "StDir")))
                               (meta_loc _loc x0))
                            (meta_string _loc x1))
-                        (meta_expr _loc x2)
+                        (meta_list meta_expr _loc x2)
                   | Ast.StSem x0 x1 x2 ->
                       Ast.ExApp _loc
                         (Ast.ExApp _loc
@@ -4636,7 +4636,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                     (Ast.IdUid _loc "SgDir")))
                               (meta_loc _loc x0))
                            (meta_string _loc x1))
-                        (meta_expr _loc x2)
+                        (meta_list meta_expr _loc x2)
                   | Ast.SgSem x0 x1 x2 ->
                       Ast.PaApp _loc
                         (Ast.PaApp _loc
@@ -4775,7 +4775,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                                     (Ast.IdUid _loc "StDir")))
                               (meta_loc _loc x0))
                            (meta_string _loc x1))
-                        (meta_expr _loc x2)
+                        (meta_list meta_expr _loc x2)
                   | Ast.StSem x0 x1 x2 ->
                       Ast.PaApp _loc
                         (Ast.PaApp _loc
@@ -4939,7 +4939,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           | StDir _x _x_i1 _x_i2 ->
               let _x = o#loc _x in
               let _x_i1 = o#string _x_i1 in
-              let _x_i2 = o#expr _x_i2 in StDir _x _x_i1 _x_i2
+              let _x_i2 = o#list (fun o -> o#expr) _x_i2
+              in StDir _x _x_i1 _x_i2
           | StExc _x _x_i1 _x_i2 ->
               let _x = o#loc _x in
               let _x_i1 = o#ctyp _x_i1 in
@@ -4996,7 +4997,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           | SgDir _x _x_i1 _x_i2 ->
               let _x = o#loc _x in
               let _x_i1 = o#string _x_i1 in
-              let _x_i2 = o#expr _x_i2 in SgDir _x _x_i1 _x_i2
+              let _x_i2 = o#list (fun o -> o#expr) _x_i2
+              in SgDir _x _x_i1 _x_i2
           | SgExc _x _x_i1 ->
               let _x = o#loc _x in let _x_i1 = o#ctyp _x_i1 in SgExc _x _x_i1
           | SgExt _x _x_i1 _x_i2 _x_i3 ->
@@ -5854,7 +5856,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let o = o#str_item _x_i1 in let o = o#str_item _x_i2 in o
           | StDir _x _x_i1 _x_i2 ->
               let o = o#loc _x in
-              let o = o#string _x_i1 in let o = o#expr _x_i2 in o
+              let o = o#string _x_i1 in
+              let o = o#list (fun o -> o#expr) _x_i2 in o
           | StExc _x _x_i1 _x_i2 ->
               let o = o#loc _x in
               let o = o#ctyp _x_i1 in
@@ -5895,7 +5898,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let o = o#sig_item _x_i1 in let o = o#sig_item _x_i2 in o
           | SgDir _x _x_i1 _x_i2 ->
               let o = o#loc _x in
-              let o = o#string _x_i1 in let o = o#expr _x_i2 in o
+              let o = o#string _x_i1 in
+              let o = o#list (fun o -> o#expr) _x_i2 in o
           | SgExc _x _x_i1 -> let o = o#loc _x in let o = o#ctyp _x_i1 in o
           | SgExt _x _x_i1 _x_i2 _x_i3 ->
               let o = o#loc _x in
