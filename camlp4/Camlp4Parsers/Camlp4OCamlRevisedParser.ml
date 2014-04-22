@@ -577,6 +577,8 @@ New syntax:\
         | "("; "module"; i = module_longident_with_app; ")" -> Ast.MtAlias (_loc, i)
         | "("; mt = SELF; ")" -> <:module_type< $mt$ >>
         | "module"; "type"; "of"; me = module_expr ->
+            <:module_type< module type of $me$ >>
+        | "("; "module"; "type"; "of"; me = module_expr; ")" ->
             <:module_type< module type of $me$ >> ] ]
     ;
     sig_item:
