@@ -15683,8 +15683,12 @@ module Struct =
                            (mktyp _loc (Ptyp_poly (ampersand_vars, ty')))))) in
                   let e = mk_newtypes vars
                   in
-                    { pvb_pat = pat; pvb_expr = e; pvb_attributes = []; } ::
-                      acc
+                    {
+                      pvb_pat = pat;
+                      pvb_expr = e;
+                      pvb_attributes = [];
+                      pvb_loc = mkloc _loc;
+                    } :: acc
               | Ast.BiEq (_loc, p,
                   (Ast.ExTyc (_, e, (Ast.TyPol (_, vs, ty))))) ->
                   {
@@ -15692,9 +15696,14 @@ module Struct =
                       patt (Ast.PaTyc (_loc, p, (Ast.TyPol (_loc, vs, ty))));
                     pvb_expr = expr e;
                     pvb_attributes = [];
+                    pvb_loc = mkloc _loc;
                   } :: acc
-              | Ast.BiEq (_, p, e) ->
-                  { pvb_pat = patt p; pvb_expr = expr e; pvb_attributes = [];
+              | Ast.BiEq (_loc, p, e) ->
+                  {
+                    pvb_pat = patt p;
+                    pvb_expr = expr e;
+                    pvb_attributes = [];
+                    pvb_loc = mkloc _loc;
                   } :: acc
               | Ast.BiNil _ -> acc
               | _ -> assert false
@@ -15823,7 +15832,10 @@ module Struct =
               | SgInc (loc, mt) ->
                   (mksig loc
                      (Psig_include
-                        { pincl_mod = module_type mt; pincl_attributes = [];
+                        {
+                          pincl_mod = module_type mt;
+                          pincl_attributes = [];
+                          pincl_loc = mkloc loc;
                         })) ::
                     l
               | SgMod (loc, n, mt) ->
@@ -15863,6 +15875,7 @@ module Struct =
                             popen_override = fresh;
                             popen_lid = long_uident id;
                             popen_attributes = [];
+                            popen_loc = mkloc loc;
                           })) ::
                       l
               | SgTyp (loc, tdl) ->
@@ -15992,6 +16005,7 @@ module Struct =
                           pexrb_name = with_loc (conv_con s) loc;
                           pexrb_lid = long_uident ~conv_con i;
                           pexrb_attributes = [];
+                          pexrb_loc = mkloc loc;
                         })) ::
                     l
               | Ast.StExc (loc,
@@ -16008,7 +16022,10 @@ module Struct =
               | StInc (loc, me) ->
                   (mkstr loc
                      (Pstr_include
-                        { pincl_mod = module_expr me; pincl_attributes = [];
+                        {
+                          pincl_mod = module_expr me;
+                          pincl_attributes = [];
+                          pincl_loc = mkloc loc;
                         })) ::
                     l
               | StMod (loc, n, me) ->
@@ -16048,6 +16065,7 @@ module Struct =
                             popen_override = fresh;
                             popen_lid = long_uident id;
                             popen_attributes = [];
+                            popen_loc = mkloc loc;
                           })) ::
                       l
               | StTyp (loc, tdl) ->
