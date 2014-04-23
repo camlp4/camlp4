@@ -412,6 +412,12 @@ New syntax:\
       in fetch_more test_longident_dot 0
     );
 
+  value test_not_module_type =
+    Gram.Entry.of_parser "test_not_module_type" (fun strm ->
+      match Stream.npeek 2 strm with
+      [ [(KEYWORD "module", _); (KEYWORD "type", _) :: _] -> raise Stream.Failure
+      | _ -> () ]);
+
   Token.Filter.define_filter (Gram.get_filter ())
     (fun f strm -> infix_kwds_filter (f strm));
 
@@ -574,11 +580,9 @@ New syntax:\
         | `QUOTATION x -> Quotation.expand _loc x Quotation.DynAst.module_type_tag
         | i = module_longident_with_app -> <:module_type< $id:i$ >>
         | "'"; i = a_ident -> <:module_type< ' $i$ >>
-        | "("; "module"; i = module_longident_with_app; ")" -> Ast.MtAlias (_loc, i)
+        | "("; test_not_module_type; "module"; i = module_longident_with_app; ")" -> Ast.MtAlias (_loc, i)
         | "("; mt = SELF; ")" -> <:module_type< $mt$ >>
         | "module"; "type"; "of"; me = module_expr ->
-            <:module_type< module type of $me$ >>
-        | "("; "module"; "type"; "of"; me = module_expr; ")" ->
             <:module_type< module type of $me$ >> ] ]
     ;
     sig_item:
