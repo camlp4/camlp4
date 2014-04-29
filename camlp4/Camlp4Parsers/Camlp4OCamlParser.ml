@@ -711,8 +711,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       ] ]
     ;
     top_phrase:
-      [ [ "#"; n = a_LIDENT; args = LIST0 expr; ";;" ->
-            Some (Ast.StDir _loc n args)
+      [ [ "#"; n = a_LIDENT; arg = expr; ";;" ->
+            Some (Ast.StDir _loc n arg)
         | l = LIST1 str_item; ";;" -> Some (Ast.stSem_of_list l)
         | `EOI -> None
       ] ]

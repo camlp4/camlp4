@@ -79,9 +79,9 @@ value use_file token_stream =
       in
       if stopped_at_directive <> None then
         match pl with
-        [ [ Ast.StDir _ "load" [ Ast.ExStr _ s ] ] ->
+        [ [ Ast.StDir _ "load" (Ast.ExStr _ s) ] ->
             do { Topdirs.dir_load Format.std_formatter s; loop () }
-        | [ Ast.StDir _ "directory" [ Ast.ExStr _ s ] ] ->
+        | [ Ast.StDir _ "directory" (Ast.ExStr _ s) ] ->
             do { Topdirs.dir_directory s; loop () }
         | _ -> (pl, False) ]
       else (pl, True)

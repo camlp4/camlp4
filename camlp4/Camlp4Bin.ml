@@ -142,12 +142,12 @@ value process dyn_loader name pa pr clean fold_filters getdir =
 
 value gind =
   fun
-  [ Ast.SgDir loc n [ Ast.ExStr _ s ] -> Some (loc, n, s)
+  [ Ast.SgDir loc n (Ast.ExStr _ s) -> Some (loc, n, s)
   | _ -> None ];
 
 value gimd =
   fun
-  [ Ast.StDir loc n [ Ast.ExStr _ s ] -> Some (loc, n, s)
+  [ Ast.StDir loc n (Ast.ExStr _ s) -> Some (loc, n, s)
   | _ -> None ];
 
 value process_intf dyn_loader name =
