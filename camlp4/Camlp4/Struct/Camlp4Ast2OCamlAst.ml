@@ -1332,7 +1332,7 @@ value varify_constructors var_names =
 
   value phrase =
     fun
-    [ StDir _ d args -> Ptop_dir d (List.map directive_arg args)
+    [ StDir _ d arg -> Ptop_dir d (directive_arg arg)
     | si -> Ptop_def (str_item si) ]
   ;
 

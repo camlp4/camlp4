@@ -1524,15 +1524,21 @@ New syntax:\
                             (Gram.Action.mk
                                (fun _ (mt : 'module_type) _
                                   (_loc : Gram.Loc.t) -> (mt : 'module_type))));
-                           ([ Gram.Skeyword "("; Gram.Skeyword "module";
-                              Gram.Snterm
-                                (Gram.Entry.obj
-                                   (module_longident_with_app :
-                                     'module_longident_with_app Gram.Entry.t));
+                           ([ Gram.Skeyword "(";
+                              Gram.Stry
+                                (Gram.srules module_type
+                                   [ ([ Gram.Skeyword "module";
+                                        Gram.Snterm
+                                          (Gram.Entry.obj
+                                             (module_longident :
+                                               'module_longident Gram.Entry.t)) ],
+                                      (Gram.Action.mk
+                                         (fun (i : 'module_longident) _
+                                            (_loc : Gram.Loc.t) ->
+                                            (i : 'e__1)))) ]);
                               Gram.Skeyword ")" ],
                             (Gram.Action.mk
-                               (fun _ (i : 'module_longident_with_app) _ _
-                                  (_loc : Gram.Loc.t) ->
+                               (fun _ (i : 'e__1) _ (_loc : Gram.Loc.t) ->
                                   (Ast.MtAlias ((_loc, i)) : 'module_type))));
                            ([ Gram.Skeyword "'";
                               Gram.Snterm
@@ -2866,16 +2872,16 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (seq : 'sequence)
                                             (_loc : Gram.Loc.t) ->
-                                            (seq : 'e__3)))) ]) ],
+                                            (seq : 'e__4)))) ]) ],
                             (Gram.Action.mk
-                               (fun (seq : 'e__3) (_loc : Gram.Loc.t) ->
+                               (fun (seq : 'e__4) (_loc : Gram.Loc.t) ->
                                   (seq : 'do_sequence))));
                            ([ Gram.Stry
                                 (Gram.srules do_sequence
                                    [ ([ Gram.Skeyword "{"; Gram.Skeyword "}" ],
                                       (Gram.Action.mk
                                          (fun _ _ (_loc : Gram.Loc.t) ->
-                                            (() : 'e__2)))) ]) ],
+                                            (() : 'e__3)))) ]) ],
                             (Gram.Action.mk
                                (fun _ (_loc : Gram.Loc.t) ->
                                   (Ast.ExId (_loc, (Ast.IdUid (_loc, "()"))) :
@@ -2891,9 +2897,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (seq : 'sequence) _
                                             (_loc : Gram.Loc.t) ->
-                                            (seq : 'e__1)))) ]) ],
+                                            (seq : 'e__2)))) ]) ],
                             (Gram.Action.mk
-                               (fun (seq : 'e__1) (_loc : Gram.Loc.t) ->
+                               (fun (seq : 'e__2) (_loc : Gram.Loc.t) ->
                                   (seq : 'do_sequence)))) ]) ]))
                     ());
                Gram.extend (infixop5 : 'infixop5 Gram.Entry.t)
@@ -2906,15 +2912,15 @@ New syntax:\
                                       (fun (x : Gram.Token.t)
                                          (_loc : Gram.Loc.t) ->
                                          (Gram.Token.extract_string x :
-                                           'e__4))));
+                                           'e__5))));
                                   ([ Gram.Skeyword "&" ],
                                    (Gram.Action.mk
                                       (fun (x : Gram.Token.t)
                                          (_loc : Gram.Loc.t) ->
                                          (Gram.Token.extract_string x :
-                                           'e__4)))) ] ],
+                                           'e__5)))) ] ],
                             (Gram.Action.mk
-                               (fun (x : 'e__4) (_loc : Gram.Loc.t) ->
+                               (fun (x : 'e__5) (_loc : Gram.Loc.t) ->
                                   (Ast.ExId (_loc, (Ast.IdLid (_loc, x))) :
                                     'infixop5)))) ]) ]))
                     ());
@@ -2928,15 +2934,15 @@ New syntax:\
                                       (fun (x : Gram.Token.t)
                                          (_loc : Gram.Loc.t) ->
                                          (Gram.Token.extract_string x :
-                                           'e__5))));
+                                           'e__6))));
                                   ([ Gram.Skeyword "or" ],
                                    (Gram.Action.mk
                                       (fun (x : Gram.Token.t)
                                          (_loc : Gram.Loc.t) ->
                                          (Gram.Token.extract_string x :
-                                           'e__5)))) ] ],
+                                           'e__6)))) ] ],
                             (Gram.Action.mk
-                               (fun (x : 'e__5) (_loc : Gram.Loc.t) ->
+                               (fun (x : 'e__6) (_loc : Gram.Loc.t) ->
                                   (Ast.ExId (_loc, (Ast.IdLid (_loc, x))) :
                                     'infixop6)))) ]) ]))
                     ());
@@ -3272,7 +3278,7 @@ New syntax:\
                                         Gram.Skeyword "type" ],
                                       (Gram.Action.mk
                                          (fun _ _ (_loc : Gram.Loc.t) ->
-                                            (() : 'e__6)))) ]);
+                                            (() : 'e__7)))) ]);
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
@@ -3578,7 +3584,7 @@ New syntax:\
                                         Gram.Skeyword "type" ],
                                       (Gram.Action.mk
                                          (fun _ _ (_loc : Gram.Loc.t) ->
-                                            (() : 'e__7)))) ]);
+                                            (() : 'e__8)))) ]);
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
@@ -3631,7 +3637,7 @@ New syntax:\
                                         Gram.Skeyword "type" ],
                                       (Gram.Action.mk
                                          (fun _ _ (_loc : Gram.Loc.t) ->
-                                            (() : 'e__8)))) ]);
+                                            (() : 'e__9)))) ]);
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
@@ -3679,7 +3685,7 @@ New syntax:\
                                         Gram.Skeyword "type" ],
                                       (Gram.Action.mk
                                          (fun _ _ (_loc : Gram.Loc.t) ->
-                                            (() : 'e__9)))) ]);
+                                            (() : 'e__10)))) ]);
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
@@ -5748,9 +5754,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun (l : 'module_longident) _
                                             (_loc : Gram.Loc.t) ->
-                                            (l : 'e__10)))) ]) ],
+                                            (l : 'e__11)))) ]) ],
                             (Gram.Action.mk
-                               (fun (l : 'e__10) (m : 'a_UIDENT)
+                               (fun (l : 'e__11) (m : 'a_UIDENT)
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.IdAcc (_loc, (Ast.IdUid (_loc, m)), l) :
                                     'module_longident))));
@@ -6372,9 +6378,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (cst : 'class_str_item)
                                             (_loc : Gram.Loc.t) ->
-                                            (cst : 'e__11)))) ]) ],
+                                            (cst : 'e__12)))) ]) ],
                             (Gram.Action.mk
-                               (fun (l : 'e__11 list) (_loc : Gram.Loc.t) ->
+                               (fun (l : 'e__12 list) (_loc : Gram.Loc.t) ->
                                   (Ast.crSem_of_list l : 'class_structure))));
                            ([ Gram.Stoken
                                 (((function
@@ -6997,9 +7003,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (csg : 'class_sig_item)
                                             (_loc : Gram.Loc.t) ->
-                                            (csg : 'e__12)))) ]) ],
+                                            (csg : 'e__13)))) ]) ],
                             (Gram.Action.mk
-                               (fun (l : 'e__12 list) (_loc : Gram.Loc.t) ->
+                               (fun (l : 'e__13 list) (_loc : Gram.Loc.t) ->
                                   (Ast.cgSem_of_list l : 'class_signature))));
                            ([ Gram.Stoken
                                 (((function
@@ -8178,16 +8184,14 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t)));
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.SgDir (_loc, n, args) ],
+                                  (([ Ast.SgDir (_loc, n, arg) ],
                                     (stopped_at _loc)) : 'interf)))) ]) ]))
                     ());
                Gram.extend (sig_items : 'sig_items Gram.Entry.t)
@@ -8206,9 +8210,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (sg : 'sig_item)
                                             (_loc : Gram.Loc.t) ->
-                                            (sg : 'e__13)))) ]) ],
+                                            (sg : 'e__14)))) ]) ],
                             (Gram.Action.mk
-                               (fun (l : 'e__13 list) (_loc : Gram.Loc.t) ->
+                               (fun (l : 'e__14 list) (_loc : Gram.Loc.t) ->
                                   (Ast.sgSem_of_list l : 'sig_items))));
                            ([ Gram.Stoken
                                 (((function
@@ -8280,16 +8284,14 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t)));
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, args) ],
+                                  (([ Ast.StDir (_loc, n, arg) ],
                                     (stopped_at _loc)) : 'implem)))) ]) ]))
                     ());
                Gram.extend (str_items : 'str_items Gram.Entry.t)
@@ -8308,9 +8310,9 @@ New syntax:\
                                       (Gram.Action.mk
                                          (fun _ (st : 'str_item)
                                             (_loc : Gram.Loc.t) ->
-                                            (st : 'e__14)))) ]) ],
+                                            (st : 'e__15)))) ]) ],
                             (Gram.Action.mk
-                               (fun (l : 'e__14 list) (_loc : Gram.Loc.t) ->
+                               (fun (l : 'e__15 list) (_loc : Gram.Loc.t) ->
                                   (Ast.stSem_of_list l : 'str_items))));
                            ([ Gram.Stoken
                                 (((function
@@ -8402,16 +8404,14 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t)));
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, args) ],
+                                  (([ Ast.StDir (_loc, n, arg) ],
                                     (stopped_at _loc)) : 'use_file)))) ]) ]))
                     ());
                Gram.extend (phrase : 'phrase Gram.Entry.t)
@@ -8430,16 +8430,14 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t)));
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, args) : 'phrase)))) ]) ]))
+                                  (Ast.StDir (_loc, n, arg) : 'phrase)))) ]) ]))
                     ());
                Gram.extend (a_INT : 'a_INT Gram.Entry.t)
                  ((fun () ->
@@ -9141,15 +9139,12 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t))) ],
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, args) :
-                                    'str_item_quot)))) ]) ]))
+                                  (Ast.StDir (_loc, n, arg) : 'str_item_quot)))) ]) ]))
                     ());
                Gram.extend (sig_item_quot : 'sig_item_quot Gram.Entry.t)
                  ((fun () ->
@@ -9182,15 +9177,12 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Slist0
-                                (Gram.Snterm
-                                   (Gram.Entry.obj
-                                      (expr : 'expr Gram.Entry.t))) ],
+                              Gram.Snterm
+                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun (args : 'expr list) (n : 'a_LIDENT) _
+                               (fun (arg : 'expr) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.SgDir (_loc, n, args) :
-                                    'sig_item_quot)))) ]) ]))
+                                  (Ast.SgDir (_loc, n, arg) : 'sig_item_quot)))) ]) ]))
                     ());
                Gram.extend
                  (module_type_quot : 'module_type_quot Gram.Entry.t)
@@ -11403,9 +11395,9 @@ module Rp =
                                              'stream_expr Gram.Entry.t)) ],
                                     (Gram.Action.mk
                                        (fun (e : 'stream_expr) _
-                                          (_loc : Gram.Loc.t) -> (e : 'e__15)))) ]) ],
+                                          (_loc : Gram.Loc.t) -> (e : 'e__16)))) ]) ],
                           (Gram.Action.mk
-                             (fun (eo : 'e__15 option)
+                             (fun (eo : 'e__16 option)
                                 (spc : 'stream_patt_comp) (_loc : Gram.Loc.t)
                                 -> ((spc, eo) : 'stream_patt_comp_err)))) ]) ]))
                   ());
@@ -11476,9 +11468,9 @@ module Rp =
                                              'stream_expr Gram.Entry.t)) ],
                                     (Gram.Action.mk
                                        (fun (e : 'stream_expr) _
-                                          (_loc : Gram.Loc.t) -> (e : 'e__16)))) ]) ],
+                                          (_loc : Gram.Loc.t) -> (e : 'e__17)))) ]) ],
                           (Gram.Action.mk
-                             (fun (eo : 'e__16 option) (p : 'patt) _
+                             (fun (eo : 'e__17 option) (p : 'patt) _
                                 (_loc : Gram.Loc.t) ->
                                 (SpTrm (_loc, p, eo) : 'stream_patt_comp)))) ]) ]))
                   ());
@@ -12654,9 +12646,9 @@ module G =
                                              'semi_sep Gram.Entry.t)) ],
                                     (Gram.Action.mk
                                        (fun _ (e : 'entry)
-                                          (_loc : Gram.Loc.t) -> (e : 'e__17)))) ]) ],
+                                          (_loc : Gram.Loc.t) -> (e : 'e__18)))) ]) ],
                           (Gram.Action.mk
-                             (fun (el : 'e__17 list)
+                             (fun (el : 'e__18 list)
                                 (global_list : 'global option)
                                 ((gram, g) : 'extend_header)
                                 (_loc : Gram.Loc.t) ->
@@ -12713,7 +12705,7 @@ module G =
                                     (fun (__camlp4_0 : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
                                        match __camlp4_0 with
-                                       | UIDENT "GLOBAL" -> (() : 'e__18)
+                                       | UIDENT "GLOBAL" -> (() : 'e__19)
                                        | _ -> assert false)));
                                 ([ Gram.Stoken
                                      (((function
@@ -12724,7 +12716,7 @@ module G =
                                     (fun (__camlp4_0 : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
                                        match __camlp4_0 with
-                                       | LIDENT ((_)) -> (() : 'e__18)
+                                       | LIDENT ((_)) -> (() : 'e__19)
                                        | _ -> assert false))) ] ],
                           (Gram.Action.mk
                              (fun _ (_loc : Gram.Loc.t) ->
@@ -12767,7 +12759,7 @@ module G =
                                     (fun (__camlp4_0 : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
                                        match __camlp4_0 with
-                                       | UIDENT "GLOBAL" -> (() : 'e__19)
+                                       | UIDENT "GLOBAL" -> (() : 'e__20)
                                        | _ -> assert false)));
                                 ([ Gram.Stoken
                                      (((function
@@ -12778,7 +12770,7 @@ module G =
                                     (fun (__camlp4_0 : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
                                        match __camlp4_0 with
-                                       | LIDENT ((_)) -> (() : 'e__19)
+                                       | LIDENT ((_)) -> (() : 'e__20)
                                        | _ -> assert false))) ] ],
                           (Gram.Action.mk
                              (fun _ (_loc : Gram.Loc.t) ->
@@ -13083,7 +13075,7 @@ module G =
                                           (_loc : Gram.Loc.t) ->
                                           (let x =
                                              Gram.Token.extract_string x
-                                           in x : 'e__20)))) ]);
+                                           in x : 'e__21)))) ]);
                             Gram.Sopt
                               (Gram.Snterm
                                  (Gram.Entry.obj
@@ -13093,7 +13085,7 @@ module G =
                                  (rule_list : 'rule_list Gram.Entry.t)) ],
                           (Gram.Action.mk
                              (fun (rules : 'rule_list) (ass : 'assoc option)
-                                (lab : 'e__20 option) (_loc : Gram.Loc.t) ->
+                                (lab : 'e__21 option) (_loc : Gram.Loc.t) ->
                                 ({ label = lab; assoc = ass; rules = rules; } :
                                   'level)))) ]) ]))
                   ());
@@ -13266,10 +13258,10 @@ module G =
                                           | UIDENT "LEVEL" ->
                                               (let s =
                                                  Gram.Token.extract_string s
-                                               in s : 'e__21)
+                                               in s : 'e__22)
                                           | _ -> assert false))) ]) ],
                           (Gram.Action.mk
-                             (fun (lev : 'e__21 option) (i : Gram.Token.t)
+                             (fun (lev : 'e__22 option) (i : Gram.Token.t)
                                 (_loc : Gram.Loc.t) ->
                                 (let i = Gram.Token.extract_string i in
                                  let name =
@@ -13407,10 +13399,10 @@ module G =
                                           (__camlp4_0 : Gram.Token.t)
                                           (_loc : Gram.Loc.t) ->
                                           match __camlp4_0 with
-                                          | UIDENT "SEP" -> (t : 'e__23)
+                                          | UIDENT "SEP" -> (t : 'e__24)
                                           | _ -> assert false))) ]) ],
                           (Gram.Action.mk
-                             (fun (sep : 'e__23 option) (s : 'symbol)
+                             (fun (sep : 'e__24 option) (s : 'symbol)
                                 (__camlp4_0 : Gram.Token.t)
                                 (_loc : Gram.Loc.t) ->
                                 match __camlp4_0 with
@@ -13454,10 +13446,10 @@ module G =
                                           (__camlp4_0 : Gram.Token.t)
                                           (_loc : Gram.Loc.t) ->
                                           match __camlp4_0 with
-                                          | UIDENT "SEP" -> (t : 'e__22)
+                                          | UIDENT "SEP" -> (t : 'e__23)
                                           | _ -> assert false))) ]) ],
                           (Gram.Action.mk
-                             (fun (sep : 'e__22 option) (s : 'symbol)
+                             (fun (sep : 'e__23 option) (s : 'symbol)
                                 (__camlp4_0 : Gram.Token.t)
                                 (_loc : Gram.Loc.t) ->
                                 match __camlp4_0 with
@@ -13507,10 +13499,10 @@ module G =
                                           | UIDENT "LEVEL" ->
                                               (let s =
                                                  Gram.Token.extract_string s
-                                               in s : 'e__25)
+                                               in s : 'e__26)
                                           | _ -> assert false))) ]) ],
                           (Gram.Action.mk
-                             (fun (lev : 'e__25 option) (n : 'name)
+                             (fun (lev : 'e__26 option) (n : 'name)
                                 (_loc : Gram.Loc.t) ->
                                 ({
                                    used = [ n.tvar ];
@@ -13544,10 +13536,10 @@ module G =
                                           | UIDENT "LEVEL" ->
                                               (let s =
                                                  Gram.Token.extract_string s
-                                               in s : 'e__24)
+                                               in s : 'e__25)
                                           | _ -> assert false))) ]) ],
                           (Gram.Action.mk
-                             (fun (lev : 'e__24 option) (il : 'qualid) _
+                             (fun (lev : 'e__25 option) (il : 'qualid) _
                                 (i : Gram.Token.t) (_loc : Gram.Loc.t) ->
                                 (let i = Gram.Token.extract_string i in
                                  let n =
@@ -14774,7 +14766,7 @@ Added statements:
                                     (Gram.Action.mk
                                        (fun _ (si : 'str_item)
                                           (_loc : Gram.Loc.t) ->
-                                          (SdStr si : 'e__26))));
+                                          (SdStr si : 'e__27))));
                                    ([ Gram.Snterm
                                         (Gram.Entry.obj
                                            (macro_def :
@@ -14790,9 +14782,9 @@ Added statements:
                                              (fun a b ->
                                                 Ast.StSem (_loc, a, b))
                                              Then d :
-                                            'e__26)))) ]) ],
+                                            'e__27)))) ]) ],
                           (Gram.Action.mk
-                             (fun (sml : 'e__26 list) (_loc : Gram.Loc.t) ->
+                             (fun (sml : 'e__27 list) (_loc : Gram.Loc.t) ->
                                 (sml : 'smlist_then)))) ]) ]))
                   ());
              Gram.extend (smlist_else : 'smlist_else Gram.Entry.t)
@@ -14811,7 +14803,7 @@ Added statements:
                                     (Gram.Action.mk
                                        (fun _ (si : 'str_item)
                                           (_loc : Gram.Loc.t) ->
-                                          (SdStr si : 'e__27))));
+                                          (SdStr si : 'e__28))));
                                    ([ Gram.Snterm
                                         (Gram.Entry.obj
                                            (macro_def :
@@ -14827,9 +14819,9 @@ Added statements:
                                              (fun a b ->
                                                 Ast.StSem (_loc, a, b))
                                              Else d :
-                                            'e__27)))) ]) ],
+                                            'e__28)))) ]) ],
                           (Gram.Action.mk
-                             (fun (sml : 'e__27 list) (_loc : Gram.Loc.t) ->
+                             (fun (sml : 'e__28 list) (_loc : Gram.Loc.t) ->
                                 (sml : 'smlist_else)))) ]) ]))
                   ());
              Gram.extend (sglist_then : 'sglist_then Gram.Entry.t)
@@ -14838,43 +14830,6 @@ Added statements:
                     [ (None, None,
                        [ ([ Gram.Slist1
                               (Gram.srules sglist_then
-                                 [ ([ Gram.Snterm
-                                        (Gram.Entry.obj
-                                           (sig_item :
-                                             'sig_item Gram.Entry.t));
-                                      Gram.Snterm
-                                        (Gram.Entry.obj
-                                           (semi : 'semi Gram.Entry.t)) ],
-                                    (Gram.Action.mk
-                                       (fun _ (si : 'sig_item)
-                                          (_loc : Gram.Loc.t) ->
-                                          (SdStr si : 'e__28))));
-                                   ([ Gram.Snterm
-                                        (Gram.Entry.obj
-                                           (macro_def_sig :
-                                             'macro_def_sig Gram.Entry.t));
-                                      Gram.Snterm
-                                        (Gram.Entry.obj
-                                           (semi : 'semi Gram.Entry.t)) ],
-                                    (Gram.Action.mk
-                                       (fun _ (d : 'macro_def_sig)
-                                          (_loc : Gram.Loc.t) ->
-                                          (execute_macro_if_active_branch
-                                             _loc (Ast.SgNil _loc)
-                                             (fun a b ->
-                                                Ast.SgSem (_loc, a, b))
-                                             Then d :
-                                            'e__28)))) ]) ],
-                          (Gram.Action.mk
-                             (fun (sgl : 'e__28 list) (_loc : Gram.Loc.t) ->
-                                (sgl : 'sglist_then)))) ]) ]))
-                  ());
-             Gram.extend (sglist_else : 'sglist_else Gram.Entry.t)
-               ((fun () ->
-                   (None,
-                    [ (None, None,
-                       [ ([ Gram.Slist1
-                              (Gram.srules sglist_else
                                  [ ([ Gram.Snterm
                                         (Gram.Entry.obj
                                            (sig_item :
@@ -14900,10 +14855,47 @@ Added statements:
                                              _loc (Ast.SgNil _loc)
                                              (fun a b ->
                                                 Ast.SgSem (_loc, a, b))
-                                             Else d :
+                                             Then d :
                                             'e__29)))) ]) ],
                           (Gram.Action.mk
                              (fun (sgl : 'e__29 list) (_loc : Gram.Loc.t) ->
+                                (sgl : 'sglist_then)))) ]) ]))
+                  ());
+             Gram.extend (sglist_else : 'sglist_else Gram.Entry.t)
+               ((fun () ->
+                   (None,
+                    [ (None, None,
+                       [ ([ Gram.Slist1
+                              (Gram.srules sglist_else
+                                 [ ([ Gram.Snterm
+                                        (Gram.Entry.obj
+                                           (sig_item :
+                                             'sig_item Gram.Entry.t));
+                                      Gram.Snterm
+                                        (Gram.Entry.obj
+                                           (semi : 'semi Gram.Entry.t)) ],
+                                    (Gram.Action.mk
+                                       (fun _ (si : 'sig_item)
+                                          (_loc : Gram.Loc.t) ->
+                                          (SdStr si : 'e__30))));
+                                   ([ Gram.Snterm
+                                        (Gram.Entry.obj
+                                           (macro_def_sig :
+                                             'macro_def_sig Gram.Entry.t));
+                                      Gram.Snterm
+                                        (Gram.Entry.obj
+                                           (semi : 'semi Gram.Entry.t)) ],
+                                    (Gram.Action.mk
+                                       (fun _ (d : 'macro_def_sig)
+                                          (_loc : Gram.Loc.t) ->
+                                          (execute_macro_if_active_branch
+                                             _loc (Ast.SgNil _loc)
+                                             (fun a b ->
+                                                Ast.SgSem (_loc, a, b))
+                                             Else d :
+                                            'e__30)))) ]) ],
+                          (Gram.Action.mk
+                             (fun (sgl : 'e__30 list) (_loc : Gram.Loc.t) ->
                                 (sgl : 'sglist_else)))) ]) ]))
                   ());
              Gram.extend (endif : 'endif Gram.Entry.t)
@@ -14944,13 +14936,13 @@ Added statements:
                                            (_loc : Gram.Loc.t) ->
                                            (let x =
                                               Gram.Token.extract_string x
-                                            in x : 'e__30)))) ]),
+                                            in x : 'e__31)))) ]),
                               (Gram.Skeyword ","));
                             Gram.Skeyword ")"; Gram.Skeyword "=";
                             Gram.Snterm
                               (Gram.Entry.obj (expr : 'expr Gram.Entry.t)) ],
                           (Gram.Action.mk
-                             (fun (e : 'expr) _ _ (pl : 'e__30 list) _
+                             (fun (e : 'expr) _ _ (pl : 'e__31 list) _
                                 (_loc : Gram.Loc.t) ->
                                 (Some ((pl, e)) : 'opt_macro_value)))) ]) ]))
                   ());
@@ -15051,60 +15043,13 @@ Added statements:
                                  (Gram.Action.mk
                                     (fun (x : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
+                                       (Gram.Token.extract_string x : 'e__32))));
                                 ([ Gram.Skeyword "DEFINE" ],
                                  (Gram.Action.mk
                                     (fun (x : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
+                                       (Gram.Token.extract_string x : 'e__32))));
                                 ([ Gram.Skeyword "ENDIF" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
-                                ([ Gram.Skeyword "END" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
-                                ([ Gram.Skeyword "ELSE" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
-                                ([ Gram.Skeyword "THEN" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
-                                ([ Gram.Skeyword "IFNDEF" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31))));
-                                ([ Gram.Skeyword "IFDEF" ],
-                                 (Gram.Action.mk
-                                    (fun (x : Gram.Token.t)
-                                       (_loc : Gram.Loc.t) ->
-                                       (Gram.Token.extract_string x : 'e__31)))) ] ],
-                          (Gram.Action.mk
-                             (fun (kwd : 'e__31) _ (_loc : Gram.Loc.t) ->
-                                (Ast.ExVrn (_loc, kwd) : 'expr)))) ]) ]))
-                  ());
-             Gram.extend (* idem *) (patt : 'patt Gram.Entry.t)
-               ((fun () ->
-                   ((Some (Camlp4.Sig.Grammar.Before "simple")),
-                    [ (None, None,
-                       [ ([ Gram.Skeyword "`";
-                            Gram.Snterm
-                              (Gram.Entry.obj
-                                 (a_ident : 'a_ident Gram.Entry.t)) ],
-                          (Gram.Action.mk
-                             (fun (s : 'a_ident) _ (_loc : Gram.Loc.t) ->
-                                (Ast.PaVrn (_loc, s) : 'patt))));
-                         ([ Gram.Skeyword "`";
-                            Gram.srules patt
-                              [ ([ Gram.Skeyword "ENDIF" ],
                                  (Gram.Action.mk
                                     (fun (x : Gram.Token.t)
                                        (_loc : Gram.Loc.t) ->
@@ -15136,6 +15081,53 @@ Added statements:
                                        (Gram.Token.extract_string x : 'e__32)))) ] ],
                           (Gram.Action.mk
                              (fun (kwd : 'e__32) _ (_loc : Gram.Loc.t) ->
+                                (Ast.ExVrn (_loc, kwd) : 'expr)))) ]) ]))
+                  ());
+             Gram.extend (* idem *) (patt : 'patt Gram.Entry.t)
+               ((fun () ->
+                   ((Some (Camlp4.Sig.Grammar.Before "simple")),
+                    [ (None, None,
+                       [ ([ Gram.Skeyword "`";
+                            Gram.Snterm
+                              (Gram.Entry.obj
+                                 (a_ident : 'a_ident Gram.Entry.t)) ],
+                          (Gram.Action.mk
+                             (fun (s : 'a_ident) _ (_loc : Gram.Loc.t) ->
+                                (Ast.PaVrn (_loc, s) : 'patt))));
+                         ([ Gram.Skeyword "`";
+                            Gram.srules patt
+                              [ ([ Gram.Skeyword "ENDIF" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33))));
+                                ([ Gram.Skeyword "END" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33))));
+                                ([ Gram.Skeyword "ELSE" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33))));
+                                ([ Gram.Skeyword "THEN" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33))));
+                                ([ Gram.Skeyword "IFNDEF" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33))));
+                                ([ Gram.Skeyword "IFDEF" ],
+                                 (Gram.Action.mk
+                                    (fun (x : Gram.Token.t)
+                                       (_loc : Gram.Loc.t) ->
+                                       (Gram.Token.extract_string x : 'e__33)))) ] ],
+                          (Gram.Action.mk
+                             (fun (kwd : 'e__33) _ (_loc : Gram.Loc.t) ->
                                 (Ast.PaVrn (_loc, kwd) : 'patt)))) ]) ]))
                   ()))
           
@@ -15708,12 +15700,12 @@ module L =
                                       Gram.Skeyword "<-" ],
                                     (Gram.Action.mk
                                        (fun _ (p : 'patt) (_loc : Gram.Loc.t)
-                                          -> (p : 'e__33)))) ]);
+                                          -> (p : 'e__34)))) ]);
                             Gram.Snterml
                               ((Gram.Entry.obj (expr : 'expr Gram.Entry.t)),
                               "top") ],
                           (Gram.Action.mk
-                             (fun (e : 'expr) (p : 'e__33)
+                             (fun (e : 'expr) (p : 'e__34)
                                 (_loc : Gram.Loc.t) ->
                                 (`gen ((p, e)) : 'item)))) ]) ]))
                   ()))
@@ -16003,12 +15995,12 @@ module B =
       
     let gind =
       function
-      | Ast.SgDir (loc, n, ([ Ast.ExStr (_, s) ])) -> Some ((loc, n, s))
+      | Ast.SgDir (loc, n, (Ast.ExStr (_, s))) -> Some ((loc, n, s))
       | _ -> None
       
     let gimd =
       function
-      | Ast.StDir (loc, n, ([ Ast.ExStr (_, s) ])) -> Some ((loc, n, s))
+      | Ast.StDir (loc, n, (Ast.ExStr (_, s))) -> Some ((loc, n, s))
       | _ -> None
       
     let process_intf dyn_loader name =
