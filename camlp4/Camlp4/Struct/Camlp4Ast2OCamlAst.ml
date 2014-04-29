@@ -84,7 +84,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
       else
         match s.[src] with
         [ '_' -> remove (src + 1) dst
-        |  c  -> do { s.[dst] := c; remove (src + 1) (dst + 1) } ]
+        |  c  -> do { Bytes.set s dst c; remove (src + 1) (dst + 1) } ]
     in remove 0 0
   ;
 
