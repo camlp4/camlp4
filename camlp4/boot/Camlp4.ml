@@ -14557,7 +14557,7 @@ module Struct =
                 else
                   (match s.[src] with
                    | '_' -> remove (src + 1) dst
-                   | c -> (s.[dst] <- c; remove (src + 1) (dst + 1)))
+                   | c -> (Bytes.set s dst c; remove (src + 1) (dst + 1)))
               in remove 0 0
               
             let mkloc = Loc.to_ocaml_location
@@ -14852,12 +14852,12 @@ module Struct =
             and row_field =
               function
               | Ast.TyNil _ -> []
-              | Ast.TyVrn (_, i) -> [ Rtag ((conv_con i), true, []) ]
+              | Ast.TyVrn (_, i) -> [ Rtag ((conv_con i), [], true, []) ]
               | Ast.TyOfAmp (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((conv_con i), true,
+                  [ Rtag ((conv_con i), [], true,
                       (List.map ctyp (list_of_ctyp t []))) ]
               | Ast.TyOf (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((conv_con i), false,
+                  [ Rtag ((conv_con i), [], false,
                       (List.map ctyp (list_of_ctyp t []))) ]
               | Ast.TyOr (_, t1, t2) -> (row_field t1) @ (row_field t2)
               | t -> [ Rinherit (ctyp t) ]
@@ -15360,8 +15360,8 @@ module Struct =
                 in { (t) with ptyp_desc = desc; }
               and loop_row_field x =
                 match x with
-                | Rtag ((label, flag, lst)) ->
-                    Rtag ((label, flag, (List.map loop lst)))
+                | Rtag ((label, attrs, flag, lst)) ->
+                    Rtag ((label, attrs, flag, (List.map loop lst)))
                 | Rinherit t -> Rinherit (loop t)
               in loop
               
