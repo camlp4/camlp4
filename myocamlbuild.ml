@@ -64,13 +64,21 @@ let () =
     Options.make_links := false
 
   | After_rules ->
+    let use_external_camlp4boot =
+      try ignore (Sys.getenv "EXT_CAMLP4BOOT" : string); true with Not_found -> false
+    in
+
     let hot_camlp4boot =
-      "camlp4"/"boot"/"camlp4boot" ^
-      if !Options.native_plugin then
-        (* If we are using a native plugin, we might as well use a native preprocessor. *)
-        ".native"
+      if use_external_camlp4boot then
+        "camlp4boot"
       else
-        ".byte"
+        "camlp4"/"boot"/"camlp4boot" ^
+        if !Options.native_plugin then
+          (* If we are using a native plugin, we might as well use a native
+             preprocessor. *)
+          ".native"
+        else
+          ".byte"
     in
 
     flag ["ocaml"; "ocamlyacc"] (A"-v");
@@ -85,7 +93,8 @@ let () =
       end modules []
     in
 
-    dep ["camlp4boot"] [hot_camlp4boot];
+    if not use_external_camlp4boot then
+      dep ["camlp4boot"] [hot_camlp4boot];
     flag ["ocaml"; "pp"; "camlp4boot"] (P hot_camlp4boot);
     flag ["ocaml"; "pp"; "camlp4boot"; "native"] (S[A"-D"; A"OPT"]);
     flag ["ocaml"; "pp"; "camlp4boot"; "pp:dep"] (S[A"-D"; A"OPT"]);
