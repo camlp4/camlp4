@@ -334,9 +334,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyTup loc _ -> error loc "this construction is not allowed here" ]
   and row_field = fun
     [ <:ctyp<>> -> []
-    | <:ctyp< `$i$ >> -> [Rtag (conv_con i) True []]
-    | <:ctyp< `$i$ of & $t$ >> -> [Rtag (conv_con i) True (List.map ctyp (list_of_ctyp t []))]
-    | <:ctyp< `$i$ of $t$ >> -> [Rtag (conv_con i) False (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ >> -> [Rtag (conv_con i) [] True []]
+    | <:ctyp< `$i$ of & $t$ >> -> [Rtag (conv_con i) [] True (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp< `$i$ of $t$ >> -> [Rtag (conv_con i) [] False (List.map ctyp (list_of_ctyp t []))]
     | <:ctyp< $t1$ | $t2$ >> -> row_field t1 @ row_field t2
     | t -> [Rinherit (ctyp t)] ]
   and name_tags = fun
@@ -724,8 +724,8 @@ value varify_constructors var_names =
     {(t) with ptyp_desc = desc}
   and loop_row_field x  =
     match x with
-      [ Rtag(label,flag,lst) ->
-          Rtag(label,flag,List.map loop lst)
+      [ Rtag(label,attrs,flag,lst) ->
+          Rtag(label,attrs,flag,List.map loop lst)
       | Rinherit t ->
           Rinherit (loop t) ]
   in
