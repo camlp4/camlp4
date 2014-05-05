@@ -97,8 +97,6 @@ module ObjTools = struct
               opaque "abstract"
       | x when x = Obj.custom_tag ->
               opaque "custom"
-      | x when x = Obj.final_tag ->
-              opaque "final"
       | _ ->
               failwith ("ObjTools.to_string: unknown tag (" ^ string_of_int t ^ ")") ];
 
