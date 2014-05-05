@@ -7,6 +7,7 @@ i386)
   make world.opt
   sudo make install
   cd ..
+  rm -rf ocaml
   ./configure && make && sudo make install
   ;;
 *)
