@@ -467,23 +467,32 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:ctyp< '$s$ >> -> [(s, Invariant) :: acc]
     | _ -> assert False ];
 
+  value core_type loc ty =
+    { ptyp_desc       = ty
+    ; ptyp_loc        = mkloc loc
+    ; ptyp_attributes = []
+    };
+
+  value ptyp_var loc s = core_type loc (Ptyp_var s);
+  value ptyp_any loc = core_type loc Ptyp_any;
+
   value rec optional_type_parameters t acc =
     match t with
     [ <:ctyp< $t1$ $t2$ >> -> optional_type_parameters t1 (optional_type_parameters t2 acc)
-    | <:ctyp@loc< +'$s$ >> -> [(Some (with_loc s loc), Covariant) :: acc]
-    | Ast.TyAnP _loc  -> [(None, Covariant) :: acc]
-    | <:ctyp@loc< -'$s$ >> -> [(Some (with_loc s loc), Contravariant) :: acc]
-    | Ast.TyAnM _loc -> [(None, Contravariant) :: acc]
-    | <:ctyp@loc< '$s$ >> -> [(Some (with_loc s loc), Invariant) :: acc]
-    | Ast.TyAny _loc -> [(None, Invariant) :: acc]
+    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, Covariant) :: acc]
+    | Ast.TyAnP loc  -> [(ptyp_any loc, Covariant) :: acc]
+    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, Contravariant) :: acc]
+    | Ast.TyAnM loc -> [(ptyp_any loc, Contravariant) :: acc]
+    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, Invariant) :: acc]
+    | Ast.TyAny loc -> [(ptyp_any loc, Invariant) :: acc]
     | _ -> assert False ];
 
   value rec class_parameters t acc =
     match t with
     [ <:ctyp< $t1$, $t2$ >> -> class_parameters t1 (class_parameters t2 acc)
-    | <:ctyp@loc< +'$s$ >> -> [(with_loc s loc, Covariant) :: acc]
-    | <:ctyp@loc< -'$s$ >> -> [(with_loc s loc, Contravariant) :: acc]
-    | <:ctyp@loc< '$s$ >> -> [(with_loc s loc, Invariant) :: acc]
+    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, Covariant) :: acc]
+    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, Contravariant) :: acc]
+    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, Invariant) :: acc]
     | _ -> assert False ];
 
   value rec type_parameters_and_type_name t acc =
@@ -1056,9 +1065,17 @@ value varify_constructors var_names =
     | <:sig_item< $sg1$; $sg2$ >> -> sig_item sg1 (sig_item sg2 l)
     | SgDir _ _ _ -> l
     | <:sig_item@loc< exception $uid:s$ >> ->
-        [mksig loc (Psig_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=[]; pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l]
+        [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
+                                   ; pext_kind       = Pext_decl ([], None)
+                                   ; pext_attributes = []
+                                   ; pext_loc        = mkloc loc })
+         :: l]
     | <:sig_item@loc< exception $uid:s$ of $t$ >> ->
-        [mksig loc (Psig_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=List.map ctyp (list_of_ctyp t []); pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l]
+        [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
+                                   ; pext_kind       = Pext_decl (List.map ctyp (list_of_ctyp t []), None)
+                                   ; pext_attributes = []
+                                   ; pext_loc        = mkloc loc })
+         :: l]
     | SgExc _ _ -> assert False (*FIXME*)
     | SgExt loc n t sl -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t (list_of_meta_list sl))) :: l]
     | SgInc loc mt -> [mksig loc (Psig_include {pincl_mod=module_type mt;
@@ -1138,14 +1155,23 @@ value varify_constructors var_names =
     | <:str_item< $st1$; $st2$ >> -> str_item st1 (str_item st2 l)
     | StDir _ _ _ -> l
     | <:str_item@loc< exception $uid:s$ >> ->
-        [mkstr loc (Pstr_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=[]; pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l ]
+        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
+                                   ; pext_kind       = Pext_decl ([], None)
+                                   ; pext_attributes = []
+                                   ; pext_loc        = mkloc loc })
+         :: l ]
     | <:str_item@loc< exception $uid:s$ of $t$ >> ->
-        [mkstr loc (Pstr_exception {pcd_name=with_loc (conv_con s) loc; pcd_args=List.map ctyp (list_of_ctyp t []);pcd_attributes=[]; pcd_res=None; pcd_loc=mkloc loc}) :: l ]
+        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
+                                   ; pext_kind       = Pext_decl (List.map ctyp (list_of_ctyp t []), None)
+                                   ; pext_attributes = []
+                                   ; pext_loc        = mkloc loc })
+         :: l ]
     | <:str_item@loc< exception $uid:s$ = $i$ >> ->
-        [mkstr loc (Pstr_exn_rebind {pexrb_name=with_loc (conv_con s) loc;
-                                     pexrb_lid=long_uident ~conv_con i;
-                                     pexrb_attributes=[];
-                                     pexrb_loc=mkloc loc}) :: l ]
+        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
+                                   ; pext_kind       = Pext_rebind (long_uident ~conv_con i)
+                                   ; pext_attributes = []
+                                   ; pext_loc        = mkloc loc })
+         :: l ]
     | <:str_item@loc< exception $uid:_$ of $_$ = $_$ >> ->
         error loc "type in exception alias"
     | StExc _ _ _ -> assert False (*FIXME*)

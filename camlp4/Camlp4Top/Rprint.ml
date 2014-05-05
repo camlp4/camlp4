@@ -208,7 +208,7 @@ and print_simple_out_type ppf =
             n tyl;
           fprintf ppf ")@]"
       }
-  | Otyp_alias _ _ | Otyp_poly _ _
+  | Otyp_alias _ _ | Otyp_poly _ _ | Otyp_open
   | Otyp_arrow _ _ _ | Otyp_constr _ [_ :: _] as ty ->
       fprintf ppf "@[<1>(%a)@]" print_out_type ty ]
   in
@@ -226,6 +226,29 @@ and print_out_constr ppf (name, tyl, ret) =
 and print_out_label ppf (name, mut, arg) =
   fprintf ppf "@[<2>%s :@ %s%a@]" name (if mut then "mutable " else "")
     print_out_type arg
+and print_out_extension_constructor ppf ext =
+  let print_extended_type ppf =
+    let print_type_parameter ppf ty =
+      fprintf ppf "%s"
+        (if ty = "_" then ty else "'"^ty)
+    in
+      match ext.oext_type_params with
+      [ [] -> fprintf ppf "%s" ext.oext_type_name
+      | [ty_param] ->
+        fprintf ppf "@[%a@ %s@]"
+          print_type_parameter
+          ty_param
+          ext.oext_type_name
+      | _ ->
+        fprintf ppf "@[(@[%a)@]@ %s@]"
+          (print_list print_type_parameter (fun ppf -> fprintf ppf ",@ "))
+          ext.oext_type_params
+          ext.oext_type_name ]
+  in
+  fprintf ppf "@[<hv 2>type %t +=%s@;<1 2>%a@]"
+    print_extended_type
+    (if ext.oext_private = Asttypes.Private then " private" else "")
+    print_out_constr (ext.oext_name, ext.oext_args, ext.oext_ret_type)
 and print_fields rest ppf =
   fun
   [ [] ->
@@ -343,7 +366,7 @@ and needs_semi =
   | Osig_class_type _ _ _ _ rs
   | Osig_module _ _ rs
   | Osig_type _ rs -> rs <> Orec_next
-  | Osig_exception _ _
+  | Osig_typext _ _
   | Osig_modtype _ _
   | Osig_value _ _ _ -> True ]
 and print_out_signature ppf =
@@ -368,15 +391,18 @@ and print_out_sig_item ppf =
         (if rs = Orec_next then "and" else "class type")
         (if vir_flag then " virtual" else "") print_out_class_params params
         name Toploop.print_out_class_type.val clt
-  | Osig_exception id tyl ->
-      fprintf ppf "@[<2>exception %a@]" print_out_constr (id, tyl,None)
+  | Osig_typext ext Oext_exception ->
+      fprintf ppf "@[<2>exception %a@]"
+        print_out_constr (ext.oext_name, ext.oext_args, ext.oext_ret_type)
+  | Osig_typext ext _es ->
+      print_out_extension_constructor ppf ext
   | Osig_modtype name Omty_abstract ->
       fprintf ppf "@[<2>module type %s@]" name
   | Osig_modtype name mty ->
       fprintf ppf "@[<2>module type %s =@ %a@]" name
         Toploop.print_out_module_type.val mty
   | Osig_module name (Omty_alias id) Orec_not ->
-      fprintf ppf "@[<2>module %s :@ %a@]" name print_ident id  
+      fprintf ppf "@[<2>module %s :@ %a@]" name print_ident id
   | Osig_module name mty rs ->
       fprintf ppf "@[<2>%s %s :@ %a@]"
         (match rs with [ Orec_not -> "module"
@@ -401,7 +427,11 @@ and print_out_sig_item ppf =
       fprintf ppf "@[<2>%s %a :@ %a%a@]" kwd value_ident name
         Toploop.print_out_type.val ty pr_prims prims ]
 
-and print_out_type_decl kwd ppf (name, args, ty, priv, constraints) =
+and print_out_type_decl kwd ppf { otype_name    = name
+                                ; otype_params  = args
+                                ; otype_type    = ty
+                                ; otype_private = priv
+                                ; otype_cstrs   = constraints } =
   let constrain ppf (ty, ty') =
     fprintf ppf "@ @[<2>constraint %a =@ %a@]" Toploop.print_out_type.val ty
       Toploop.print_out_type.val ty'
