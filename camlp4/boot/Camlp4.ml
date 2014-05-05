@@ -15047,30 +15047,35 @@ module Struct =
               | Ast.TyQuo (_, s) -> (s, Invariant) :: acc
               | _ -> assert false
               
+            let core_type loc ty =
+              { ptyp_desc = ty; ptyp_loc = mkloc loc; ptyp_attributes = []; }
+              
+            let ptyp_var loc s = core_type loc (Ptyp_var s)
+              
+            let ptyp_any loc = core_type loc Ptyp_any
+              
             let rec optional_type_parameters t acc =
               match t with
               | Ast.TyApp (_, t1, t2) ->
                   optional_type_parameters t1
                     (optional_type_parameters t2 acc)
-              | Ast.TyQuP (loc, s) ->
-                  ((Some (with_loc s loc)), Covariant) :: acc
-              | Ast.TyAnP _loc -> (None, Covariant) :: acc
+              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), Covariant) :: acc
+              | Ast.TyAnP loc -> ((ptyp_any loc), Covariant) :: acc
               | Ast.TyQuM (loc, s) ->
-                  ((Some (with_loc s loc)), Contravariant) :: acc
-              | Ast.TyAnM _loc -> (None, Contravariant) :: acc
-              | Ast.TyQuo (loc, s) ->
-                  ((Some (with_loc s loc)), Invariant) :: acc
-              | Ast.TyAny _loc -> (None, Invariant) :: acc
+                  ((ptyp_var loc s), Contravariant) :: acc
+              | Ast.TyAnM loc -> ((ptyp_any loc), Contravariant) :: acc
+              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), Invariant) :: acc
+              | Ast.TyAny loc -> ((ptyp_any loc), Invariant) :: acc
               | _ -> assert false
               
             let rec class_parameters t acc =
               match t with
               | Ast.TyCom (_, t1, t2) ->
                   class_parameters t1 (class_parameters t2 acc)
-              | Ast.TyQuP (loc, s) -> ((with_loc s loc), Covariant) :: acc
+              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), Covariant) :: acc
               | Ast.TyQuM (loc, s) ->
-                  ((with_loc s loc), Contravariant) :: acc
-              | Ast.TyQuo (loc, s) -> ((with_loc s loc), Invariant) :: acc
+                  ((ptyp_var loc s), Contravariant) :: acc
+              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), Invariant) :: acc
               | _ -> assert false
               
             let rec type_parameters_and_type_name t acc =
@@ -15799,11 +15804,10 @@ module Struct =
                   (mksig loc
                      (Psig_exception
                         {
-                          pcd_name = with_loc (conv_con s) loc;
-                          pcd_args = [];
-                          pcd_attributes = [];
-                          pcd_res = None;
-                          pcd_loc = mkloc loc;
+                          pext_name = with_loc (conv_con s) loc;
+                          pext_kind = Pext_decl (([], None));
+                          pext_attributes = [];
+                          pext_loc = mkloc loc;
                         })) ::
                     l
               | Ast.SgExc (loc,
@@ -15811,11 +15815,12 @@ module Struct =
                   (mksig loc
                      (Psig_exception
                         {
-                          pcd_name = with_loc (conv_con s) loc;
-                          pcd_args = List.map ctyp (list_of_ctyp t []);
-                          pcd_attributes = [];
-                          pcd_res = None;
-                          pcd_loc = mkloc loc;
+                          pext_name = with_loc (conv_con s) loc;
+                          pext_kind =
+                            Pext_decl
+                              (((List.map ctyp (list_of_ctyp t [])), None));
+                          pext_attributes = [];
+                          pext_loc = mkloc loc;
                         })) ::
                     l
               | SgExc (_, _) -> assert false
@@ -15973,11 +15978,10 @@ module Struct =
                   (mkstr loc
                      (Pstr_exception
                         {
-                          pcd_name = with_loc (conv_con s) loc;
-                          pcd_args = [];
-                          pcd_attributes = [];
-                          pcd_res = None;
-                          pcd_loc = mkloc loc;
+                          pext_name = with_loc (conv_con s) loc;
+                          pext_kind = Pext_decl (([], None));
+                          pext_attributes = [];
+                          pext_loc = mkloc loc;
                         })) ::
                     l
               | Ast.StExc (loc,
@@ -15986,22 +15990,23 @@ module Struct =
                   (mkstr loc
                      (Pstr_exception
                         {
-                          pcd_name = with_loc (conv_con s) loc;
-                          pcd_args = List.map ctyp (list_of_ctyp t []);
-                          pcd_attributes = [];
-                          pcd_res = None;
-                          pcd_loc = mkloc loc;
+                          pext_name = with_loc (conv_con s) loc;
+                          pext_kind =
+                            Pext_decl
+                              (((List.map ctyp (list_of_ctyp t [])), None));
+                          pext_attributes = [];
+                          pext_loc = mkloc loc;
                         })) ::
                     l
               | Ast.StExc (loc, (Ast.TyId (_, (Ast.IdUid (_, s)))),
                   (Ast.OSome i)) ->
                   (mkstr loc
-                     (Pstr_exn_rebind
+                     (Pstr_exception
                         {
-                          pexrb_name = with_loc (conv_con s) loc;
-                          pexrb_lid = long_uident ~conv_con i;
-                          pexrb_attributes = [];
-                          pexrb_loc = mkloc loc;
+                          pext_name = with_loc (conv_con s) loc;
+                          pext_kind = Pext_rebind (long_uident ~conv_con i);
+                          pext_attributes = [];
+                          pext_loc = mkloc loc;
                         })) ::
                     l
               | Ast.StExc (loc,
