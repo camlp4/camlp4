@@ -3023,7 +3023,6 @@ module ErrorHandler :
                    Utils.float_repres (Obj.magic r : float)
                | x when x = Obj.abstract_tag -> opaque "abstract"
                | x when x = Obj.custom_tag -> opaque "custom"
-               | x when x = Obj.final_tag -> opaque "final"
                | _ ->
                    failwith
                      ("ObjTools.to_string: unknown tag (" ^
