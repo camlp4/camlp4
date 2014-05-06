@@ -347,7 +347,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     match fl with
     [ <:ctyp<>> -> acc
     | <:ctyp< $t1$; $t2$ >> -> meth_list t1 (meth_list t2 acc)
-    | <:ctyp< $lid:lab$ : $t$ >> -> [(lab, mkpolytype (ctyp t)) :: acc]
+    | <:ctyp< $lid:lab$ : $t$ >> -> [(lab, [], mkpolytype (ctyp t)) :: acc]
     | _ -> assert False ]
 
   and package_type_constraints wc acc =
@@ -715,7 +715,7 @@ value varify_constructors var_names =
       | Ptyp_constr longident lst ->
           Ptyp_constr longident (List.map loop lst)
       | Ptyp_object (lst, o) ->
-          Ptyp_object (List.map (fun (s, t) -> (s, loop t)) lst, o)
+          Ptyp_object (List.map (fun (s, a, t) -> (s, a, loop t)) lst, o)
       | Ptyp_class longident lst ->
           Ptyp_class (longident, List.map loop lst)
       | Ptyp_alias core_type string ->
