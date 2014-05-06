@@ -14870,7 +14870,7 @@ module Struct =
               | Ast.TyNil _ -> acc
               | Ast.TySem (_, t1, t2) -> meth_list t1 (meth_list t2 acc)
               | Ast.TyCol (_, (Ast.TyId (_, (Ast.IdLid (_, lab)))), t) ->
-                  (lab, (mkpolytype (ctyp t))) :: acc
+                  (lab, [], (mkpolytype (ctyp t))) :: acc
               | _ -> assert false
             and package_type_constraints wc acc =
               match wc with
@@ -15345,7 +15345,8 @@ module Struct =
                       Ptyp_constr (longident, (List.map loop lst))
                   | Ptyp_object ((lst, o)) ->
                       Ptyp_object
-                        (((List.map (fun (s, t) -> (s, (loop t))) lst), o))
+                        (((List.map (fun (s, a, t) -> (s, a, (loop t))) lst),
+                          o))
                   | Ptyp_class (longident, lst) ->
                       Ptyp_class ((longident, (List.map loop lst)))
                   | Ptyp_alias (core_type, string) ->
