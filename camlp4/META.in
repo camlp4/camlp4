@@ -23,7 +23,7 @@
 
 # Specifications for the "camlp4" preprocessor:
 requires = ""
-version = "4.02"
+version = "@@VERSION@@"
 description = "Base for Camlp4 syntax extensions"
 directory = "+camlp4"
 
@@ -39,7 +39,7 @@ preprocessor = "camlp4"
 
 package "lib" (
   requires = "camlp4 dynlink"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Camlp4 library"
   archive(byte) = "camlp4lib.cma"
   archive(byte,toploop) = ""  # already contained in camlp4*.cma
@@ -48,14 +48,14 @@ package "lib" (
 
 package "gramlib" (
   requires = "camlp4.lib"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Compatibilty name for camlp4.lib"
 )
 
 # dont use camlp4.lib and camlp4.fulllib together'
 package "fulllib" (
   requires = "camlp4 dynlink"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Camlp4 library"
   error(pkg_camlp4.lib) = "camlp4.lib and camlp4.fulllib are incompatible"
   archive(byte) = "camlp4fulllib.cma"
@@ -64,20 +64,20 @@ package "fulllib" (
 )
 
 package "quotations" (
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax extension: Quotations to create AST nodes"
   requires = "camlp4.quotations.r"  # backward compat
   archive(syntax,preprocessor) = "-ignore foo"
   package "o" (
     requires = "camlp4"
-    version = "4.02"
+    version = "@@VERSION@@"
     description = "Syntax extension: Quotations to create AST nodes (original syntax)"
     archive(syntax,preprocessor) = "-parser Camlp4QuotationCommon -parser Camlp4OCamlOriginalQuotationExpander"
     archive(syntax,toploop) = "Camlp4Parsers/Camlp4QuotationCommon.cmo Camlp4Parsers/Camlp4OCamlOriginalQuotationExpander.cmo"
   )
   package "r" (
     requires = "camlp4"
-    version = "4.02"
+    version = "@@VERSION@@"
     description = "Syntax extension: Quotations to create AST nodes (revised syntax)"
     archive(syntax,preprocessor) = "-parser Camlp4QuotationCommon -parser Camlp4OCamlRevisedQuotationExpander"
     archive(syntax,toploop) = "Camlp4Parsers/Camlp4QuotationCommon.cmo Camlp4Parsers/Camlp4OCamlRevisedQuotationExpander.cmo"
@@ -86,7 +86,7 @@ package "quotations" (
 
 package "extend" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax extension: EXTEND the camlp4 grammar"
   archive(syntax,preprocessor) = "-parser Camlp4GrammarParser"
   archive(syntax,toploop) = "Camlp4Parsers/Camlp4GrammarParser.cmo"
@@ -94,7 +94,7 @@ package "extend" (
 
 package "listcomprehension" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax extension for list comprehensions"
   archive(syntax,preprocessor) = "-parser Camlp4ListComprehension"
   archive(syntax,toploop) = "Camlp4Parsers/Camlp4ListComprehension.cmo"
@@ -102,7 +102,7 @@ package "listcomprehension" (
 
 package "macro" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax extension: Conditional compilation"
   archive(syntax,preprocessor) = "-parser Camlp4MacroParser"
   archive(syntax,toploop) = "Camlp4Parsers/Camlp4MacroParser.cmo"
@@ -110,7 +110,7 @@ package "macro" (
 
 package "mapgenerator" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Traverse data structure (map style)"
   archive(syntax,preprocessor) = "-filter Camlp4MapGenerator"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4MapGenerator.cmo"
@@ -118,7 +118,7 @@ package "mapgenerator" (
 
 package "foldgenerator" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Traverse data structure (fold style)"
   archive(syntax,preprocessor) = "-filter Camlp4FoldGenerator"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4FoldGenerator.cmo"
@@ -126,7 +126,7 @@ package "foldgenerator" (
 
 package "metagenerator" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Generate AST generator for data structure"
   archive(syntax,preprocessor) = "-filter Camlp4MetaGenerator"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4MetaGenerator.cmo"
@@ -134,7 +134,7 @@ package "metagenerator" (
 
 package "locationstripper" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Remove location info from AST"
   archive(syntax,preprocessor) = "-filter Camlp4LocationStripper"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4LocationStripper.cmo"
@@ -142,7 +142,7 @@ package "locationstripper" (
 
 package "tracer" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Trace execution"
   archive(syntax,preprocessor) = "-filter Camlp4Tracer"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4Tracer.cmo"
@@ -150,7 +150,7 @@ package "tracer" (
 
 package "exceptiontracer" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Trace exception execution"
   archive(syntax,preprocessor) = "-filter Camlp4ExceptionTracer"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4ExceptionTracer.cmo"
@@ -158,7 +158,7 @@ package "exceptiontracer" (
 
 package "profiler" (
   requires = "camlp4"
-  version = "4.02"
+  version = "@@VERSION@@"
   description = "Syntax filter: Count events during execution"
   archive(syntax,preprocessor) = "-filter Camlp4Profiler"
   archive(syntax,toploop) = "Camlp4Filters/Camlp4Profiler.cmo"
