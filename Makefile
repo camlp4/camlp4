@@ -1,4 +1,6 @@
 OB := ocamlbuild -classic-display -no-ocamlfind
+LIB ?= /usr/local/lib/
+-include config.sh
 
 .PHONY: default
 default: byte
@@ -17,6 +19,14 @@ all: byte native
 .PHONY: install
 install:
 	./build/install.sh
+
+.PHONY: install-META
+install-META: camlp4/META
+	mkdir -p ${LIB}/camlp4/
+	cp -f camlp4/META ${LIB}/camlp4/
+
+camlp4/META: camlp4/META.in
+	sed -e s/@@VERSION@@/${version}/g $? > $@
 
 .PHONY: bootstrap
 bootstrap:
