@@ -4,6 +4,26 @@
 unset LANG
 unset LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
 
+set -e
+
+for i in "$@"; do
+  case $i in
+    --bindir=*)
+      BINDIR=${i##*=}
+      ;;
+    --libdir=*)
+      LIBDIR=${i##*=}
+      ;;
+    --pkgdir=*)
+      PKGDIR=${i##*=}
+      ;;
+    *)
+      echo "usage: ./configure [--bindir=<dir>] [--libdir=<dir>] [--pkgdir=<dir>]" 1>&2
+      exit 2
+      ;;
+  esac
+done
+
 # OCaml is already installed, this means we should have everything we
 # need. Just dump its configuration.
 
@@ -20,9 +40,10 @@ else
     ext_exe=""
 fi
 
-LIBDIR="$standard_library"
 OCAMLC="`which ocamlc`"
-BINDIR="`dirname $OCAMLC`"
+LIBDIR="${LIBDIR:-$standard_library}"
+BINDIR="${BINDIR:-`dirname $OCAMLC`}"
+PKGDIR="${PKGDIR:-$standard_library/camlp4}"
 
 cat >> config.sh <<EOF
 A="$ext_lib"
@@ -30,4 +51,5 @@ O="$ext_obj"
 EXE="$ext_exe"
 LIBDIR="$LIBDIR"
 BINDIR="$BINDIR"
+PKGDIR="$PKGDIR"
 EOF
