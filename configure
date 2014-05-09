@@ -20,9 +20,10 @@ else
     ext_exe=""
 fi
 
-LIBDIR="$standard_library"
 OCAMLC="`which ocamlc`"
-BINDIR="`dirname $OCAMLC`"
+: ${LIBDIR:="$standard_library"}
+: ${BINDIR:="`dirname $OCAMLC`"}
+: ${PKGDIR:="`ocamlc -where`/camlp4"}
 
 cat >> config.sh <<EOF
 A="$ext_lib"
@@ -30,4 +31,5 @@ O="$ext_obj"
 EXE="$ext_exe"
 LIBDIR="$LIBDIR"
 BINDIR="$BINDIR"
+PKGDIR="$PKGDIR"
 EOF

@@ -1,5 +1,4 @@
 OB := ocamlbuild -classic-display -no-ocamlfind
-PKGDIR ?= /usr/local/lib/
 -include config.sh
 
 .PHONY: default
