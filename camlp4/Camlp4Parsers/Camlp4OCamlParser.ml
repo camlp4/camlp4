@@ -484,7 +484,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       [ [ t1 = SELF; "as"; "'"; i = a_ident -> <:ctyp< $t1$ as '$i$ >> ]
       | "arrow" RIGHTA
         [ t1 = SELF; "->"; t2 = SELF -> <:ctyp< $t1$ -> $t2$ >>
-        | i = TRY [i = a_LIDENT; ":" -> i]; t1 = ctyp LEVEL "star"; "->"; t2 = SELF ->
+        | (i, t1) = TRY [i = a_LIDENT; ":"; t1 = ctyp LEVEL "star"; "->" -> (i, t1)]; t2 = SELF ->
             <:ctyp< ( ~ $i$ : $t1$ ) -> $t2$ >>
         | i = a_OPTLABEL; t1 = ctyp LEVEL "star"; "->"; t2 = SELF ->
             <:ctyp< ( ? $i$ : $t1$ ) -> $t2$ >>
