@@ -16,13 +16,8 @@ native:
 all: byte native
 
 .PHONY: install
-install:
+install: camlp4/META
 	./build/install.sh
-
-.PHONY: install-META
-install-META: camlp4/META
-	mkdir -p ${PKGDIR}/camlp4/
-	cp -f camlp4/META ${PKGDIR}/camlp4/
 
 camlp4/META: camlp4/META.in
 	sed -e s/@@VERSION@@/${version}/g $? > $@
