@@ -68,17 +68,25 @@ let () =
       try ignore (Sys.getenv "EXT_CAMLP4BOOT" : string); true with Not_found -> false
     in
 
-    let hot_camlp4boot =
+    let hot_camlp4boot_dep, hot_camlp4boot_cmd =
       if use_external_camlp4boot then
-        "camlp4boot"
+        (None, "camlp4boot")
       else
-        "camlp4"/"boot"/"camlp4boot" ^
-        if !Options.native_plugin then
-          (* If we are using a native plugin, we might as well use a native
-             preprocessor. *)
-          ".native"
-        else
-          ".byte"
+        let exe =
+          "camlp4boot" ^
+          if !Options.native_plugin then
+            (* If we are using a native plugin, we might as well use a native
+               preprocessor. *)
+            ".native"
+          else
+            ".byte"
+        in
+        let dep = "camlp4"/"boot"/exe in
+        let cmd =
+          let ( / ) = Filename.concat in
+          "camlp4"/"boot"/exe
+        in
+        (Some dep, cmd)
     in
 
     flag ["ocaml"; "ocamlyacc"] (A"-v");
@@ -93,9 +101,11 @@ let () =
       end modules []
     in
 
-    if not use_external_camlp4boot then
-      dep ["camlp4boot"] [hot_camlp4boot];
-    flag ["ocaml"; "pp"; "camlp4boot"] (P hot_camlp4boot);
+    (match hot_camlp4boot_dep with
+     | Some fn ->
+       dep ["camlp4boot"] [fn]
+     | None -> ());
+    flag ["ocaml"; "pp"; "camlp4boot"] (P hot_camlp4boot_cmd);
     flag ["ocaml"; "pp"; "camlp4boot"; "native"] (S[A"-D"; A"OPT"]);
     flag ["ocaml"; "pp"; "camlp4boot"; "pp:dep"] (S[A"-D"; A"OPT"]);
     flag ["ocaml"; "pp"; "camlp4boot"; "pp:doc"] (S[A"-printer"; A"o"]);
