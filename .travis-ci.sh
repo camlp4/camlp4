@@ -16,5 +16,6 @@ opam --git-version
 opam init --comp=$OCAML_VERSION >/dev/null 2>&1
 opam pin camlp4 .
 opam install camlp4
+opam reinstall camlp4
 opam remove camlp4
-find ~/.opam/system/ # to manually check uninstall
+find ~/.opam/$OCAML_VERSION/ # to manually check uninstall
