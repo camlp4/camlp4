@@ -19,6 +19,6 @@ eval `opam config env`
 
 echo Testing bytecode only installation
 ./configure && make && make install
-gmake clean
+make clean
 echo Testing native code installation
 ./configure && make && make native && make install
