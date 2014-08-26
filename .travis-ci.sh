@@ -17,4 +17,8 @@ opam init --comp=$OCAML_VERSION >/dev/null 2>&1
 opam install ocamlfind
 eval `opam config env`
 
+echo Testing bytecode only installation
 ./configure && make && make install
+gmake clean
+echo Testing native code installation
+./configure && make && make native && make install
