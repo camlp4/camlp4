@@ -129,7 +129,7 @@ installbin camlp4/camlp4r.native$EXE $BINDIR/camlp4r.opt$EXE
 installbin camlp4/camlp4rf.native$EXE $BINDIR/camlp4rf.opt$EXE
 
 cd camlp4
-ocamlfind install camlp4 camlp4/META \
+ocamlfind install camlp4 ../../camlp4/META \
   camlp4lib.cma camlp4lib.cmxa Camlp4.cmi \
   camlp4fulllib.cma camlp4fulllib.cmxa \
   camlp4o.cma camlp4of.cma camlp4oof.cma \
