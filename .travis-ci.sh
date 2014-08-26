@@ -14,11 +14,7 @@ opam --version
 opam --git-version
 
 opam init --comp=$OCAML_VERSION >/dev/null 2>&1
-opam install ocamlfind
-eval `opam config env`
-
-echo Testing bytecode only installation
-./configure && make && make install
-make clean
-echo Testing native code installation
-./configure && make && make native && make install
+opam pin camlp4 .
+opam install camlp4
+opam remove camlp4
+find ~/.opam/system/ # to manually check uninstall
