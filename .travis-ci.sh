@@ -1,5 +1,5 @@
 case "$OPAM_VERSION" in
-1.1.0) ppa=avsm/ocaml41+opam11 ;;
+1.1.*) ppa=avsm/ocaml41+opam11 ;;
 *) echo Unknown $OPAM_VERSION; exit 1 ;;
 esac
 
