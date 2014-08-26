@@ -18,4 +18,5 @@ opam pin camlp4 .
 opam install camlp4
 opam reinstall camlp4
 opam remove camlp4
-find ~/.opam/$OCAML_VERSION/ # to manually check uninstall
+echo Checking for camlp4 remnants...
+find ~/.opam/$OCAML_VERSION/ |grep camlp4
