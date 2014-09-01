@@ -985,6 +985,8 @@ New syntax:\
             and optional_type_parameter :
               'optional_type_parameter Gram.Entry.t =
               grammar_entry_create "optional_type_parameter"
+            and opt_eq_pluseq_ctyp : 'opt_eq_pluseq_ctyp Gram.Entry.t =
+              grammar_entry_create "opt_eq_pluseq_ctyp"
             and fun_def_cont_no_when : 'fun_def_cont_no_when Gram.Entry.t =
               grammar_entry_create "fun_def_cont_no_when"
             and fun_def_cont : 'fun_def_cont Gram.Entry.t =
@@ -4677,17 +4679,33 @@ New syntax:\
                                      'type_ident_and_parameters Gram.Entry.t));
                               Gram.Snterm
                                 (Gram.Entry.obj
-                                   (opt_eq_ctyp : 'opt_eq_ctyp Gram.Entry.t));
+                                   (opt_eq_pluseq_ctyp :
+                                     'opt_eq_pluseq_ctyp Gram.Entry.t));
                               Gram.Slist0
                                 (Gram.Snterm
                                    (Gram.Entry.obj
                                       (constrain : 'constrain Gram.Entry.t))) ],
                             (Gram.Action.mk
                                (fun (cl : 'constrain list)
-                                  (tk : 'opt_eq_ctyp)
+                                  (tk : 'opt_eq_pluseq_ctyp)
                                   ((n, tpl) : 'type_ident_and_parameters)
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.TyDcl (_loc, n, tpl, tk, cl) :
+                                  (match tk with
+                                   | `Dcl tk ->
+                                       (match n with
+                                        | Ast.IdLid (_, n) ->
+                                            Ast.TyDcl (_loc, n, tpl, tk, cl)
+                                        | _ ->
+                                            raise
+                                              (Stream.Error
+                                                 "long identifier not allowed here"))
+                                   | `Ext tk ->
+                                       (match cl with
+                                        | [] -> Ast.TyExt (_loc, n, tpl, tk)
+                                        | _ ->
+                                            raise
+                                              (Stream.Error
+                                                 "constraints not allowed on type extensions")) :
                                     'type_declaration))));
                            ([ Gram.Sself; Gram.Skeyword "and"; Gram.Sself ],
                             (Gram.Action.mk
@@ -4772,6 +4790,31 @@ New syntax:\
                                (fun (tk : 'type_kind) _ (_loc : Gram.Loc.t)
                                   -> (tk : 'opt_eq_ctyp)))) ]) ]))
                     ());
+               Gram.extend
+                 (opt_eq_pluseq_ctyp : 'opt_eq_pluseq_ctyp Gram.Entry.t)
+                 ((fun () ->
+                     (None,
+                      [ (None, None,
+                         [ ([],
+                            (Gram.Action.mk
+                               (fun (_loc : Gram.Loc.t) ->
+                                  (`Dcl (Ast.TyNil _loc) :
+                                    'opt_eq_pluseq_ctyp))));
+                           ([ Gram.Skeyword "+=";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (type_kind : 'type_kind Gram.Entry.t)) ],
+                            (Gram.Action.mk
+                               (fun (tk : 'type_kind) _ (_loc : Gram.Loc.t)
+                                  -> (`Ext tk : 'opt_eq_pluseq_ctyp))));
+                           ([ Gram.Skeyword "=";
+                              Gram.Snterm
+                                (Gram.Entry.obj
+                                   (type_kind : 'type_kind Gram.Entry.t)) ],
+                            (Gram.Action.mk
+                               (fun (tk : 'type_kind) _ (_loc : Gram.Loc.t)
+                                  -> (`Dcl tk : 'opt_eq_pluseq_ctyp)))) ]) ]))
+                    ());
                Gram.extend (type_kind : 'type_kind Gram.Entry.t)
                  ((fun () ->
                      (None,
@@ -4790,7 +4833,8 @@ New syntax:\
                       [ (None, None,
                          [ ([ Gram.Snterm
                                 (Gram.Entry.obj
-                                   (a_LIDENT : 'a_LIDENT Gram.Entry.t));
+                                   (type_longident :
+                                     'type_longident Gram.Entry.t));
                               Gram.Slist0
                                 (Gram.Snterm
                                    (Gram.Entry.obj
@@ -4798,8 +4842,8 @@ New syntax:\
                                         'optional_type_parameter Gram.Entry.t))) ],
                             (Gram.Action.mk
                                (fun (tpl : 'optional_type_parameter list)
-                                  (i : 'a_LIDENT) (_loc : Gram.Loc.t) ->
-                                  ((i, tpl) : 'type_ident_and_parameters)))) ]) ]))
+                                  (i : 'type_longident) (_loc : Gram.Loc.t)
+                                  -> ((i, tpl) : 'type_ident_and_parameters)))) ]) ]))
                     ());
                Gram.extend
                  (type_longident_and_parameters :
@@ -5303,6 +5347,10 @@ New syntax:\
                                          (mk_anti ~c: "ctyp" n s)) :
                                         'ctyp)
                                   | _ -> assert false)));
+                           ([ Gram.Skeyword ".." ],
+                            (Gram.Action.mk
+                               (fun _ (_loc : Gram.Loc.t) ->
+                                  (Ast.TyOpn _loc : 'ctyp))));
                            ([ Gram.Skeyword "_" ],
                             (Gram.Action.mk
                                (fun _ (_loc : Gram.Loc.t) ->

@@ -896,6 +896,8 @@ module Sig =
           (* type t = [ A | B ] == Foo.t *)
           (* type t 'a 'b 'c = t constraint t = t constraint t = t *)
           TyDcl of loc * string * ctyp list * ctyp * (ctyp * ctyp) list
+          | (* type t 'a 'b 'c += A *)
+          TyExt of loc * ident * ctyp list * ctyp
           | (* < (t)? (..)? > *)
           (* < move : int -> 'a .. > as 'a  *)
           TyObj of loc * ctyp * row_var_flag
@@ -961,6 +963,8 @@ module Sig =
           | (* t of & t *)
           TyPkg of loc * module_type
           | (* (module S) *)
+          TyOpn of loc
+          | (* .. *)
           TyAtt of loc * string * str_item * ctyp
           | (* .. [@attr] *)
           TyAnt of loc * string
@@ -1826,6 +1830,7 @@ module Sig =
           | TyId of loc * ident
           | TyMan of loc * ctyp * ctyp
           | TyDcl of loc * string * ctyp list * ctyp * (ctyp * ctyp) list
+          | TyExt of loc * ident * ctyp list * ctyp
           | TyObj of loc * ctyp * row_var_flag
           | TyOlb of loc * string * ctyp
           | TyPol of loc * ctyp * ctyp
@@ -1855,6 +1860,7 @@ module Sig =
           | TyAmp of loc * ctyp * ctyp
           | TyOfAmp of loc * ctyp * ctyp
           | TyPkg of loc * module_type
+          | TyOpn of loc
           | TyAtt of loc * string * str_item * ctyp
           | TyAnt of loc * string
           and patt =
@@ -2873,7 +2879,7 @@ module Sig =
         val type_declaration : Ast.ctyp Gram.Entry.t
           
         val type_ident_and_parameters :
-          (string * (Ast.ctyp list)) Gram.Entry.t
+          (Ast.ident * (Ast.ctyp list)) Gram.Entry.t
           
         val type_kind : Ast.ctyp Gram.Entry.t
           
@@ -7958,6 +7964,13 @@ module Struct =
                                       (meta_string _loc x1))),
                                    (meta_str_item _loc x2))),
                                 (meta_ctyp _loc x3))
+                          | Ast.TyOpn x0 ->
+                              Ast.ExApp (_loc,
+                                (Ast.ExId (_loc,
+                                   (Ast.IdAcc (_loc,
+                                      (Ast.IdUid (_loc, "Ast")),
+                                      (Ast.IdUid (_loc, "TyOpn")))))),
+                                (meta_loc _loc x0))
                           | Ast.TyPkg (x0, x1) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -8243,6 +8256,19 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_ctyp _loc x1))),
                                 (meta_row_var_flag _loc x2))
+                          | Ast.TyExt (x0, x1, x2, x3) ->
+                              Ast.ExApp (_loc,
+                                (Ast.ExApp (_loc,
+                                   (Ast.ExApp (_loc,
+                                      (Ast.ExApp (_loc,
+                                         (Ast.ExId (_loc,
+                                            (Ast.IdAcc (_loc,
+                                               (Ast.IdUid (_loc, "Ast")),
+                                               (Ast.IdUid (_loc, "TyExt")))))),
+                                         (meta_loc _loc x0))),
+                                      (meta_ident _loc x1))),
+                                   (meta_list meta_ctyp _loc x2))),
+                                (meta_ctyp _loc x3))
                           | Ast.TyDcl (x0, x1, x2, x3, x4) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -10404,6 +10430,13 @@ module Struct =
                                       (meta_string _loc x1))),
                                    (meta_str_item _loc x2))),
                                 (meta_ctyp _loc x3))
+                          | Ast.TyOpn x0 ->
+                              Ast.PaApp (_loc,
+                                (Ast.PaId (_loc,
+                                   (Ast.IdAcc (_loc,
+                                      (Ast.IdUid (_loc, "Ast")),
+                                      (Ast.IdUid (_loc, "TyOpn")))))),
+                                (meta_loc _loc x0))
                           | Ast.TyPkg (x0, x1) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -10689,6 +10722,19 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_ctyp _loc x1))),
                                 (meta_row_var_flag _loc x2))
+                          | Ast.TyExt (x0, x1, x2, x3) ->
+                              Ast.PaApp (_loc,
+                                (Ast.PaApp (_loc,
+                                   (Ast.PaApp (_loc,
+                                      (Ast.PaApp (_loc,
+                                         (Ast.PaId (_loc,
+                                            (Ast.IdAcc (_loc,
+                                               (Ast.IdUid (_loc, "Ast")),
+                                               (Ast.IdUid (_loc, "TyExt")))))),
+                                         (meta_loc _loc x0))),
+                                      (meta_ident _loc x1))),
+                                   (meta_list meta_ctyp _loc x2))),
+                                (meta_ctyp _loc x3))
                           | Ast.TyDcl (x0, x1, x2, x3, x4) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -13069,6 +13115,12 @@ module Struct =
                              let _x_i1 = o#ctyp _x_i1 in (_x, _x_i1))
                           _x_i4
                       in TyDcl (_x, _x_i1, _x_i2, _x_i3, _x_i4)
+                  | TyExt (_x, _x_i1, _x_i2, _x_i3) ->
+                      let _x = o#loc _x in
+                      let _x_i1 = o#ident _x_i1 in
+                      let _x_i2 = o#list (fun o -> o#ctyp) _x_i2 in
+                      let _x_i3 = o#ctyp _x_i3
+                      in TyExt (_x, _x_i1, _x_i2, _x_i3)
                   | TyObj (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#ctyp _x_i1 in
@@ -13169,6 +13221,7 @@ module Struct =
                   | TyPkg (_x, _x_i1) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#module_type _x_i1 in TyPkg (_x, _x_i1)
+                  | TyOpn _x -> let _x = o#loc _x in TyOpn _x
                   | TyAtt (_x, _x_i1, _x_i2, _x_i3) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in
@@ -13918,6 +13971,11 @@ module Struct =
                              let o = o#ctyp _x in let o = o#ctyp _x_i1 in o)
                           _x_i4
                       in o
+                  | TyExt (_x, _x_i1, _x_i2, _x_i3) ->
+                      let o = o#loc _x in
+                      let o = o#ident _x_i1 in
+                      let o = o#list (fun o -> o#ctyp) _x_i2 in
+                      let o = o#ctyp _x_i3 in o
                   | TyObj (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
                       let o = o#ctyp _x_i1 in
@@ -13989,6 +14047,7 @@ module Struct =
                       let o = o#ctyp _x_i1 in let o = o#ctyp _x_i2 in o
                   | TyPkg (_x, _x_i1) ->
                       let o = o#loc _x in let o = o#module_type _x_i1 in o
+                  | TyOpn _x -> let o = o#loc _x in o
                   | TyAtt (_x, _x_i1, _x_i2, _x_i3) ->
                       let o = o#loc _x in
                       let o = o#string _x_i1 in
@@ -14871,8 +14930,9 @@ module Struct =
               | TyAnt (loc, _) -> error loc "antiquotation not allowed here"
               | TyOfAmp (loc, _, _) | TyAmp (loc, _, _) | TySta (loc, _, _) |
                   TyCom (loc, _, _) | TyVrn (loc, _) | TyQuM (loc, _) |
-                  TyQuP (loc, _) | TyDcl (loc, _, _, _, _) | TyAnP loc |
-                  TyAnM loc | TyObj (loc, _, (RvAnt _)) | TyNil loc |
+                  TyQuP (loc, _) | TyDcl (loc, _, _, _, _) |
+                  TyExt (loc, _, _, _) | TyAnP loc | TyAnM loc |
+                  TyObj (loc, _, (RvAnt _)) | TyNil loc | TyOpn loc |
                   TyTup (loc, _) ->
                   error loc "this construction is not allowed here"
             and row_field =
@@ -14927,6 +14987,15 @@ module Struct =
                 ptype_manifest = tm;
                 ptype_loc = mkloc loc;
                 ptype_attributes = [];
+              }
+              
+            let mktypext path tl tc tp =
+              {
+                ptyext_path = path;
+                ptyext_params = tl;
+                ptyext_constructors = tc;
+                ptyext_private = tp;
+                ptyext_attributes = [];
               }
               
             let mkprivate' m = if m then Private else Public
@@ -14995,6 +15064,50 @@ module Struct =
                   }
               | _ -> assert false
               
+            let mkextension_constructor =
+              function
+              | Ast.TyId (loc, (Ast.IdUid (sloc, s))) ->
+                  {
+                    pext_name = with_loc (conv_con s) sloc;
+                    pext_kind = Pext_decl ([], None);
+                    pext_loc = mkloc loc;
+                    pext_attributes = [];
+                  }
+              | Ast.TyOf (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))), t) ->
+                  {
+                    pext_name = with_loc (conv_con s) sloc;
+                    pext_kind =
+                      Pext_decl ((List.map ctyp (list_of_ctyp t [])), None);
+                    pext_loc = mkloc loc;
+                    pext_attributes = [];
+                  }
+              | Ast.TyCol (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))),
+                  (Ast.TyArr (_, t, u))) ->
+                  {
+                    pext_name = with_loc (conv_con s) sloc;
+                    pext_kind =
+                      Pext_decl ((List.map ctyp (list_of_ctyp t [])),
+                        (Some (ctyp u)));
+                    pext_loc = mkloc loc;
+                    pext_attributes = [];
+                  }
+              | Ast.TyCol (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))), t) ->
+                  {
+                    pext_name = with_loc (conv_con s) sloc;
+                    pext_kind = Pext_decl ([], (Some (ctyp t)));
+                    pext_loc = mkloc loc;
+                    pext_attributes = [];
+                  }
+              | Ast.TyMan (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))),
+                  (Ast.TyId (_, r))) ->
+                  {
+                    pext_name = with_loc (conv_con s) sloc;
+                    pext_kind = Pext_rebind (long_uident r);
+                    pext_loc = mkloc loc;
+                    pext_attributes = [];
+                  }
+              | _ -> assert false
+              
             let rec type_decl name tl cl loc m pflag =
               function
               | Ast.TyMan (_, t1, t2) ->
@@ -15013,6 +15126,8 @@ module Struct =
                   mktype loc name tl cl
                     (Ptype_variant (List.map mkvariant (list_of_ctyp t [])))
                     (mkprivate' pflag) m
+              | TyOpn loc ->
+                  mktype loc name tl cl Ptype_open (mkprivate' pflag) m
               | t ->
                   if m <> None
                   then
@@ -15026,8 +15141,26 @@ module Struct =
                        mktype loc name tl cl Ptype_abstract
                          (mkprivate' pflag) m)
               
+            let rec type_ext path tl loc pflag =
+              function
+              | Ast.TyMan (_loc, _, _) ->
+                  error _loc "manifest type not allowed for extensions"
+              | Ast.TyPrv (_loc, t) ->
+                  if pflag
+                  then
+                    error _loc
+                      "multiple private keyword used, use only one instead"
+                  else type_ext path tl loc true t
+              | Ast.TySum (_, t) ->
+                  mktypext path tl
+                    (List.map mkextension_constructor (list_of_ctyp t []))
+                    (mkprivate' pflag)
+              | _ -> error loc "invalid type extension"
+              
             let type_decl name tl cl t loc =
               type_decl name tl cl loc None false t
+              
+            let type_ext path tl t loc = type_ext path tl loc false t
               
             let mkvalue_desc loc name t p =
               {
@@ -15761,9 +15894,10 @@ module Struct =
               | Ast.RbEq (_, (Ast.IdLid (sloc, s)), e) ->
                   ((with_loc s sloc), (expr e)) :: acc
               | _ -> assert false
-            and mktype_decl x acc =
+            and mktype_decl_or_ext x acc =
               match x with
-              | Ast.TyAnd (_, x, y) -> mktype_decl x (mktype_decl y acc)
+              | Ast.TyAnd (_, x, y) ->
+                  mktype_decl_or_ext x (mktype_decl_or_ext y acc)
               | Ast.TyDcl (cloc, c, tl, td, cl) ->
                   let cl =
                     List.map
@@ -15771,12 +15905,28 @@ module Struct =
                          let loc =
                            Loc.merge (loc_of_ctyp t1) (loc_of_ctyp t2)
                          in ((ctyp t1), (ctyp t2), (mkloc loc)))
-                      cl
+                      cl in
+                  let td =
+                    type_decl (with_loc c cloc)
+                      (List.fold_right optional_type_parameters tl []) cl td
+                      cloc
                   in
-                    (type_decl (with_loc c cloc)
-                       (List.fold_right optional_type_parameters tl []) cl td
-                       cloc) ::
-                      acc
+                    (match acc with
+                     | `Unknown -> `Dcl [ td ]
+                     | `Dcl acc -> `Dcl (td :: acc)
+                     | `Ext _ ->
+                         error cloc
+                           "cannot mix type declaration and extension")
+              | Ast.TyExt (cloc, c, tl, td) ->
+                  (match acc with
+                   | `Unknown ->
+                       `Ext
+                         (type_ext (long_type_ident c)
+                            (List.fold_right optional_type_parameters tl [])
+                            td cloc)
+                   | `Dcl _ ->
+                       error cloc "cannot mix type declaration and extension"
+                   | `Ext _ -> error cloc "only one type extension allowed")
               | _ -> assert false
             and module_type =
               function
@@ -15908,7 +16058,12 @@ module Struct =
                           })) ::
                       l
               | SgTyp (loc, tdl) ->
-                  (mksig loc (Psig_type (mktype_decl tdl []))) :: l
+                  let ty =
+                    (match mktype_decl_or_ext tdl `Unknown with
+                     | `Unknown -> Psig_type []
+                     | `Dcl l -> Psig_type l
+                     | `Ext e -> Psig_typext e)
+                  in (mksig loc ty) :: l
               | SgVal (loc, n, t) ->
                   (mksig loc
                      (Psig_value (mkvalue_desc loc (with_loc n loc) t []))) ::
@@ -16098,7 +16253,12 @@ module Struct =
                           })) ::
                       l
               | StTyp (loc, tdl) ->
-                  (mkstr loc (Pstr_type (mktype_decl tdl []))) :: l
+                  let ty =
+                    (match mktype_decl_or_ext tdl `Unknown with
+                     | `Unknown -> Pstr_type []
+                     | `Dcl l -> Pstr_type l
+                     | `Ext e -> Pstr_typext e)
+                  in (mkstr loc ty) :: l
               | StVal (loc, rf, bi) ->
                   (mkstr loc (Pstr_value ((mkrf rf), (binding bi [])))) :: l
               | Ast.StAnt (loc, _) -> error loc "antiquotation in str_item"
