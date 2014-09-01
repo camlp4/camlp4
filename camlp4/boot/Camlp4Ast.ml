@@ -2016,7 +2016,15 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                            (Ast.IdUid _loc "OvOverride")) ]
                 and meta_patt _loc =
                   fun
-                  [ Ast.PaMod x0 x1 ->
+                  [ Ast.PaExc x0 x1 ->
+                      Ast.ExApp _loc
+                        (Ast.ExApp _loc
+                           (Ast.ExId _loc
+                              (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                                 (Ast.IdUid _loc "PaExc")))
+                           (meta_loc _loc x0))
+                        (meta_patt _loc x1)
+                  | Ast.PaMod x0 x1 ->
                       Ast.ExApp _loc
                         (Ast.ExApp _loc
                            (Ast.ExId _loc
@@ -4221,7 +4229,15 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                            (Ast.IdUid _loc "OvOverride")) ]
                 and meta_patt _loc =
                   fun
-                  [ Ast.PaMod x0 x1 ->
+                  [ Ast.PaExc x0 x1 ->
+                      Ast.PaApp _loc
+                        (Ast.PaApp _loc
+                           (Ast.PaId _loc
+                              (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                                 (Ast.IdUid _loc "PaExc")))
+                           (meta_loc _loc x0))
+                        (meta_patt _loc x1)
+                  | Ast.PaMod x0 x1 ->
                       Ast.PaApp _loc
                         (Ast.PaApp _loc
                            (Ast.PaId _loc
@@ -5157,7 +5173,9 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let _x_i3 = o#patt _x_i3 in PaAtt _x _x_i1 _x_i2 _x_i3
           | PaMod _x _x_i1 ->
               let _x = o#loc _x in
-              let _x_i1 = o#string _x_i1 in PaMod _x _x_i1 ];
+              let _x_i1 = o#string _x_i1 in PaMod _x _x_i1
+          | PaExc _x _x_i1 ->
+              let _x = o#loc _x in let _x_i1 = o#patt _x_i1 in PaExc _x _x_i1 ];
         method override_flag : override_flag -> override_flag =
           fun
           [ OvOverride -> OvOverride
@@ -6005,7 +6023,8 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let o = o#loc _x in
               let o = o#string _x_i1 in
               let o = o#str_item _x_i2 in let o = o#patt _x_i3 in o
-          | PaMod _x _x_i1 -> let o = o#loc _x in let o = o#string _x_i1 in o ];
+          | PaMod _x _x_i1 -> let o = o#loc _x in let o = o#string _x_i1 in o
+          | PaExc _x _x_i1 -> let o = o#loc _x in let o = o#patt _x_i1 in o ];
         method override_flag : override_flag -> 'self_type =
           fun
           [ OvOverride -> o
