@@ -939,7 +939,8 @@ New syntax:\
         [ p1 = SELF; ".."; p2 = SELF -> <:patt< $p1$ .. $p2$ >> ]
       | "apply" LEFTA
         [ p1 = SELF; p2 = SELF -> <:patt< $p1$ $p2$ >>
-        | "lazy"; p = SELF -> <:patt< lazy $p$ >>  ]
+        | "lazy"; p = SELF -> <:patt< lazy $p$ >>
+        | "exception"; p = SELF -> Ast.PaExc (_loc, p) ]
       | "simple"
         [ `ANTIQUOT (""|"pat"|"anti" as n) s ->
             <:patt< $anti:mk_anti ~c:"patt" n s$ >>

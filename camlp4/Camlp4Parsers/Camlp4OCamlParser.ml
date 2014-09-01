@@ -359,6 +359,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
                                 (Ast.list_of_patt p [])
             | _ -> <:patt< $p1$ $p2$ >> ]
         | "lazy"; p = SELF -> <:patt< lazy $p$ >>
+        | "exception"; p = SELF -> Ast.PaExc _loc p
         | `ANTIQUOT (""|"pat"|"anti" as n) s ->
             <:patt< $anti:mk_anti ~c:"patt" n s$ >>
         | p = patt_constr -> p ]

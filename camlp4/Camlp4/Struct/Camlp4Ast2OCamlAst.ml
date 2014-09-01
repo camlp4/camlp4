@@ -646,6 +646,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | PaVrn loc s -> mkpat loc (Ppat_variant (conv_con s) None)
     | PaLaz loc p -> mkpat loc (Ppat_lazy (patt p))
     | PaMod loc m -> mkpat loc (Ppat_unpack (with_loc m loc))
+    | PaExc loc p -> mkpat loc (Ppat_exception (patt p))
     | PaAtt loc s str e ->
         let e = patt e in
         {(e) with ppat_attributes = e.ppat_attributes @ [attribute loc s str]}
