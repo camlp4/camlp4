@@ -111,6 +111,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
       | Ast.PaId _ _ -> False
       | (* here one need to know the arity of constructors *) Ast.PaMod _ _
           -> True
+      | Ast.PaExc _loc p -> is_irrefut_patt p
       | Ast.PaVrn _ _ | Ast.PaStr _ _ | Ast.PaRng _ _ _ | Ast.PaFlo _ _ |
           Ast.PaNativeInt _ _ | Ast.PaInt64 _ _ | Ast.PaInt32 _ _ |
           Ast.PaInt _ _ | Ast.PaChr _ _ | Ast.PaTyp _ _ | Ast.PaArr _ _ |
