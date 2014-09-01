@@ -139,7 +139,8 @@
     | PaVrn of loc and string (* `s *)
     | PaLaz of loc and patt (* lazy p *)
     | PaAtt of loc and string and str_item and patt  (* .. [@attr] *)
-    | PaMod of loc and string (* (module M) *) ]
+    | PaMod of loc and string (* (module M) *)
+    | PaExc of loc and patt (* exception p *) ]
   and expr =
     [ ExNil of loc
     | ExId  of loc and ident (* i *)
