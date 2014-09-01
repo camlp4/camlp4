@@ -160,6 +160,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
   DELETE_RULE Gram expr: "~"; a_LIDENT; ":"; SELF END;
   DELETE_RULE Gram expr: "?"; a_LIDENT; ":"; SELF END;
   DELETE_RULE Gram constructor_declarations: a_UIDENT; ":"; ctyp END;
+  DELETE_RULE Gram constructor_declarations: a_UIDENT; "=="; ident END;
   (* Some other DELETE_RULE are after the grammar *)
 
   value clear = Gram.Entry.clear;
@@ -510,6 +511,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       | "simple"
         [ "'"; i = a_ident -> <:ctyp< '$i$ >>
         | "_" -> <:ctyp< _ >>
+        | ".." -> Ast.TyOpn _loc
         | i = a_LIDENT -> <:ctyp< $lid:i$ >>
         | i = a_UIDENT -> <:ctyp< $uid:i$ >>
         | `ANTIQUOT (""|"typ"|"anti" as n) s ->
@@ -561,6 +563,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
            match Ast.list_of_ctyp ret [] with
                [ [c] -> <:ctyp< $uid:s$ : $c$ >>
                | _ -> raise (Stream.Error "invalid generalized constructor type") ]
+        | s = a_UIDENT; "="; i = ident ->
+          <:ctyp< $uid:s$ == $id:i$>>
         ] ]
     ;
     semi:
@@ -599,9 +603,9 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     ;
 
     type_ident_and_parameters:
-      [ [ "("; tpl = LIST1 optional_type_parameter SEP ","; ")"; i = a_LIDENT -> (i, tpl)
-        | t = optional_type_parameter; i = a_LIDENT -> (i, [t])
-        | i = a_LIDENT -> (i, [])
+      [ [ "("; tpl = LIST1 optional_type_parameter SEP ","; ")"; i = type_longident -> (i, tpl)
+        | t = optional_type_parameter; i = type_longident -> (i, [t])
+        | i = type_longident -> (i, [])
       ] ]
     ;
     type_kind:

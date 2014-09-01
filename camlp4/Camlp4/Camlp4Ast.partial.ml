@@ -74,8 +74,8 @@
     | TyMan of loc and ctyp and ctyp (* t == t *) (* type t = [ A | B ] == Foo.t *)
       (* type t 'a 'b 'c = t constraint t = t constraint t = t *)
     | TyDcl of loc and string and list ctyp and ctyp and list (ctyp * ctyp)
-      (* type t 'a 'b 'c += t *)
-    | TyExt of loc and string and list ctyp and ctyp
+      (* type t 'a 'b 'c += A *)
+    | TyExt of loc and ident and list ctyp and ctyp
       (* < (t)? (..)? > *) (* < move : int -> 'a .. > as 'a  *)
     | TyObj of loc and ctyp and row_var_flag
     | TyOlb of loc and string and ctyp (* ?s:t *)
