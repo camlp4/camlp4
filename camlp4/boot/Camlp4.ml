@@ -15298,6 +15298,7 @@ module Struct =
                   mkpat loc (Ppat_variant ((conv_con s), None))
               | PaLaz (loc, p) -> mkpat loc (Ppat_lazy (patt p))
               | PaMod (loc, m) -> mkpat loc (Ppat_unpack (with_loc m loc))
+              | PaExc (loc, p) -> mkpat loc (Ppat_exception (patt p))
               | PaAtt (loc, s, str, e) ->
                   let e = patt e
                   in
@@ -20276,6 +20277,8 @@ module Printers =
                        as p) -> o#simple_patt f p
                     | Ast.PaLaz (_, p) ->
                         pp f "@[<2>lazy %a@]" o#simple_patt p
+                    | Ast.PaExc (_, p) ->
+                        pp f "@[<2>exception %a@]" o#simple_patt p
                     | Ast.PaApp (_, x, y) ->
                         let (a, al) = get_patt_args x [ y ]
                         in
@@ -20340,7 +20343,8 @@ module Printers =
                       | (Ast.PaApp (_, _, _) | Ast.PaAli (_, _, _) |
                            Ast.PaOrp (_, _, _) | Ast.PaRng (_, _, _) |
                            Ast.PaCom (_, _, _) | Ast.PaSem (_, _, _) |
-                           Ast.PaEq (_, _, _) | Ast.PaLaz (_, _)
+                           Ast.PaEq (_, _, _) | Ast.PaLaz (_, _) |
+                           Ast.PaExc (_, _)
                          as p) -> pp f "@[<1>(%a)@]" o#patt p
                       | Ast.PaAtt (_loc, s, str, e) ->
                           pp f "((%a)[@@%s %a])" o#patt e s o#str_item str

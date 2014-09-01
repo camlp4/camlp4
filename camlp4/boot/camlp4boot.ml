@@ -3725,7 +3725,11 @@ New syntax:\
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.PaRng (_loc, p1, p2) : 'patt)))) ]);
                         ((Some "apply"), (Some Camlp4.Sig.Grammar.LeftA),
-                         [ ([ Gram.Skeyword "lazy"; Gram.Sself ],
+                         [ ([ Gram.Skeyword "exception"; Gram.Sself ],
+                            (Gram.Action.mk
+                               (fun (p : 'patt) _ (_loc : Gram.Loc.t) ->
+                                  (Ast.PaExc ((_loc, p)) : 'patt))));
+                           ([ Gram.Skeyword "lazy"; Gram.Sself ],
                             (Gram.Action.mk
                                (fun (p : 'patt) _ (_loc : Gram.Loc.t) ->
                                   (Ast.PaLaz (_loc, p) : 'patt))));
