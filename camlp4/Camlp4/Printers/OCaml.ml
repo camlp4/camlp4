@@ -645,6 +645,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     [ <:patt< [$_$ :: $_$] >> as p -> o#simple_patt f p
     | <:patt< lazy $p$ >> ->
         pp f "@[<2>lazy %a@]" o#simple_patt p
+    | Ast.PaExc _ p ->
+        pp f "@[<2>exception %a@]" o#simple_patt p
     | <:patt< $x$ $y$ >> ->
         let (a, al) = get_patt_args x [y] in
         if not (Ast.is_patt_constructor a) then
@@ -694,7 +696,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
           pp f "@[<2>?%s:@,@[<1>(%a =@ %a)@]@]" s o#patt_tycon p o#expr e
     | <:patt< $_$ $_$ >> | <:patt< ($_$ as $_$) >> | <:patt< $_$ | $_$ >> |
       <:patt< $_$ .. $_$ >> | <:patt< $_$, $_$ >> |
-      <:patt< $_$; $_$ >> | <:patt< $_$ = $_$ >> | <:patt< lazy $_$ >> as p ->
+      <:patt< $_$; $_$ >> | <:patt< $_$ = $_$ >> | <:patt< lazy $_$ >> |
+      Ast.PaExc _ _ as p ->
           pp f "@[<1>(%a)@]" o#patt p
     | Ast.PaAtt _loc s str e ->
         pp f "((%a)[@@%s %a])" o#patt e s o#str_item str
