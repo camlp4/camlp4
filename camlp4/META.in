@@ -25,6 +25,7 @@
 requires = ""
 version = "@@VERSION@@"
 description = "Base for Camlp4 syntax extensions"
+directory = "+camlp4"
 
 # For the toploop:
 requires(byte,toploop) = "dynlink"
