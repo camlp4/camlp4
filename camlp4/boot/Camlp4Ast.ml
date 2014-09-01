@@ -901,6 +901,12 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                               (meta_string _loc x1))
                            (meta_str_item _loc x2))
                         (meta_ctyp _loc x3)
+                  | Ast.TyOpn x0 ->
+                      Ast.ExApp _loc
+                        (Ast.ExId _loc
+                           (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                              (Ast.IdUid _loc "TyOpn")))
+                        (meta_loc _loc x0)
                   | Ast.TyPkg x0 x1 ->
                       Ast.ExApp _loc
                         (Ast.ExApp _loc
@@ -3126,6 +3132,12 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
                               (meta_string _loc x1))
                            (meta_str_item _loc x2))
                         (meta_ctyp _loc x3)
+                  | Ast.TyOpn x0 ->
+                      Ast.PaApp _loc
+                        (Ast.PaId _loc
+                           (Ast.IdAcc _loc (Ast.IdUid _loc "Ast")
+                              (Ast.IdUid _loc "TyOpn")))
+                        (meta_loc _loc x0)
                   | Ast.TyPkg x0 x1 ->
                       Ast.PaApp _loc
                         (Ast.PaApp _loc
@@ -5673,6 +5685,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
           | TyPkg _x _x_i1 ->
               let _x = o#loc _x in
               let _x_i1 = o#module_type _x_i1 in TyPkg _x _x_i1
+          | TyOpn _x -> let _x = o#loc _x in TyOpn _x
           | TyAtt _x _x_i1 _x_i2 _x_i3 ->
               let _x = o#loc _x in
               let _x_i1 = o#string _x_i1 in
@@ -6382,6 +6395,7 @@ module Make (Loc : Sig.Loc) : Sig.Camlp4Ast with module Loc = Loc =
               let o = o#ctyp _x_i1 in let o = o#ctyp _x_i2 in o
           | TyPkg _x _x_i1 ->
               let o = o#loc _x in let o = o#module_type _x_i1 in o
+          | TyOpn _x -> let o = o#loc _x in o
           | TyAtt _x _x_i1 _x_i2 _x_i3 ->
               let o = o#loc _x in
               let o = o#string _x_i1 in

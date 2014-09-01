@@ -106,6 +106,7 @@
     | TyAmp of loc and ctyp and ctyp (* t & t *)
     | TyOfAmp of loc and ctyp and ctyp (* t of & t *)
     | TyPkg of loc and module_type (* (module S) *)
+    | TyOpn of loc (* .. *)
     | TyAtt of loc and string and str_item and ctyp  (* .. [@attr] *)
     | TyAnt of loc and string (* $s$ *)
     ]
