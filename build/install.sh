@@ -129,17 +129,7 @@ installbin camlp4/camlp4r.native$EXE $BINDIR/camlp4r.opt$EXE
 installbin camlp4/camlp4rf.native$EXE $BINDIR/camlp4rf.opt$EXE
 
 cd camlp4
-ocamlfind remove camlp4 || true
-ocamlfind install camlp4 ../../camlp4/META \
-  camlp4lib.cma Camlp4.cmi camlp4fulllib.cma \
-  camlp4o.cma camlp4of.cma camlp4oof.cma \
-  camlp4orf.cma camlp4r.cma camlp4rf.cma \
-  -optional camlp4fulllib.cmxa camlp4lib.cmxa \
-  Camlp4Bin.cm[iox] Camlp4Bin$O Camlp4Top.cm[io] \
-  config/Camlp4_config.cmi camlp4prof.cm[iox] \
-  camlp4prof$O
-CAMLP4DIR=`ocamlfind query camlp4`
-installlibdir camlp4lib$A camlp4fulllib$A $CAMLP4DIR
+CAMLP4DIR=$LIBDIR/camlp4
 for dir in Camlp4Parsers Camlp4Printers Camlp4Filters Camlp4Top; do
   echo "Installing $dir..."
   mkdir -p $CAMLP4DIR/$dir
@@ -148,4 +138,13 @@ for dir in Camlp4Parsers Camlp4Printers Camlp4Filters Camlp4Top; do
     $dir/*$O    \
     $CAMLP4DIR/$dir
 done
+installdir \
+  camlp4lib.cma camlp4lib.cmxa Camlp4.cmi \
+  camlp4fulllib.cma camlp4fulllib.cmxa \
+  camlp4o.cma camlp4of.cma camlp4oof.cma \
+  camlp4orf.cma camlp4r.cma camlp4rf.cma \
+  Camlp4Bin.cm[iox] Camlp4Bin$O Camlp4Top.cm[io] \
+  config/Camlp4_config.cmi camlp4prof.cm[iox] camlp4prof$O \
+  $CAMLP4DIR
+installlibdir camlp4lib$A camlp4fulllib$A $CAMLP4DIR
 cd ..
