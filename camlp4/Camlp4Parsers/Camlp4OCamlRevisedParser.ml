@@ -1081,8 +1081,19 @@ New syntax:\
             <:ctyp< $anti:mk_anti ~c:"ctypand" n s$ >>
         | `QUOTATION x -> Quotation.expand _loc x Quotation.DynAst.ctyp_tag
         | t1 = SELF; "and"; t2 = SELF -> <:ctyp< $t1$ and $t2$ >>
-        | (n, tpl) = type_ident_and_parameters; tk = opt_eq_ctyp;
-          cl = LIST0 constrain -> Ast.TyDcl _loc n tpl tk cl ] ]
+        | (n, tpl) = type_ident_and_parameters; tk = opt_eq_pluseq_ctyp;
+          cl = LIST0 constrain ->
+          match tk with
+          [ `Dcl tk ->
+            match n with
+            [ Ast.IdLid _ n -> Ast.TyDcl _loc n tpl tk cl
+            | _ -> raise (Stream.Error "long identifier not allowed here") ]
+          | `Ext tk ->
+            match cl with
+            [ [] -> Ast.TyExt _loc n tpl tk
+            | _ -> raise (Stream.Error "constraints not allowed on type extensions") ]
+          ]
+        ] ]
     ;
     constrain:
       [ [ "constraint"; t1 = ctyp; "="; t2 = ctyp -> (t1, t2) ] ]
@@ -1091,11 +1102,16 @@ New syntax:\
       [ [ "="; tk = type_kind -> tk
         | -> <:ctyp<>> ] ]
     ;
+    opt_eq_pluseq_ctyp:
+      [ [ "="; tk = type_kind -> `Dcl tk
+        | "+="; tk = type_kind -> `Ext tk
+        | -> `Dcl <:ctyp<>> ] ]
+    ;
     type_kind:
       [ [ t = ctyp -> t ] ]
     ;
     type_ident_and_parameters:
-      [ [ i = a_LIDENT; tpl = LIST0 optional_type_parameter -> (i, tpl) ] ]
+      [ [ i = type_longident; tpl = LIST0 optional_type_parameter -> (i, tpl) ] ]
     ;
     type_longident_and_parameters:
       [ [ i = type_longident; tpl = type_parameters -> tpl <:ctyp< $id:i$ >>
@@ -1161,6 +1177,7 @@ New syntax:\
       | "simple"
         [ "'"; i = a_ident -> <:ctyp< '$i$ >>
         | "_" -> <:ctyp< _ >>
+        | ".." -> Ast.TyOpn _loc
         | `ANTIQUOT (""|"typ"|"anti" as n) s ->
             <:ctyp< $anti:mk_anti ~c:"ctyp" n s$ >>
         | `ANTIQUOT ("tup" as n) s ->
@@ -1217,6 +1234,8 @@ New syntax:\
         | s = a_UIDENT; ":"; t = ctyp ->
             let (tl, rt) = generalized_type_of_type t in
             <:ctyp< $uid:s$ : ($Ast.tyAnd_of_list tl$ -> $rt$) >>
+        | s = a_UIDENT; "=="; i = ident ->
+          <:ctyp< $uid:s$ == $id:i$>>
         | s = a_UIDENT ->
           <:ctyp< $uid:s$ >>
       ] ]

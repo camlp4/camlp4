@@ -714,6 +714,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     [ <:ctyp< $id:i$ >> -> o#ident f i
     | <:ctyp< $anti:s$ >> -> o#anti f s
     | <:ctyp< _ >> -> pp f "_"
+    | Ast.TyOpn _ -> pp f ".."
     | Ast.TyAnP _ -> pp f "+_"
     | Ast.TyAnM _ -> pp f "-_"
     | <:ctyp< ~ $s$ : $t$ >> -> pp f "@[<2>%s:@ %a@]" s o#simple_ctyp t
@@ -771,6 +772,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
         | _ -> pp f " =@ %a" o#ctyp te ];
         if cl <> [] then pp f "@ %a" (list o#constrain "@ ") cl else ();
       }
+    | Ast.TyExt _ tn tp te ->
+        pp f "@[<2>%a%a@] =@ %a" o#type_params tp o#ident tn o#ctyp te
     | t -> o#ctyp1 f t ];
 
     method ctyp1 f = fun

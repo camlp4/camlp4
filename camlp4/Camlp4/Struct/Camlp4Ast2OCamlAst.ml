@@ -327,10 +327,12 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyQuM loc _
     | TyQuP loc _
     | TyDcl loc _ _ _ _
+    | TyExt loc _ _ _
     | TyAnP loc
     | TyAnM loc
     | TyObj loc _ (RvAnt _)
     | TyNil loc
+    | TyOpn loc
     | TyTup loc _ -> error loc "this construction is not allowed here" ]
   and row_field = fun
     [ <:ctyp<>> -> []
@@ -373,6 +375,13 @@ module Make (Ast : Sig.Camlp4Ast) = struct
      ptype_private = tp; ptype_manifest = tm; ptype_loc = mkloc loc;
      ptype_attributes = []}
   ;
+  value mktypext path tl tc tp =
+    {ptyext_path = path;
+     ptyext_params = tl;
+     ptyext_constructors = tc;
+     ptyext_private = tp;
+     ptyext_attributes = []}
+  ;
   value mkprivate' m = if m then Private else Public;
   value mkprivate = fun
     [ <:private_flag< private >> -> Private
@@ -406,6 +415,34 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : $t$ >> ->
         {pcd_name = with_loc (conv_con s) sloc; pcd_args = []; pcd_res = Some (ctyp t); pcd_loc = mkloc loc; pcd_attributes = []}
     | _ -> assert False (*FIXME*) ];
+  value mkextension_constructor =
+    fun
+    [ <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ >> ->
+       {pext_name = with_loc (conv_con s) sloc;
+        pext_kind = Pext_decl [] None;
+        pext_loc  = mkloc loc;
+        pext_attributes = []}
+    | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ of $t$ >> ->
+       {pext_name = with_loc (conv_con s) sloc;
+        pext_kind = Pext_decl (List.map ctyp (list_of_ctyp t [])) None;
+        pext_loc  = mkloc loc;
+        pext_attributes = []}
+    | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : ($t$ -> $u$) >> ->
+       {pext_name = with_loc (conv_con s) sloc;
+        pext_kind = Pext_decl (List.map ctyp (list_of_ctyp t [])) (Some (ctyp u));
+        pext_loc  = mkloc loc;
+        pext_attributes = []}
+    | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : $t$ >> ->
+       {pext_name = with_loc (conv_con s) sloc;
+        pext_kind = Pext_decl [] (Some (ctyp t));
+        pext_loc  = mkloc loc;
+        pext_attributes = []}
+    | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ == $id:r$  >> ->
+       {pext_name = with_loc (conv_con s) sloc;
+        pext_kind = Pext_rebind (long_uident r);
+        pext_loc  = mkloc loc;
+        pext_attributes = []}
+    | _ -> assert False (*FIXME*) ];
   value rec type_decl name tl cl loc m pflag =
     fun
     [ <:ctyp< $t1$ == $t2$ >> ->
@@ -421,6 +458,8 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:ctyp< [ $t$ ] >> ->
         mktype loc name tl cl
           (Ptype_variant (List.map mkvariant (list_of_ctyp t []))) (mkprivate' pflag) m
+    | TyOpn loc ->
+        mktype loc name tl cl Ptype_open (mkprivate' pflag) m
     | t ->
         if m <> None then
           error loc "only one manifest type allowed by definition" else
@@ -431,8 +470,25 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         in
         mktype loc name tl cl Ptype_abstract (mkprivate' pflag) m ]
   ;
+  value rec type_ext path tl loc pflag =
+    fun
+    [ <:ctyp@_loc< $_$ == $_$ >> ->
+        error _loc "manifest type not allowed for extensions"
+    | <:ctyp@_loc< private $t$ >> ->
+        if pflag then
+          error _loc "multiple private keyword used, use only one instead"
+        else
+          type_ext path tl loc True t
+    | <:ctyp< [ $t$ ] >> ->
+      mktypext path tl
+        (List.map mkextension_constructor (list_of_ctyp t []))
+        (mkprivate' pflag)
+    | _ ->
+      error loc "invalid type extension" ]
+  ;
 
   value type_decl name tl cl t loc = type_decl name tl cl loc None False t;
+  value type_ext path tl t loc = type_ext path tl loc False t;
 
   value mkvalue_desc loc name t p = {pval_name = name; pval_type = ctyp t; pval_prim = p; pval_loc = mkloc loc; pval_attributes = []};
 
@@ -1019,10 +1075,10 @@ value varify_constructors var_names =
          mkideexp x (mkideexp y acc)
     | <:rec_binding< $id:( <:ident@sloc< $lid:s$ >>)$ = $e$ >> -> [(with_loc s sloc, expr e) :: acc]
     | _ -> assert False ]
-  and mktype_decl x acc =
+  and mktype_decl_or_ext x acc =
     match x with
     [ <:ctyp< $x$ and $y$ >> ->
-         mktype_decl x (mktype_decl y acc)
+         mktype_decl_or_ext x (mktype_decl_or_ext y acc)
     | Ast.TyDcl cloc c tl td cl ->
         let cl =
           List.map
@@ -1031,7 +1087,24 @@ value varify_constructors var_names =
               (ctyp t1, ctyp t2, mkloc loc))
             cl
         in
-        [type_decl (with_loc c cloc) (List.fold_right optional_type_parameters tl []) cl td cloc :: acc]
+        let td =
+          type_decl (with_loc c cloc) (List.fold_right optional_type_parameters tl [])
+            cl td cloc
+        in
+        match acc with
+        [ `Unknown -> `Dcl [td]
+        | `Dcl acc -> `Dcl [td :: acc]
+        | `Ext _ ->
+          error cloc "cannot mix type declaration and extension" ]
+    | Ast.TyExt cloc c tl td ->
+        match acc with
+        [ `Unknown ->
+          `Ext(type_ext (long_type_ident c)
+                 (List.fold_right optional_type_parameters tl []) td cloc)
+        | `Dcl _ ->
+          error cloc "cannot mix type declaration and extension"
+        | `Ext _ ->
+          error cloc "only one type extension allowed" ]
     | _ -> assert False ]
   and module_type =
     fun
@@ -1096,7 +1169,14 @@ value varify_constructors var_names =
         let fresh = override_flag loc ov in
         [mksig loc (Psig_open {popen_override=fresh; popen_lid=long_uident id;
                                popen_attributes=[]; popen_loc = mkloc loc}) :: l]
-    | SgTyp loc tdl -> [mksig loc (Psig_type (mktype_decl tdl [])) :: l]
+    | SgTyp loc tdl ->
+      let ty =
+        match mktype_decl_or_ext tdl `Unknown with
+        [ `Unknown -> Psig_type []
+        | `Dcl l -> Psig_type l
+        | `Ext e -> Psig_typext e ]
+      in
+      [mksig loc ty :: l]
     | SgVal loc n t -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t [])) :: l]
     | <:sig_item@loc< $anti:_$ >> -> error loc "antiquotation in sig_item" ]
   and module_sig_binding x acc =
@@ -1197,7 +1277,14 @@ value varify_constructors var_names =
                                popen_lid=long_uident id;
                                popen_attributes=[];
                                popen_loc=mkloc loc}) :: l]
-    | StTyp loc tdl -> [mkstr loc (Pstr_type (mktype_decl tdl [])) :: l]
+    | StTyp loc tdl ->
+      let ty =
+        match mktype_decl_or_ext tdl `Unknown with
+        [ `Unknown -> Pstr_type []
+        | `Dcl l -> Pstr_type l
+        | `Ext e -> Pstr_typext e ]
+      in
+      [mkstr loc ty :: l]
     | StVal loc rf bi ->
         [mkstr loc (Pstr_value (mkrf rf) (binding bi [])) :: l]
     | <:str_item@loc< $anti:_$ >> -> error loc "antiquotation in str_item" ]
