@@ -1022,7 +1022,9 @@ module Sig =
           PaAtt of loc * string * str_item * patt
           | (* .. [@attr] *)
           PaMod of loc * string
-          and (* (module M) *)
+          | (* (module M) *)
+          PaExc of loc * patt
+          and (* exception p *)
           expr =
           | ExNil of loc
           | ExId of loc * ident
@@ -1886,6 +1888,7 @@ module Sig =
           | PaLaz of loc * patt
           | PaAtt of loc * string * str_item * patt
           | PaMod of loc * string
+          | PaExc of loc * patt
           and expr =
           | ExNil of loc
           | ExId of loc * ident
@@ -6407,7 +6410,7 @@ module Struct =
               }
               
             let rec token c lexbuf =
-              (lexbuf.Lexing.lex_mem <- Array.create 12 (-1);
+              (lexbuf.Lexing.lex_mem <- Array.make 12 (-1);
                __ocaml_lex_token_rec c lexbuf 0)
             and __ocaml_lex_token_rec c lexbuf __ocaml_lex_state =
               match Lexing.new_engine __ocaml_lex_tables __ocaml_lex_state
@@ -6658,7 +6661,7 @@ module Struct =
                   (lexbuf.Lexing.refill_buff lexbuf;
                    __ocaml_lex_comment_rec c lexbuf __ocaml_lex_state)
             and string c lexbuf =
-              (lexbuf.Lexing.lex_mem <- Array.create 2 (-1);
+              (lexbuf.Lexing.lex_mem <- Array.make 2 (-1);
                __ocaml_lex_string_rec c lexbuf 159)
             and __ocaml_lex_string_rec c lexbuf __ocaml_lex_state =
               match Lexing.new_engine __ocaml_lex_tables __ocaml_lex_state
@@ -6732,7 +6735,7 @@ module Struct =
                    __ocaml_lex_maybe_quotation_at_rec c lexbuf
                      __ocaml_lex_state)
             and maybe_quotation_colon c lexbuf =
-              (lexbuf.Lexing.lex_mem <- Array.create 2 (-1);
+              (lexbuf.Lexing.lex_mem <- Array.make 2 (-1);
                __ocaml_lex_maybe_quotation_colon_rec c lexbuf 181)
             and
               __ocaml_lex_maybe_quotation_colon_rec c lexbuf
@@ -7005,6 +7008,7 @@ module Struct =
               | Ast.PaAtt (_loc, _s, _str, p) -> is_irrefut_patt p
               | Ast.PaId (_, _) -> false
               | Ast.PaMod (_, _) -> true
+              | Ast.PaExc (_loc, p) -> is_irrefut_patt p
               | Ast.PaVrn (_, _) | Ast.PaStr (_, _) | Ast.PaRng (_, _, _) |
                   Ast.PaFlo (_, _) | Ast.PaNativeInt (_, _) |
                   Ast.PaInt64 (_, _) | Ast.PaInt32 (_, _) | Ast.PaInt (_, _)
@@ -9184,6 +9188,15 @@ module Struct =
                                    (Ast.IdUid (_loc, "OvOverride")))))
                         and meta_patt _loc =
                           function
+                          | Ast.PaExc (x0, x1) ->
+                              Ast.ExApp (_loc,
+                                (Ast.ExApp (_loc,
+                                   (Ast.ExId (_loc,
+                                      (Ast.IdAcc (_loc,
+                                         (Ast.IdUid (_loc, "Ast")),
+                                         (Ast.IdUid (_loc, "PaExc")))))),
+                                   (meta_loc _loc x0))),
+                                (meta_patt _loc x1))
                           | Ast.PaMod (x0, x1) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -11621,6 +11634,15 @@ module Struct =
                                    (Ast.IdUid (_loc, "OvOverride")))))
                         and meta_patt _loc =
                           function
+                          | Ast.PaExc (x0, x1) ->
+                              Ast.PaApp (_loc,
+                                (Ast.PaApp (_loc,
+                                   (Ast.PaId (_loc,
+                                      (Ast.IdAcc (_loc,
+                                         (Ast.IdUid (_loc, "Ast")),
+                                         (Ast.IdUid (_loc, "PaExc")))))),
+                                   (meta_loc _loc x0))),
+                                (meta_patt _loc x1))
                           | Ast.PaMod (x0, x1) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12651,6 +12673,9 @@ module Struct =
                   | PaMod (_x, _x_i1) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in PaMod (_x, _x_i1)
+                  | PaExc (_x, _x_i1) ->
+                      let _x = o#loc _x in
+                      let _x_i1 = o#patt _x_i1 in PaExc (_x, _x_i1)
                 method override_flag : override_flag -> override_flag =
                   function
                   | OvOverride -> OvOverride
@@ -13585,6 +13610,8 @@ module Struct =
                       let o = o#str_item _x_i2 in let o = o#patt _x_i3 in o
                   | PaMod (_x, _x_i1) ->
                       let o = o#loc _x in let o = o#string _x_i1 in o
+                  | PaExc (_x, _x_i1) ->
+                      let o = o#loc _x in let o = o#patt _x_i1 in o
                 method override_flag : override_flag -> 'self_type =
                   function
                   | OvOverride -> o
