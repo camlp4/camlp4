@@ -1033,7 +1033,15 @@ New syntax:\
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.MeFun (_loc, i, t, me) : 'module_expr)))) ]);
                         ((Some "apply"), None,
-                         [ ([ Gram.Sself; Gram.Sself ],
+                         [ ([ Gram.Sself; Gram.Skeyword "(";
+                              Gram.Skeyword ")" ],
+                            (Gram.Action.mk
+                               (fun _ _ (me1 : 'module_expr)
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.MeApp (_loc, me1,
+                                     (Ast.MeStr (_loc, (Ast.StNil _loc)))) :
+                                    'module_expr))));
+                           ([ Gram.Sself; Gram.Sself ],
                             (Gram.Action.mk
                                (fun (me2 : 'module_expr) (me1 : 'module_expr)
                                   (_loc : Gram.Loc.t) ->
@@ -5418,6 +5426,19 @@ New syntax:\
                             (Gram.Action.mk
                                (fun (s : 'a_UIDENT) (_loc : Gram.Loc.t) ->
                                   (Ast.TyId (_loc, (Ast.IdUid (_loc, s))) :
+                                    'constructor_declarations))));
+                           ([ Gram.Snterm
+                                (Gram.Entry.obj
+                                   (a_UIDENT : 'a_UIDENT Gram.Entry.t));
+                              Gram.Skeyword "==";
+                              Gram.Snterm
+                                (Gram.Entry.obj (ident : 'ident Gram.Entry.t)) ],
+                            (Gram.Action.mk
+                               (fun (i : 'ident) _ (s : 'a_UIDENT)
+                                  (_loc : Gram.Loc.t) ->
+                                  (Ast.TyMan (_loc,
+                                     (Ast.TyId (_loc, (Ast.IdUid (_loc, s)))),
+                                     (Ast.TyId (_loc, i))) :
                                     'constructor_declarations))));
                            ([ Gram.Snterm
                                 (Gram.Entry.obj
