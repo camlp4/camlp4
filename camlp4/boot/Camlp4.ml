@@ -20522,6 +20522,7 @@ module Printers =
                       | Ast.TyId (_, i) -> o#ident f i
                       | Ast.TyAnt (_, s) -> o#anti f s
                       | Ast.TyAny _ -> pp f "_"
+                      | Ast.TyOpn _ -> pp f ".."
                       | Ast.TyAnP _ -> pp f "+_"
                       | Ast.TyAnM _ -> pp f "-_"
                       | Ast.TyLab (_, s, t) ->
@@ -20603,6 +20604,9 @@ module Printers =
                            if cl <> []
                            then pp f "@ %a" (list o#constrain "@ ") cl
                            else ())
+                      | Ast.TyExt (_, tn, tp, te) ->
+                          pp f "@[<2>%a%a@] =@ %a" o#type_params tp o#ident
+                            tn o#ctyp te
                       | t -> o#ctyp1 f t
                 method ctyp1 =
                   fun f ->
