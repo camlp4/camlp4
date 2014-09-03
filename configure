@@ -43,7 +43,7 @@ fi
 OCAMLC="`which ocamlc`"
 LIBDIR="${LIBDIR:-$standard_library}"
 BINDIR="${BINDIR:-`dirname $OCAMLC`}"
-PKGDIR="${PKGDIR:-$standard_library/camlp4}"
+PKGDIR="${PKGDIR:-$standard_library}"
 
 cat >> config.sh <<EOF
 A="$ext_lib"
