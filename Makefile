@@ -1,6 +1,8 @@
 OB := ocamlbuild -classic-display -no-ocamlfind
 -include config.sh
 
+OB += $(OB_FLAGS)
+
 .PHONY: default
 default: byte
 
