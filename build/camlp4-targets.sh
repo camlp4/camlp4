@@ -32,7 +32,7 @@ for i in camlp4boot camlp4r camlp4rf camlp4o camlp4of camlp4oof camlp4orf; do
   CAMLP4_NATIVE="$CAMLP4_NATIVE camlp4/$i.native$EXE"
 done
 
-cd camlp4
+cd ./camlp4
 for dir in Camlp4Parsers Camlp4Printers Camlp4Filters; do
   for file in $dir/*.ml; do
     base=camlp4/$dir/`basename $file .ml`
