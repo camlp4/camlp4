@@ -13,8 +13,10 @@
 #########################################################################
 
 set -e
-
-cd `dirname $0`/..
+if [ ! -e camlp4/META.in ] ; then
+  echo "script $0 invoked from the wrong location"
+  exit 1
+fi
 
 # Save the following environment variables before sourcing config.sh
 # since it will overwrite them and the user might have set them to
@@ -108,7 +110,7 @@ installlibdir() {
 mkdir -p $BINDIR
 mkdir -p $LIBDIR/camlp4
 
-cd _build
+cd ./_build
 
 echo "Installing camlp4..."
 installbin camlp4/camlp4prof.byte$EXE $BINDIR/camlp4prof$EXE
@@ -128,7 +130,7 @@ installbin camlp4/camlp4orf.native$EXE $BINDIR/camlp4orf.opt$EXE
 installbin camlp4/camlp4r.native$EXE $BINDIR/camlp4r.opt$EXE
 installbin camlp4/camlp4rf.native$EXE $BINDIR/camlp4rf.opt$EXE
 
-cd camlp4
+cd ./camlp4
 CAMLP4DIR=$LIBDIR/camlp4
 for dir in Camlp4Parsers Camlp4Printers Camlp4Filters Camlp4Top; do
   echo "Installing $dir..."

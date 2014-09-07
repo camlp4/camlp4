@@ -15,7 +15,10 @@
 # README: to bootstrap camlp4 have a look at build/camlp4-bootstrap-recipe.txt
 
 set -e
-cd `dirname $0`/..
+if [ ! -e camlp4/META.in ] ; then
+  echo "script $0 invoked from the wrong location"
+  exit 1
+fi
 
 . ./config.sh
 export PATH=$BINDIR:$PATH
