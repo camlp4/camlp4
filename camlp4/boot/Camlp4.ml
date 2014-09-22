@@ -15271,7 +15271,17 @@ module Struct =
               | Ast.WcMod (_, i1, i2) ->
                   (Pwith_module ((long_uident i1), (long_uident i2))) :: acc
               | Ast.WcTyS (loc, id_tpl, ct) ->
-                  (mkwithtyp (fun _ x -> Pwith_typesubst x) loc id_tpl ct) ::
+                  (mkwithtyp
+                     (fun lid x ->
+                        let _ =
+                          match lid with
+                          | { Location.txt = Lident _ } -> ()
+                          | _ ->
+                              Loc.raise loc
+                                (Failure
+                                   "substitution of types with module paths isn't allowed")
+                        in Pwith_typesubst x)
+                     loc id_tpl ct) ::
                     acc
               | Ast.WcMoS (loc, i1, i2) ->
                   (match long_uident i1 with
