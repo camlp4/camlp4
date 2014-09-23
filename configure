@@ -60,3 +60,9 @@ BINDIR="$BINDIR"
 PKGDIR="$PKGDIR"
 OB_FLAGS=$OB_FLAGS
 EOF
+
+cat >> myocamlbuild_config.ml <<EOF
+let libdir="$LIBDIR"
+let bindir="$BINDIR"
+let pkgdir="$PKGDIR"
+EOF

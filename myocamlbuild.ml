@@ -185,7 +185,7 @@ let () =
       ~dep:gen_import
       ~prod:camlp4_import
       (fun _ _ ->
-         Cmd (Px gen_import));
+         Cmd (S [Px gen_import; A Myocamlbuild_config.libdir]));
 
     copy_rule "% -> %.exe" ~insert:`bottom "%" "%.exe";
 
