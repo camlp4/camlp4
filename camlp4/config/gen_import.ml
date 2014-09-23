@@ -7,8 +7,10 @@ let () =
 let standard_library = %S
 let ast_intf_magic_number = %S
 let ast_impl_magic_number = %S
+let camlp4_standard_library = %S
 "
     Config.standard_library
     Config.ast_intf_magic_number
-    Config.ast_impl_magic_number;
+    Config.ast_impl_magic_number
+    (Filename.concat Sys.argv.(1) "camlp4");
   close_out oc
