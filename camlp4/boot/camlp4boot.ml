@@ -1015,7 +1015,7 @@ New syntax:\
                                (fun (me : 'module_expr) _ _ _ _
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.MeFun
-                                     ((_loc, "()", (Ast.MtNil _loc), me)) :
+                                     ((_loc, "*", (Ast.MtNil _loc), me)) :
                                     'module_expr))));
                            ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
                               Gram.Snterm
@@ -1346,7 +1346,7 @@ New syntax:\
                                (fun (mb : 'module_binding0) _ _
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.MeFun
-                                     ((_loc, "()", (Ast.MtNil _loc), mb)) :
+                                     ((_loc, "*", (Ast.MtNil _loc), mb)) :
                                     'module_binding0))));
                            ([ Gram.Skeyword "(";
                               Gram.Snterm
@@ -1473,7 +1473,7 @@ New syntax:\
                                (fun (mt : 'module_type) _ _ _ _
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.MtFun
-                                     ((_loc, "()", (Ast.MtNil _loc), mt)) :
+                                     ((_loc, "*", (Ast.MtNil _loc), mt)) :
                                     'module_type))));
                            ([ Gram.Skeyword "functor"; Gram.Skeyword "(";
                               Gram.Snterm
@@ -1793,7 +1793,7 @@ New syntax:\
                                (fun (mt : 'module_declaration) _ _
                                   (_loc : Gram.Loc.t) ->
                                   (Ast.MtFun
-                                     ((_loc, "()", (Ast.MtNil _loc), mt)) :
+                                     ((_loc, "*", (Ast.MtNil _loc), mt)) :
                                     'module_declaration))));
                            ([ Gram.Skeyword "(";
                               Gram.Snterm
