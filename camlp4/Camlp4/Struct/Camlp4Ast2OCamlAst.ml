@@ -1120,8 +1120,8 @@ value varify_constructors var_names =
     fun
     [ <:module_type@loc<>> -> error loc "abstract/nil module type not allowed here"
     | <:module_type@loc< $id:i$ >> -> mkmty loc (Pmty_ident (long_uident i))
-    | Ast.MtFun(loc, "()", Ast.MtNil _, mt) ->
-        mkmty loc (Pmty_functor (with_loc "()" loc) None (module_type mt))
+    | Ast.MtFun(loc, "*", Ast.MtNil _, mt) ->
+        mkmty loc (Pmty_functor (with_loc "*" loc) None (module_type mt))
     | <:module_type@loc< functor ($n$ : $nt$) -> $mt$ >> ->
         mkmty loc (Pmty_functor (with_loc n loc) (Some (module_type nt)) (module_type mt))
     | <:module_type@loc< '$_$ >> -> error loc "module type variable not allowed here"
@@ -1216,8 +1216,8 @@ value varify_constructors var_names =
     | <:module_expr@loc< $id:i$ >> -> mkmod loc (Pmod_ident (long_uident i))
     | <:module_expr@loc< $me1$ $me2$ >> ->
         mkmod loc (Pmod_apply (module_expr me1) (module_expr me2))
-    | Ast.MeFun(loc, "()", Ast.MtNil _, me) ->
-        mkmod loc (Pmod_functor (with_loc "()" loc) None (module_expr me))
+    | Ast.MeFun(loc, "*", Ast.MtNil _, me) ->
+        mkmod loc (Pmod_functor (with_loc "*" loc) None (module_expr me))
     | <:module_expr@loc< functor ($n$ : $mt$) -> $me$ >> ->
         mkmod loc (Pmod_functor (with_loc n loc) (Some (module_type mt)) (module_expr me))
     | <:module_expr@loc< struct $sl$ end >> ->
