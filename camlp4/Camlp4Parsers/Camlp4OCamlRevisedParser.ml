@@ -386,30 +386,30 @@ New syntax:\
        | [_ :: l] -> drop (n - 1) l ]
   ;
 
+  value stream_get_nth n strm =
+    loop n (Stream.npeek n strm) where rec loop n =
+      fun
+      [ [] -> raise Stream.Failure
+      | [(x, _)] -> if n == 1 then x else raise Stream.Failure
+      | [_ :: l] -> loop (n - 1) l ]
+  ;
+
   value test_module_longident_dot_delim =
     Gram.Entry.of_parser "test_module_longident_dot_delim" (fun strm ->
-      let rec test_longident_dot pos tokens =
-        match tokens with
-        [ [(ANTIQUOT (""|"id"|"anti"|"list") _, _) :: tokens] ->
-          test_longident_dot (pos+1) tokens
-        | [(UIDENT _, _); (KEYWORD ".", _) :: tokens] ->
-          test_longident_dot (pos+2) tokens
-        | [_ :: _] ->
-          test_delim pos tokens
-        | [] -> fetch_more test_longident_dot pos ]
-      and test_delim pos tokens =
-        if pos = 0 then
-          raise Stream.Failure
-        else
-          match tokens with
-          [ [(KEYWORD ("(" | "[" | "[|" | "{" | "{<"), _) :: _] -> ()
-          | [_ :: _] -> raise Stream.Failure
-          | [] -> fetch_more test_delim pos ]
-      and fetch_more k pos =
-        match drop pos (Stream.npeek (pos + 10) strm) with
-        [ [] -> raise Stream.Failure
-        | tokens -> k pos tokens ]
-      in fetch_more test_longident_dot 0
+      let rec loop pos =
+        match stream_get_nth pos strm with
+        [ ANTIQUOT (""|"id"|"anti"|"list") _ ->
+          loop (pos + 1)
+        | UIDENT _ ->
+          match stream_get_nth (pos + 1) strm with
+            [ KEYWORD "." ->
+              loop (pos + 2)
+            | _ -> raise Stream.Failure ]
+        | KEYWORD ("(" | "[" | "[|" | "{" | "{<") when pos > 1 ->
+            ()
+        | _ -> raise Stream.Failure ]
+      in
+      loop 1
     );
 
   Token.Filter.define_filter (Gram.get_filter ())
@@ -1720,7 +1720,12 @@ New syntax:\
       ] ]
     ;
     interf:
-      [ [ "#"; n = a_LIDENT; arg = expr; semi ->
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple"; semi ->
+            let arg =
+              match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+            in
             ([ Ast.SgDir _loc n arg ], stopped_at _loc)
         | si = sig_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None) ] ]
@@ -1734,7 +1739,12 @@ New syntax:\
       ] ]
     ;
     implem:
-      [ [ "#"; n = a_LIDENT; arg = expr; semi ->
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple"; semi ->
+            let arg =
+              match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+            in
             ([ Ast.StDir _loc n arg ], stopped_at _loc)
         | si = str_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None)
@@ -1754,14 +1764,24 @@ New syntax:\
       ] ]
     ;
     use_file:
-      [ [ "#"; n = a_LIDENT; arg = expr; semi ->
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple"; semi ->
+            let arg =
+              match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+            in
             ([ Ast.StDir _loc n arg ], stopped_at _loc)
         | si = str_item; semi; (sil, stopped) = SELF -> ([si :: sil], stopped)
         | `EOI -> ([], None)
       ] ]
     ;
     phrase:
-      [ [ "#"; n = a_LIDENT; arg = expr; semi ->
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple"; semi ->
+            let arg =
+              match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+            in
             Ast.StDir _loc n arg
         | st = str_item; semi -> st
       ] ]
@@ -1873,7 +1893,13 @@ New syntax:\
       ] ]
     ;
     str_item_quot:
-      [ [ "#"; n = a_LIDENT; arg = expr -> Ast.StDir _loc n arg
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple" ->
+          let arg =
+            match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+          in
+          Ast.StDir _loc n arg
         | st1 = str_item; semi; st2 = SELF ->
             match st2 with
             [ <:str_item<>> -> st1
@@ -1882,7 +1908,13 @@ New syntax:\
         | -> <:str_item<>> ] ]
     ;
     sig_item_quot:
-      [ [ "#"; n = a_LIDENT; arg = expr -> Ast.SgDir _loc n arg
+      [ [ "#"; n = a_LIDENT; arg = OPT expr LEVEL "simple" ->
+          let arg =
+            match arg with
+              [ Some e -> e
+              | None   -> <:expr< >> ]
+          in
+          Ast.SgDir _loc n arg
         | sg1 = sig_item; semi; sg2 = SELF ->
             match sg2 with
             [ <:sig_item<>> -> sg1

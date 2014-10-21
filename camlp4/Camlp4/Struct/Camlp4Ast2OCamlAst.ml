@@ -1451,6 +1451,7 @@ value varify_constructors var_names =
     | ExInt _ i -> Pdir_int (int_of_string i)
     | <:expr< True >> -> Pdir_bool True
     | <:expr< False >> -> Pdir_bool False
+    | <:expr< >> -> Pdir_none
     | e -> Pdir_ident (ident_noloc (ident_of_expr e)) ]
   ;
 
