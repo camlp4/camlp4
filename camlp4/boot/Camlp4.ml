@@ -15943,9 +15943,9 @@ module Struct =
               | Ast.MtNil loc ->
                   error loc "abstract/nil module type not allowed here"
               | Ast.MtId (loc, i) -> mkmty loc (Pmty_ident (long_uident i))
-              | Ast.MtFun ((loc, "()", Ast.MtNil _, mt)) ->
+              | Ast.MtFun ((loc, "*", Ast.MtNil _, mt)) ->
                   mkmty loc
-                    (Pmty_functor ((with_loc "()" loc), None,
+                    (Pmty_functor ((with_loc "*" loc), None,
                        (module_type mt)))
               | Ast.MtFun (loc, n, nt, mt) ->
                   mkmty loc
@@ -16117,9 +16117,9 @@ module Struct =
               | Ast.MeApp (loc, me1, me2) ->
                   mkmod loc
                     (Pmod_apply ((module_expr me1), (module_expr me2)))
-              | Ast.MeFun ((loc, "()", Ast.MtNil _, me)) ->
+              | Ast.MeFun ((loc, "*", Ast.MtNil _, me)) ->
                   mkmod loc
-                    (Pmod_functor ((with_loc "()" loc), None,
+                    (Pmod_functor ((with_loc "*" loc), None,
                        (module_expr me)))
               | Ast.MeFun (loc, n, mt, me) ->
                   mkmod loc
