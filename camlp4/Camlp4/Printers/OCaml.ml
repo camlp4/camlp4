@@ -919,7 +919,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
         pp f "@[<2>module type of@ %a@]" o#module_expr me
     | <:module_type< $id:i$ >> -> o#ident f i
     | <:module_type< $anti:s$ >> -> o#anti f s
-    | Ast.MtFun(_, "()", Ast.MtNil _, mt) ->
+    | Ast.MtFun(_, "*", Ast.MtNil _, mt) ->
           pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_type mt
     | <:module_type< functor ( $s$ : $mt1$ ) -> $mt2$ >> ->
           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]"
@@ -967,7 +967,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     | <:module_expr< $anti:s$ >> -> o#anti f s
     | <:module_expr< $me1$ $me2$ >> ->
           pp f "@[<2>%a@,(%a)@]" o#module_expr me1 o#module_expr me2
-    | Ast.MeFun(_, "()", Ast.MtNil _, me) ->
+    | Ast.MeFun(_, "*", Ast.MtNil _, me) ->
           pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_expr me
     | <:module_expr< functor ( $s$ : $mt$ ) -> $me$ >> ->
           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]" o#var s o#module_type mt o#module_expr me
