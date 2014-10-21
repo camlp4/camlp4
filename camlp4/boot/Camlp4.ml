@@ -19600,6 +19600,7 @@ module Printers =
                       method expr_list_cons :
                         bool -> formatter -> Ast.expr -> unit
                       method fun_binding : formatter -> fun_binding -> unit
+                      method functor_arg_var : formatter -> string -> unit
                       method functor_arg :
                         formatter -> (string * Ast.module_type) -> unit
                       method functor_args :
@@ -20124,8 +20125,12 @@ module Printers =
                 method functor_arg =
                   fun f (s, mt) ->
                     match mt with
-                    | Ast.MtNil _ -> o#var f s
-                    | _ -> pp f "@[<2>(%a :@ %a)@]" o#var s o#module_type mt
+                    | Ast.MtNil _ -> o#functor_arg_var f s
+                    | _ ->
+                        pp f "@[<2>(%a :@ %a)@]" o#functor_arg_var s
+                          o#module_type mt
+                method functor_arg_var =
+                  fun f v -> match v with | "*" -> pp f "()" | v -> o#var f v
                 method module_rec_binding =
                   fun f ->
                     function
