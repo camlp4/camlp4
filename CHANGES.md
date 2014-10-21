@@ -1,3 +1,9 @@
+4.02.1+2
+--------
+
+* map `functor () ->` to `functor * ->` like OCaml
+* fix hanging problem in the toplevel
+
 4.02.0+2
 --------
 
