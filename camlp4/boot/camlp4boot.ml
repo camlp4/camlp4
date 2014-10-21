@@ -715,30 +715,28 @@ New syntax:\
           then l
           else (match l with | [] -> [] | _ :: l -> drop (n - 1) l)
           
+        let stream_get_nth n strm =
+          let rec loop n =
+            function
+            | [] -> raise Stream.Failure
+            | [ (x, _) ] -> if n == 1 then x else raise Stream.Failure
+            | _ :: l -> loop (n - 1) l
+          in loop n (Stream.npeek n strm)
+          
         let test_module_longident_dot_delim =
           Gram.Entry.of_parser "test_module_longident_dot_delim"
             (fun strm ->
-               let rec test_longident_dot pos tokens =
-                 match tokens with
-                 | (ANTIQUOT (("" | "id" | "anti" | "list"), _), _) :: tokens
-                     -> test_longident_dot (pos + 1) tokens
-                 | (UIDENT _, _) :: (KEYWORD ".", _) :: tokens ->
-                     test_longident_dot (pos + 2) tokens
-                 | _ :: _ -> test_delim pos tokens
-                 | [] -> fetch_more test_longident_dot pos
-               and test_delim pos tokens =
-                 if pos = 0
-                 then raise Stream.Failure
-                 else
-                   (match tokens with
-                    | (KEYWORD ("(" | "[" | "[|" | "{" | "{<"), _) :: _ -> ()
-                    | _ :: _ -> raise Stream.Failure
-                    | [] -> fetch_more test_delim pos)
-               and fetch_more k pos =
-                 match drop pos (Stream.npeek (pos + 10) strm) with
-                 | [] -> raise Stream.Failure
-                 | tokens -> k pos tokens
-               in fetch_more test_longident_dot 0)
+               let rec loop pos =
+                 match stream_get_nth pos strm with
+                 | ANTIQUOT (("" | "id" | "anti" | "list"), _) ->
+                     loop (pos + 1)
+                 | UIDENT _ ->
+                     (match stream_get_nth (pos + 1) strm with
+                      | KEYWORD "." -> loop (pos + 2)
+                      | _ -> raise Stream.Failure)
+                 | KEYWORD ("(" | "[" | "[|" | "{" | "{<") when pos > 1 -> ()
+                 | _ -> raise Stream.Failure
+               in loop 1)
           
         let _ =
           Token.Filter.define_filter (Gram.get_filter ())
@@ -8257,15 +8255,24 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple"));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.SgDir (_loc, n, arg) ],
-                                    (stopped_at _loc)) : 'interf)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in
+                                     ([ Ast.SgDir (_loc, n, arg) ],
+                                      (stopped_at _loc)) :
+                                    'interf)))) ]) ]))
                     ());
                Gram.extend (sig_items : 'sig_items Gram.Entry.t)
                  ((fun () ->
@@ -8357,15 +8364,24 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple"));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, arg) ],
-                                    (stopped_at _loc)) : 'implem)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in
+                                     ([ Ast.StDir (_loc, n, arg) ],
+                                      (stopped_at _loc)) :
+                                    'implem)))) ]) ]))
                     ());
                Gram.extend (str_items : 'str_items Gram.Entry.t)
                  ((fun () ->
@@ -8477,15 +8493,24 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple"));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (([ Ast.StDir (_loc, n, arg) ],
-                                    (stopped_at _loc)) : 'use_file)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in
+                                     ([ Ast.StDir (_loc, n, arg) ],
+                                      (stopped_at _loc)) :
+                                    'use_file)))) ]) ]))
                     ());
                Gram.extend (phrase : 'phrase Gram.Entry.t)
                  ((fun () ->
@@ -8503,14 +8528,21 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t));
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple"));
                               Gram.Snterm
                                 (Gram.Entry.obj (semi : 'semi Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun _ (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun _ (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, arg) : 'phrase)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in Ast.StDir (_loc, n, arg) : 'phrase)))) ]) ]))
                     ());
                Gram.extend (a_INT : 'a_INT Gram.Entry.t)
                  ((fun () ->
@@ -9212,12 +9244,20 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t)) ],
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple")) ],
                             (Gram.Action.mk
-                               (fun (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.StDir (_loc, n, arg) : 'str_item_quot)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in Ast.StDir (_loc, n, arg) :
+                                    'str_item_quot)))) ]) ]))
                     ());
                Gram.extend (sig_item_quot : 'sig_item_quot Gram.Entry.t)
                  ((fun () ->
@@ -9250,12 +9290,20 @@ New syntax:\
                               Gram.Snterm
                                 (Gram.Entry.obj
                                    (a_LIDENT : 'a_LIDENT Gram.Entry.t));
-                              Gram.Snterm
-                                (Gram.Entry.obj (expr : 'expr Gram.Entry.t)) ],
+                              Gram.Sopt
+                                (Gram.Snterml
+                                   ((Gram.Entry.obj
+                                       (expr : 'expr Gram.Entry.t)),
+                                   "simple")) ],
                             (Gram.Action.mk
-                               (fun (arg : 'expr) (n : 'a_LIDENT) _
+                               (fun (arg : 'expr option) (n : 'a_LIDENT) _
                                   (_loc : Gram.Loc.t) ->
-                                  (Ast.SgDir (_loc, n, arg) : 'sig_item_quot)))) ]) ]))
+                                  (let arg =
+                                     match arg with
+                                     | Some e -> e
+                                     | None -> Ast.ExNil _loc
+                                   in Ast.SgDir (_loc, n, arg) :
+                                    'sig_item_quot)))) ]) ]))
                     ());
                Gram.extend
                  (module_type_quot : 'module_type_quot Gram.Entry.t)

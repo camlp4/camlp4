@@ -16485,6 +16485,7 @@ module Struct =
               | ExInt (_, i) -> Pdir_int (int_of_string i)
               | Ast.ExId (_, (Ast.IdUid (_, "True"))) -> Pdir_bool true
               | Ast.ExId (_, (Ast.IdUid (_, "False"))) -> Pdir_bool false
+              | Ast.ExNil _ -> Pdir_none
               | e -> Pdir_ident (ident_noloc (ident_of_expr e))
               
             let phrase =
