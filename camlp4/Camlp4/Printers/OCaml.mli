@@ -92,6 +92,7 @@ module Make (Syntax : Sig.Camlp4Syntax) : sig
     method expr_list : formatter -> list Ast.expr -> unit;
     method expr_list_cons : bool -> formatter -> Ast.expr -> unit;
     method fun_binding : formatter -> fun_binding -> unit;
+    method functor_arg_var : formatter -> string -> unit;
     method functor_arg :
       formatter -> (string * Ast.module_type) -> unit;
     method functor_args :
