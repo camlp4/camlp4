@@ -20789,7 +20789,7 @@ module Printers =
                           pp f "@[<2>module type of@ %a@]" o#module_expr me
                       | Ast.MtId (_, i) -> o#ident f i
                       | Ast.MtAnt (_, s) -> o#anti f s
-                      | Ast.MtFun ((_, "()", Ast.MtNil _, mt)) ->
+                      | Ast.MtFun ((_, "*", Ast.MtNil _, mt)) ->
                           pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_type mt
                       | Ast.MtFun (_, s, mt1, mt2) ->
                           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]"
@@ -20849,7 +20849,7 @@ module Printers =
                       | Ast.MeApp (_, me1, me2) ->
                           pp f "@[<2>%a@,(%a)@]" o#module_expr me1
                             o#module_expr me2
-                      | Ast.MeFun ((_, "()", Ast.MtNil _, me)) ->
+                      | Ast.MeFun ((_, "*", Ast.MtNil _, me)) ->
                           pp f "@[<2>functor@ ()@ ->@ %a@]" o#module_expr me
                       | Ast.MeFun (_, s, mt, me) ->
                           pp f "@[<2>functor@ @[<1>(%a :@ %a)@]@ ->@ %a@]"
