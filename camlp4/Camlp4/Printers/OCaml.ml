@@ -397,9 +397,14 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     method functor_arg f (s, mt) =
       match mt with
       [ Ast.MtNil _ ->
-        o#var f s
+        o#functor_arg_var f s
       | _ ->
-        pp f "@[<2>(%a :@ %a)@]" o#var s o#module_type mt ];
+        pp f "@[<2>(%a :@ %a)@]" o#functor_arg_var s o#module_type mt ];
+
+    method functor_arg_var f v =
+      match v with
+      [ "*" -> pp f "()"
+      | v   -> o#var f v ];
 
     method module_rec_binding f =
       fun
