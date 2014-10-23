@@ -720,7 +720,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
           Some (Ast.StDir _loc n <:expr< >>)
         | "#"; n = a_LIDENT; arg = expr LEVEL "simple"; ";;" ->
           Some (Ast.StDir _loc n arg)
-        | s = str_item; ";;" -> Some s
+        | l = LIST1 str_item; ";;" -> Some (Ast.stSem_of_list l)
         | `EOI -> None
       ] ]
     ;
