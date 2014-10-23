@@ -15032,7 +15032,7 @@ module Struct =
               | Ast.TyId (loc, (Ast.IdUid (sloc, s))) ->
                   {
                     pcd_name = with_loc (conv_con s) sloc;
-                    pcd_args = [];
+                    pcd_args = Pcstr_tuple [];
                     pcd_res = None;
                     pcd_loc = mkloc loc;
                     pcd_attributes = [];
@@ -15040,7 +15040,8 @@ module Struct =
               | Ast.TyOf (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))), t) ->
                   {
                     pcd_name = with_loc (conv_con s) sloc;
-                    pcd_args = List.map ctyp (list_of_ctyp t []);
+                    pcd_args =
+                      Pcstr_tuple (List.map ctyp (list_of_ctyp t []));
                     pcd_res = None;
                     pcd_loc = mkloc loc;
                     pcd_attributes = [];
@@ -15049,7 +15050,8 @@ module Struct =
                   (Ast.TyArr (_, t, u))) ->
                   {
                     pcd_name = with_loc (conv_con s) sloc;
-                    pcd_args = List.map ctyp (list_of_ctyp t []);
+                    pcd_args =
+                      Pcstr_tuple (List.map ctyp (list_of_ctyp t []));
                     pcd_res = Some (ctyp u);
                     pcd_loc = mkloc loc;
                     pcd_attributes = [];
@@ -15057,7 +15059,7 @@ module Struct =
               | Ast.TyCol (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))), t) ->
                   {
                     pcd_name = with_loc (conv_con s) sloc;
-                    pcd_args = [];
+                    pcd_args = Pcstr_tuple [];
                     pcd_res = Some (ctyp t);
                     pcd_loc = mkloc loc;
                     pcd_attributes = [];
@@ -15069,7 +15071,7 @@ module Struct =
               | Ast.TyId (loc, (Ast.IdUid (sloc, s))) ->
                   {
                     pext_name = with_loc (conv_con s) sloc;
-                    pext_kind = Pext_decl ([], None);
+                    pext_kind = Pext_decl ((Pcstr_tuple []), None);
                     pext_loc = mkloc loc;
                     pext_attributes = [];
                   }
@@ -15077,7 +15079,9 @@ module Struct =
                   {
                     pext_name = with_loc (conv_con s) sloc;
                     pext_kind =
-                      Pext_decl ((List.map ctyp (list_of_ctyp t [])), None);
+                      Pext_decl
+                        ((Pcstr_tuple (List.map ctyp (list_of_ctyp t []))),
+                        None);
                     pext_loc = mkloc loc;
                     pext_attributes = [];
                   }
@@ -15086,7 +15090,8 @@ module Struct =
                   {
                     pext_name = with_loc (conv_con s) sloc;
                     pext_kind =
-                      Pext_decl ((List.map ctyp (list_of_ctyp t [])),
+                      Pext_decl
+                        ((Pcstr_tuple (List.map ctyp (list_of_ctyp t []))),
                         (Some (ctyp u)));
                     pext_loc = mkloc loc;
                     pext_attributes = [];
@@ -15094,7 +15099,7 @@ module Struct =
               | Ast.TyCol (loc, (Ast.TyId (_, (Ast.IdUid (sloc, s)))), t) ->
                   {
                     pext_name = with_loc (conv_con s) sloc;
-                    pext_kind = Pext_decl ([], (Some (ctyp t)));
+                    pext_kind = Pext_decl ((Pcstr_tuple []), (Some (ctyp t)));
                     pext_loc = mkloc loc;
                     pext_attributes = [];
                   }
@@ -15993,7 +15998,7 @@ module Struct =
                      (Psig_exception
                         {
                           pext_name = with_loc (conv_con s) loc;
-                          pext_kind = Pext_decl (([], None));
+                          pext_kind = Pext_decl (((Pcstr_tuple []), None));
                           pext_attributes = [];
                           pext_loc = mkloc loc;
                         })) ::
@@ -16006,7 +16011,9 @@ module Struct =
                           pext_name = with_loc (conv_con s) loc;
                           pext_kind =
                             Pext_decl
-                              (((List.map ctyp (list_of_ctyp t [])), None));
+                              (((Pcstr_tuple
+                                   (List.map ctyp (list_of_ctyp t []))),
+                                None));
                           pext_attributes = [];
                           pext_loc = mkloc loc;
                         })) ::
@@ -16172,7 +16179,7 @@ module Struct =
                      (Pstr_exception
                         {
                           pext_name = with_loc (conv_con s) loc;
-                          pext_kind = Pext_decl (([], None));
+                          pext_kind = Pext_decl (((Pcstr_tuple []), None));
                           pext_attributes = [];
                           pext_loc = mkloc loc;
                         })) ::
@@ -16186,7 +16193,9 @@ module Struct =
                           pext_name = with_loc (conv_con s) loc;
                           pext_kind =
                             Pext_decl
-                              (((List.map ctyp (list_of_ctyp t [])), None));
+                              (((Pcstr_tuple
+                                   (List.map ctyp (list_of_ctyp t []))),
+                                None));
                           pext_attributes = [];
                           pext_loc = mkloc loc;
                         })) ::
