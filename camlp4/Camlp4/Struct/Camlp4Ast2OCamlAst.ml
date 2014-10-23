@@ -407,34 +407,54 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   value mkvariant =
     fun
     [ <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ >> ->
-      {pcd_name = with_loc (conv_con s) sloc; pcd_args = []; pcd_res = None; pcd_loc = mkloc loc; pcd_attributes = []}
+      { pcd_name = with_loc (conv_con s) sloc
+      ; pcd_args = Pcstr_tuple []
+      ; pcd_res = None
+      ; pcd_loc = mkloc loc
+      ; pcd_attributes = []
+      }
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ of $t$ >> ->
-        {pcd_name = with_loc (conv_con s) sloc; pcd_args = List.map ctyp (list_of_ctyp t []); pcd_res = None; pcd_loc = mkloc loc; pcd_attributes = []}
+        { pcd_name = with_loc (conv_con s) sloc
+        ; pcd_args = Pcstr_tuple (List.map ctyp (list_of_ctyp t []))
+        ; pcd_res = None
+        ; pcd_loc = mkloc loc
+        ; pcd_attributes = []
+        }
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : ($t$ -> $u$) >> ->
-        {pcd_name = with_loc (conv_con s) sloc; pcd_args = List.map ctyp (list_of_ctyp t []); pcd_res = Some (ctyp u); pcd_loc = mkloc loc; pcd_attributes = []}
+        { pcd_name = with_loc (conv_con s) sloc
+        ; pcd_args = Pcstr_tuple (List.map ctyp (list_of_ctyp t []))
+        ; pcd_res = Some (ctyp u)
+        ; pcd_loc = mkloc loc
+        ; pcd_attributes = []
+        }
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : $t$ >> ->
-        {pcd_name = with_loc (conv_con s) sloc; pcd_args = []; pcd_res = Some (ctyp t); pcd_loc = mkloc loc; pcd_attributes = []}
+        { pcd_name = with_loc (conv_con s) sloc
+        ; pcd_args = Pcstr_tuple []
+        ; pcd_res = Some (ctyp t)
+        ; pcd_loc = mkloc loc
+        ; pcd_attributes = []
+        }
     | _ -> assert False (*FIXME*) ];
   value mkextension_constructor =
     fun
     [ <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ >> ->
        {pext_name = with_loc (conv_con s) sloc;
-        pext_kind = Pext_decl [] None;
+        pext_kind = Pext_decl (Pcstr_tuple []) None;
         pext_loc  = mkloc loc;
         pext_attributes = []}
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ of $t$ >> ->
        {pext_name = with_loc (conv_con s) sloc;
-        pext_kind = Pext_decl (List.map ctyp (list_of_ctyp t [])) None;
+        pext_kind = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t []))) None;
         pext_loc  = mkloc loc;
         pext_attributes = []}
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : ($t$ -> $u$) >> ->
        {pext_name = with_loc (conv_con s) sloc;
-        pext_kind = Pext_decl (List.map ctyp (list_of_ctyp t [])) (Some (ctyp u));
+        pext_kind = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t []))) (Some (ctyp u));
         pext_loc  = mkloc loc;
         pext_attributes = []}
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ : $t$ >> ->
        {pext_name = with_loc (conv_con s) sloc;
-        pext_kind = Pext_decl [] (Some (ctyp t));
+        pext_kind = Pext_decl (Pcstr_tuple []) (Some (ctyp t));
         pext_loc  = mkloc loc;
         pext_attributes = []}
     | <:ctyp@loc< $id:(<:ident@sloc< $uid:s$ >>)$ == $id:r$  >> ->
@@ -1150,13 +1170,13 @@ value varify_constructors var_names =
     | SgDir _ _ _ -> l
     | <:sig_item@loc< exception $uid:s$ >> ->
         [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl ([], None)
+                                   ; pext_kind       = Pext_decl (Pcstr_tuple [], None)
                                    ; pext_attributes = []
                                    ; pext_loc        = mkloc loc })
          :: l]
     | <:sig_item@loc< exception $uid:s$ of $t$ >> ->
         [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl (List.map ctyp (list_of_ctyp t []), None)
+                                   ; pext_kind       = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t [])), None)
                                    ; pext_attributes = []
                                    ; pext_loc        = mkloc loc })
          :: l]
@@ -1247,13 +1267,13 @@ value varify_constructors var_names =
     | StDir _ _ _ -> l
     | <:str_item@loc< exception $uid:s$ >> ->
         [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl ([], None)
+                                   ; pext_kind       = Pext_decl (Pcstr_tuple [], None)
                                    ; pext_attributes = []
                                    ; pext_loc        = mkloc loc })
          :: l ]
     | <:str_item@loc< exception $uid:s$ of $t$ >> ->
         [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl (List.map ctyp (list_of_ctyp t []), None)
+                                   ; pext_kind       = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t [])), None)
                                    ; pext_attributes = []
                                    ; pext_loc        = mkloc loc })
          :: l ]
