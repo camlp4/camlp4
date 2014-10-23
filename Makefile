@@ -1,4 +1,6 @@
 OB := ocamlbuild -classic-display -no-ocamlfind
+DESTDIR=
+
 -include config.sh
 
 OB += $(OB_FLAGS)
@@ -19,12 +21,12 @@ all: byte native
 
 .PHONY: install
 install:
-	./build/install.sh
+	env DESTDIR=$(DESTDIR) ./build/install.sh
 
 .PHONY: install-META
 install-META: camlp4/META
-	mkdir -p ${PKGDIR}/camlp4/
-	cp -f camlp4/META ${PKGDIR}/camlp4/
+	mkdir -p $(DESTDIR)${PKGDIR}/camlp4/
+	cp -f camlp4/META $(DESTDIR)${PKGDIR}/camlp4/
 
 camlp4/META: camlp4/META.in
 	sed -e s/@@VERSION@@/${version}/g $? > $@
