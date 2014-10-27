@@ -23,3 +23,10 @@ You should have OCaml installed. To build and install camlp4, type:
 
 If you don't want or can't build the native code version, replace
 `make all` by `make`.
+
+Building from git
+-----------------
+
+Camlp4 branches try to follow OCaml ones. To build with the trunk of
+OCaml, you need to use the trunk branch of Camlp4. To build for a
+specific version, for instance 4.02.1, use the 4.02 branch of Camlp4.
