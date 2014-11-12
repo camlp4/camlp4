@@ -368,7 +368,8 @@ and needs_semi =
   | Osig_type _ rs -> rs <> Orec_next
   | Osig_typext _ _
   | Osig_modtype _ _
-  | Osig_value _ _ _ -> True ]
+  | Osig_value _ _ _ -> True
+  | Osig_ellipsis -> False ]
 and print_out_signature ppf =
   fun
   [ [] -> ()
@@ -425,7 +426,9 @@ and print_out_sig_item ppf =
             } ]
       in
       fprintf ppf "@[<2>%s %a :@ %a%a@]" kwd value_ident name
-        Toploop.print_out_type.val ty pr_prims prims ]
+        Toploop.print_out_type.val ty pr_prims prims
+  | Osig_ellipsis ->
+      fprintf ppf "..." ]
 
 and print_out_type_decl kwd ppf { otype_name    = name
                                 ; otype_params  = args
