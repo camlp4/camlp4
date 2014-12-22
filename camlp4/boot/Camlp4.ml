@@ -14752,9 +14752,6 @@ module Struct =
             let ident_tag ?(conv_lid = fun x -> x) i =
               let rec self i acc =
                 match i with
-                | Ast.IdAcc (_, (Ast.IdLid (_, "*predef*")),
-                    (Ast.IdLid (_, "option"))) ->
-                    ((ldot (lident "*predef*") "option"), `lident)
                 | Ast.IdAcc (_, i1, i2) -> self i2 (Some (self i1 acc))
                 | Ast.IdApp (_, i1, i2) ->
                     let i' =
@@ -14831,13 +14828,6 @@ module Struct =
               | Ast.TyQuo (_, s) -> [ s ]
               | _ -> assert false
               
-            let predef_option loc =
-              TyId
-                ((loc,
-                  (IdAcc
-                     ((loc, (IdLid ((loc, "*predef*"))),
-                       (IdLid ((loc, "option"))))))))
-              
             let attribute_fwd = ref (fun _ _ _ -> assert false)
               
             let attribute loc s str = !attribute_fwd loc s str
@@ -14863,14 +14853,13 @@ module Struct =
                     then mktyp loc (Ptyp_class (li, (List.map ctyp al)))
                     else mktyp loc (Ptyp_constr (li, (List.map ctyp al)))
               | TyArr (loc, (TyLab (_, lab, t1)), t2) ->
-                  mktyp loc (Ptyp_arrow (lab, (ctyp t1), (ctyp t2)))
-              | TyArr (loc, (TyOlb (loc1, lab, t1)), t2) ->
-                  let t1 = TyApp (loc1, (predef_option loc1), t1)
-                  in
-                    mktyp loc
-                      (Ptyp_arrow (("?" ^ lab), (ctyp t1), (ctyp t2)))
+                  mktyp loc
+                    (Ptyp_arrow ((Labelled lab), (ctyp t1), (ctyp t2)))
+              | TyArr (loc, (TyOlb (_, lab, t1)), t2) ->
+                  mktyp loc
+                    (Ptyp_arrow ((Optional lab), (ctyp t1), (ctyp t2)))
               | TyArr (loc, t1, t2) ->
-                  mktyp loc (Ptyp_arrow ("", (ctyp t1), (ctyp t2)))
+                  mktyp loc (Ptyp_arrow (Nolabel, (ctyp t1), (ctyp t2)))
               | Ast.TyObj (loc, fl, Ast.RvNil) ->
                   mktyp loc (Ptyp_object ((meth_list fl []), Closed))
               | Ast.TyObj (loc, fl, Ast.RvRowVar) ->
@@ -15552,7 +15541,7 @@ module Struct =
                   mkexp loc
                     (Pexp_apply
                        ((mkexp loc (Pexp_ident (lident_with_loc "!" loc))),
-                       [ ("", (expr x)) ]))
+                       [ (Nolabel, (expr x)) ]))
               | (ExAcc (loc, _, _) | Ast.ExId (loc, (Ast.IdAcc (_, _, _))) as
                  e) ->
                   let (e, l) =
@@ -15608,7 +15597,7 @@ module Struct =
                     (Pexp_apply
                        ((mkexp loc
                            (Pexp_ident (array_function loc "Array" "get"))),
-                       [ ("", (expr e1)); ("", (expr e2)) ]))
+                       [ (Nolabel, (expr e1)); (Nolabel, (expr e2)) ]))
               | ExArr (loc, e) ->
                   mkexp loc (Pexp_array (List.map expr (list_of_expr e [])))
               | ExAsf loc ->
@@ -15626,7 +15615,7 @@ module Struct =
                          Pexp_apply
                            ((mkexp loc
                                (Pexp_ident (lident_with_loc ":=" loc))),
-                           [ ("", (expr x)); ("", (expr v)) ])
+                           [ (Nolabel, (expr x)); (Nolabel, (expr v)) ])
                      | ExAcc (loc, _, _) ->
                          (match (expr e).pexp_desc with
                           | Pexp_field (e, lab) ->
@@ -15636,7 +15625,8 @@ module Struct =
                          Pexp_apply
                            ((mkexp loc
                                (Pexp_ident (array_function loc "Array" "set"))),
-                           [ ("", (expr e1)); ("", (expr e2)); ("", (expr v)) ])
+                           [ (Nolabel, (expr e1)); (Nolabel, (expr e2));
+                             (Nolabel, (expr v)) ])
                      | Ast.ExId (_, (Ast.IdLid (lloc, lab))) ->
                          Pexp_setinstvar ((with_loc lab lloc), (expr v))
                      | ExSte (loc, e1, e2) ->
@@ -15644,7 +15634,8 @@ module Struct =
                            ((mkexp loc
                                (Pexp_ident
                                   (array_function loc "String" "set"))),
-                           [ ("", (expr e1)); ("", (expr e2)); ("", (expr v)) ])
+                           [ (Nolabel, (expr e1)); (Nolabel, (expr e2));
+                             (Nolabel, (expr v)) ])
                      | _ -> error loc "bad left part of assignment")
                   in mkexp loc e
               | ExAsr (loc, e) -> mkexp loc (Pexp_assert (expr e))
@@ -15665,15 +15656,17 @@ module Struct =
                       (Pexp_for ((patt p), (expr e1), (expr e2),
                          (mkdirection df), (expr e3)))
               | Ast.ExFun (loc, (Ast.McArr (_, (PaLab (_, lab, po)), w, e)))
-                  -> mkfun loc lab None (patt_of_lab loc lab po) e w
+                  ->
+                  mkfun loc (Labelled lab) None (patt_of_lab loc lab po) e w
               | Ast.ExFun (loc,
                   (Ast.McArr (_, (PaOlbi (_, lab, p, e1)), w, e2))) ->
                   let lab = paolab lab p
-                  in mkfun loc ("?" ^ lab) (Some (expr e1)) (patt p) e2 w
+                  in mkfun loc (Optional lab) (Some (expr e1)) (patt p) e2 w
               | Ast.ExFun (loc, (Ast.McArr (_, (PaOlb (_, lab, p)), w, e)))
                   ->
                   let lab = paolab lab p
-                  in mkfun loc ("?" ^ lab) None (patt_of_lab loc lab p) e w
+                  in
+                    mkfun loc (Optional lab) None (patt_of_lab loc lab p) e w
               | ExFun (loc, a) -> mkexp loc (Pexp_function (match_case a []))
               | ExIfe (loc, e1, e2, e3) ->
                   mkexp loc
@@ -15758,7 +15751,7 @@ module Struct =
                     (Pexp_apply
                        ((mkexp loc
                            (Pexp_ident (array_function loc "String" "get"))),
-                       [ ("", (expr e1)); ("", (expr e2)) ]))
+                       [ (Nolabel, (expr e1)); (Nolabel, (expr e2)) ]))
               | ExStr (loc, s) ->
                   mkexp loc
                     (Pexp_constant
@@ -15824,10 +15817,11 @@ module Struct =
               | e -> expr e
             and label_expr =
               function
-              | ExLab (loc, lab, eo) -> (lab, (expr_of_lab loc lab eo))
+              | ExLab (loc, lab, eo) ->
+                  ((Labelled lab), (expr_of_lab loc lab eo))
               | ExOlb (loc, lab, eo) ->
-                  (("?" ^ lab), (expr_of_lab loc lab eo))
-              | e -> ("", (expr e))
+                  ((Optional lab), (expr_of_lab loc lab eo))
+              | e -> (Nolabel, (expr e))
             and binding x acc =
               match x with
               | Ast.BiAnd (_, x, y) -> binding x (binding y acc)
@@ -16288,14 +16282,13 @@ module Struct =
                     (Pcty_constr ((long_class_ident id),
                        (List.map ctyp (list_of_opt_ctyp tl []))))
               | CtFun (loc, (TyLab (_, lab, t)), ct) ->
-                  mkcty loc (Pcty_arrow (lab, (ctyp t), (class_type ct)))
-              | CtFun (loc, (TyOlb (loc1, lab, t)), ct) ->
-                  let t = TyApp (loc1, (predef_option loc1), t)
-                  in
-                    mkcty loc
-                      (Pcty_arrow (("?" ^ lab), (ctyp t), (class_type ct)))
+                  mkcty loc
+                    (Pcty_arrow ((Labelled lab), (ctyp t), (class_type ct)))
+              | CtFun (loc, (TyOlb (_, lab, t)), ct) ->
+                  mkcty loc
+                    (Pcty_arrow ((Optional lab), (ctyp t), (class_type ct)))
               | CtFun (loc, t, ct) ->
-                  mkcty loc (Pcty_arrow ("", (ctyp t), (class_type ct)))
+                  mkcty loc (Pcty_arrow (Nolabel, (ctyp t), (class_type ct)))
               | CtSig (loc, t_o, ctfl) ->
                   let t =
                     (match t_o with | Ast.TyNil _ -> Ast.TyAny loc | t -> t) in
@@ -16394,22 +16387,23 @@ module Struct =
                        (List.map ctyp (list_of_opt_ctyp tl []))))
               | CeFun (loc, (PaLab (_, lab, po)), ce) ->
                   mkcl loc
-                    (Pcl_fun (lab, None, (patt_of_lab loc lab po),
+                    (Pcl_fun ((Labelled lab), None, (patt_of_lab loc lab po),
                        (class_expr ce)))
               | CeFun (loc, (PaOlbi (_, lab, p, e)), ce) ->
                   let lab = paolab lab p
                   in
                     mkcl loc
-                      (Pcl_fun (("?" ^ lab), (Some (expr e)), (patt p),
+                      (Pcl_fun ((Optional lab), (Some (expr e)), (patt p),
                          (class_expr ce)))
               | CeFun (loc, (PaOlb (_, lab, p)), ce) ->
                   let lab = paolab lab p
                   in
                     mkcl loc
-                      (Pcl_fun (("?" ^ lab), None, (patt_of_lab loc lab p),
-                         (class_expr ce)))
+                      (Pcl_fun ((Optional lab), None,
+                         (patt_of_lab loc lab p), (class_expr ce)))
               | CeFun (loc, p, ce) ->
-                  mkcl loc (Pcl_fun ("", None, (patt p), (class_expr ce)))
+                  mkcl loc
+                    (Pcl_fun (Nolabel, None, (patt p), (class_expr ce)))
               | CeLet (loc, rf, bi, ce) ->
                   mkcl loc
                     (Pcl_let ((mkrf rf), (binding bi []), (class_expr ce)))
