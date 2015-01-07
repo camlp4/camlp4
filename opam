@@ -22,4 +22,3 @@ remove: [
 depexts: [
   [ ["centos"] ["which"] ]
 ]
-available: [ (!preinstalled) & (ocaml-version = "4.02.1") ]
