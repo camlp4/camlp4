@@ -116,7 +116,6 @@ let () =
     use_lib "camlp4/mkcamlp4" "camlp4/camlp4lib";
 
     ocaml_lib ~extern:true ~dir:"+compiler-libs" "ocamlcommon";
-    ocaml_lib ~extern:true "ocamlbytecomp";
 
     let setup_arch arch =
       let annotated_arch = annotate arch in
