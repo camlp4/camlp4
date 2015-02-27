@@ -1,16 +1,18 @@
 #!/bin/sh
 
-#########################################################################
-#                                                                       #
-#                                 OCaml                                 #
-#                                                                       #
-#       Nicolas Pouillard, projet Gallium, INRIA Rocquencourt           #
-#                                                                       #
-#   Copyright 2007 Institut National de Recherche en Informatique et    #
-#   en Automatique.  All rights reserved.  This file is distributed     #
-#   under the terms of the Q Public License version 1.0.                #
-#                                                                       #
-#########################################################################
+############################################################################
+#                                                                          #
+#                                   OCaml                                  #
+#                                                                          #
+#          Nicolas Pouillard, projet Gallium, INRIA Rocquencourt           #
+#                                                                          #
+#  Copyright  2007   Institut National de Recherche  en  Informatique et   #
+#  en Automatique.  All rights reserved.  This file is distributed under   #
+#  the terms of the GNU Library General Public License, with the special   #
+#  exception on linking described in LICENSE at the top of the OCaml       #
+#  source tree.                                                            #
+#                                                                          #
+############################################################################
 
 CAMLP4_BYTE="\
   camlp4/Camlp4.cmo \
