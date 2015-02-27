@@ -16,8 +16,8 @@
 true: debug
 
 <camlp4/**/*>: use_import
-<camlp4/**/*.{byte,native}>: use_ocamlcommon, use_ocamlbytecomp, use_dynlink
-"camlp4/config/gen_import.ml": use_ocamlcommon
+<camlp4/**/*.{byte,native}>: use_dynlink
+<camlp4/config/gen_import.*>: use_ocamlcommon
 
 <camlp4/*.{byte,native}>: use_unix
 <camlp4/camlp4boot.*>: -use_unix
