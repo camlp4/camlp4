@@ -23,7 +23,6 @@ CAMLP4_BYTE="\
   camlp4/camlp4fulllib.cma"
 CAMLP4_NATIVE="\
   camlp4/Camlp4.cmx \
-  camlp4/Camlp4Top.cmx \
   camlp4/camlp4prof.native$EXE \
   camlp4/mkcamlp4.native$EXE \
   camlp4/camlp4.native$EXE \
