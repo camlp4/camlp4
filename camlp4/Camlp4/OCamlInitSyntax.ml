@@ -144,6 +144,7 @@ module Make (Ast     : Sig.Camlp4Ast)
   value opt_private = Gram.Entry.mk "opt_private";
   value private_flag_quot = Gram.Entry.mk "private_flag_quot";
   value opt_rec = Gram.Entry.mk "opt_rec";
+  value opt_nonrec = Gram.Entry.mk "opt_nonrec";
   value rec_flag_quot = Gram.Entry.mk "rec_flag_quot";
   value opt_sig_items = Gram.Entry.mk "opt_sig_items";
   value opt_str_items = Gram.Entry.mk "opt_str_items";

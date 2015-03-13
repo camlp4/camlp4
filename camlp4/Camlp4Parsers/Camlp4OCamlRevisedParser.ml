@@ -163,6 +163,7 @@ New syntax:\
   Gram.Entry.clear opt_polyt;
   Gram.Entry.clear opt_private;
   Gram.Entry.clear opt_rec;
+  Gram.Entry.clear opt_nonrec;
   Gram.Entry.clear opt_virtual;
   Gram.Entry.clear opt_when_expr;
   Gram.Entry.clear patt;
@@ -516,8 +517,8 @@ New syntax:\
             Ast.StOpn _loc Ast.OvNil i
             (* <:str_item< open $i$ >> *)
 
-        | "type"; td = type_declaration ->
-            <:str_item< type $td$ >>
+        | "type"; rf = opt_nonrec; td = type_declaration ->
+            Ast.StTyp (_loc, rf, td)
         | value_let; r = opt_rec; bi = binding ->
             <:str_item< value $rec:r$ $bi$ >>
         | "class"; cd = class_declaration ->
@@ -604,8 +605,8 @@ New syntax:\
             Ast.SgOpn _loc Ast.OvOverride i
         | "open"; i = module_longident ->
             Ast.SgOpn _loc Ast.OvNil i
-        | "type"; t = type_declaration ->
-            <:sig_item< type $t$ >>
+        | "type"; rf = opt_nonrec; td = type_declaration ->
+            Ast.SgTyp (_loc, rf, td)
         | value_val; i = a_LIDENT; ":"; t = ctyp ->
             <:sig_item< value $i$ : $t$ >>
         | "class"; cd = class_description ->
@@ -1703,9 +1704,15 @@ New syntax:\
       ] ]
     ;
     opt_rec:
-      [ [ "rec" -> <:rec_flag< rec >>
+      [ [ "rec" -> Ast.ReRecursive
         | `ANTIQUOT ("rec"|"anti" as n) s -> Ast.ReAnt (mk_anti n s)
-        | -> <:rec_flag<>>
+        | -> Ast.ReNil
+      ] ]
+    ;
+    opt_nonrec:
+      [ [ "nonrec" -> Ast.ReNonrecursive
+        | `ANTIQUOT ("nonrec"|"anti" as n) s -> Ast.ReAnt (mk_anti n s)
+        | -> Ast.ReNil
       ] ]
     ;
     opt_override:

@@ -22,6 +22,7 @@
     | BAnt of string ]
    and rec_flag =
     [ ReRecursive
+    | ReNonrecursive
     | ReNil
     | ReAnt of string ]
    and direction_flag =
@@ -258,7 +259,7 @@
       (* open i *)
     | SgOpn of loc and override_flag and ident
       (* type t *)
-    | SgTyp of loc and ctyp
+    | SgTyp of loc and rec_flag and ctyp
       (* value s : t *)
     | SgVal of loc and string and ctyp
     | SgAnt of loc and string (* $s$ *) ]
@@ -349,7 +350,7 @@
       (* open i *)
     | StOpn of loc and override_flag and ident
       (* type t *)
-    | StTyp of loc and ctyp
+    | StTyp of loc and rec_flag and ctyp
       (* value (rec)? bi *)
     | StVal of loc and rec_flag and binding
     | StAnt of loc and string (* $s$ *) ]

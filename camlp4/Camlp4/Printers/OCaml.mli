@@ -120,6 +120,7 @@ module Make (Syntax : Sig.Camlp4Syntax) : sig
     method mutable_flag : formatter -> Ast.mutable_flag -> unit;
     method direction_flag : formatter -> Ast.direction_flag -> unit;
     method rec_flag : formatter -> Ast.rec_flag -> unit;
+    method nonrec_flag : formatter -> Ast.rec_flag -> unit;
     method node : formatter -> 'b -> ('b -> Loc.t) -> unit;
     method patt : formatter -> Ast.patt -> unit;
     method patt1 : formatter -> Ast.patt -> unit;

@@ -153,8 +153,13 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   value array_function loc str name = with_loc (array_function_no_loc str name) loc;
   value mkrf =
     fun
-    [ <:rec_flag< rec >> -> Recursive
-    | <:rec_flag<>> -> Nonrecursive
+    [ Ast.ReRecursive -> Recursive
+    | Ast.ReNonrecursive | Ast.ReNil -> Nonrecursive
+    | _ -> assert False ];
+  value mknrf =
+    fun
+    [ Ast.ReNonrecursive -> Nonrecursive
+    | Ast.ReRecursive | Ast.ReNil -> Recursive
     | _ -> assert False ];
 
   value mkli sloc s list = with_loc (loop lident list) sloc
@@ -1194,11 +1199,12 @@ value varify_constructors var_names =
         let fresh = override_flag loc ov in
         [mksig loc (Psig_open {popen_override=fresh; popen_lid=long_uident id;
                                popen_attributes=[]; popen_loc = mkloc loc}) :: l]
-    | SgTyp loc tdl ->
+    | SgTyp loc rf tdl ->
+      let rf = mknrf rf in
       let ty =
         match mktype_decl_or_ext tdl `Unknown with
-        [ `Unknown -> Psig_type []
-        | `Dcl l -> Psig_type l
+        [ `Unknown -> Psig_type (rf, [])
+        | `Dcl l -> Psig_type (rf, l)
         | `Ext e -> Psig_typext e ]
       in
       [mksig loc ty :: l]
@@ -1302,11 +1308,12 @@ value varify_constructors var_names =
                                popen_lid=long_uident id;
                                popen_attributes=[];
                                popen_loc=mkloc loc}) :: l]
-    | StTyp loc tdl ->
+    | StTyp loc rf tdl ->
+      let rf = mknrf rf in
       let ty =
         match mktype_decl_or_ext tdl `Unknown with
-        [ `Unknown -> Pstr_type []
-        | `Dcl l -> Pstr_type l
+        [ `Unknown -> Pstr_type (rf, [])
+        | `Dcl l -> Pstr_type (rf, l)
         | `Ext e -> Pstr_typext e ]
       in
       [mkstr loc ty :: l]

@@ -100,14 +100,14 @@ module Make (Ast : Sig.Camlp4Ast) = struct
       match super#sig_item sg with
       [ <:sig_item< $ <:sig_item<>> $; $sg$ >> |
         <:sig_item< $sg$; $ <:sig_item<>> $ >> -> sg
-      | <:sig_item@loc< type $ <:ctyp<>> $ >> -> <:sig_item@loc<>>
+      | Ast.SgTyp (loc, _, Ast.TyNil _) -> <:sig_item@loc<>>
       | sg -> sg ];
 
     method str_item st =
       match super#str_item st with
       [ <:str_item< $ <:str_item<>> $; $st$ >> |
         <:str_item< $st$; $ <:str_item<>> $ >> -> st
-      | <:str_item@loc< type $ <:ctyp<>> $ >> -> <:str_item@loc<>>
+      | Ast.StTyp (loc, _, Ast.TyNil _) -> <:str_item@loc<>>
       | <:str_item@loc< value $rec:_$ $ <:binding<>> $ >> -> <:str_item@loc<>>
       | st -> st ];
 

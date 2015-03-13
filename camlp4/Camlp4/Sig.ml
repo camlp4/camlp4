@@ -1388,6 +1388,7 @@ module type Camlp4Syntax = sig
   value opt_private : Gram.Entry.t Ast.private_flag;
   value private_flag_quot : Gram.Entry.t Ast.private_flag;
   value opt_rec : Gram.Entry.t Ast.rec_flag;
+  value opt_nonrec : Gram.Entry.t Ast.rec_flag;
   value rec_flag_quot : Gram.Entry.t Ast.rec_flag;
   value opt_virtual : Gram.Entry.t Ast.virtual_flag;
   value virtual_flag_quot : Gram.Entry.t Ast.virtual_flag;

@@ -518,7 +518,7 @@ module Make (AstFilters : Camlp4.Sig.AstFilters) = struct
       <:class_str_item< method unknown : $gen_type$ = $M.default_expr$ >> in
     if not virtual_flag then
       <:str_item< class $lid:c$ = object (o : 'self_type) $generated$; $failure$; $unknown$ end >>
-    else 
+    else
       <:str_item< class virtual $lid:c$ = object (o : 'self_type) $generated$; $failure$; $unknown$ end >>;
 
   value generate_class_interf ?(virtual_flag=False) mode c tydcl n =
@@ -540,7 +540,7 @@ module Make (AstFilters : Camlp4.Sig.AstFilters) = struct
     let unknown =
       <:class_sig_item< method unknown : $gen_type$ >>
     in
-    if not virtual_flag then 
+    if not virtual_flag then
       <:sig_item< class $lid:c$ : object ('self_type) $generated$; $failure$; $unknown$ end >>
     else
       <:sig_item< class virtual $lid:c$ : object ('self_type) $generated$; $failure$; $unknown$ end >> ;
@@ -565,7 +565,7 @@ module Make (AstFilters : Camlp4.Sig.AstFilters) = struct
 
       method str_item st =
         match st with
-        [ <:str_item< type $t$ >> -> (last.val := t; st)
+        [ Ast.StTyp (_, _, t) -> (last.val := t; st)
 
         (* backward compatibility *)
         | <:str_item@_loc< class $lid:c$ = Camlp4Filters.GenerateFold.generated >> ->
@@ -593,7 +593,7 @@ module Make (AstFilters : Camlp4.Sig.AstFilters) = struct
 
       method sig_item sg =
         match sg with
-        [ <:sig_item< type $t$ >> -> (last.val := t; sg)
+        [ Ast.SgTyp (_, _, t) -> (last.val := t; sg)
 
         (* backward compatibility *)
         | <:sig_item@_loc< class $lid:c$ : Camlp4Filters.GenerateFold.generated >> ->

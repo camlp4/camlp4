@@ -245,6 +245,13 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
 
     method rec_flag f = fun
       [ Ast.ReRecursive -> pp f "rec@ "
+      | Ast.ReNonrecursive
+      | Ast.ReNil -> ()
+      | Ast.ReAnt s -> o#anti f s ];
+
+    method nonrec_flag f = fun
+      [ Ast.ReNonrecursive -> pp f "nonrec@ "
+      | Ast.ReRecursive
       | Ast.ReNil -> ()
       | Ast.ReAnt s -> o#anti f s ];
 
@@ -842,8 +849,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
           pp f "@[<2>open%a@ %a%(%)@]"
             o#override_flag ov
             o#ident sl semisep
-      | <:sig_item< type $t$ >> ->
-          pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t semisep
+      | Ast.SgTyp(_, rf, t) ->
+          pp f "@[<hv0>@[<hv2>type%a %a@]%(%)@]" o#nonrec_flag rf o#ctyp t semisep
       | <:sig_item< value $s$ : $t$ >> ->
           pp f "@[<2>%s %a :@ %a%(%)@]"
             o#value_val o#var s o#ctyp t semisep
@@ -898,8 +905,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
             pp f "@[<2>open%a@ %a%(%)@]"
             o#override_flag ov
             o#ident sl semisep
-      | <:str_item< type $t$ >> ->
-            pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t semisep
+      | Ast.StTyp(_, rf, t) ->
+            pp f "@[<hv0>@[<hv2>type%a %a@]%(%)@]" o#nonrec_flag rf o#ctyp t semisep
       | <:str_item< value $rec:r$ $bi$ >> ->
             pp f "@[<2>%s %a%a%(%)@]" o#value_let o#rec_flag r o#binding bi semisep
       | <:str_item< $exp:e$ >> ->
