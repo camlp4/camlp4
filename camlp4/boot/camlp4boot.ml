@@ -280,6 +280,8 @@ New syntax:\
           
         let _ = Gram.Entry.clear opt_rec
           
+        let _ = Gram.Entry.clear opt_nonrec
+          
         let _ = Gram.Entry.clear opt_virtual
           
         let _ = Gram.Entry.clear opt_when_expr
@@ -973,6 +975,8 @@ New syntax:\
               grammar_entry_create "string_list"
             and opt_override : 'opt_override Gram.Entry.t =
               grammar_entry_create "opt_override"
+            and opt_nonrec : 'opt_nonrec Gram.Entry.t =
+              grammar_entry_create "opt_nonrec"
             and unquoted_typevars : 'unquoted_typevars Gram.Entry.t =
               grammar_entry_create "unquoted_typevars"
             and value_val_opt_override :
@@ -1206,12 +1210,15 @@ New syntax:\
                            ([ Gram.Skeyword "type";
                               Gram.Snterm
                                 (Gram.Entry.obj
+                                   (opt_nonrec : 'opt_nonrec Gram.Entry.t));
+                              Gram.Snterm
+                                (Gram.Entry.obj
                                    (type_declaration :
                                      'type_declaration Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun (td : 'type_declaration) _
-                                  (_loc : Gram.Loc.t) ->
-                                  (Ast.StTyp (_loc, td) : 'str_item))));
+                               (fun (td : 'type_declaration)
+                                  (rf : 'opt_nonrec) _ (_loc : Gram.Loc.t) ->
+                                  (Ast.StTyp ((_loc, rf, td)) : 'str_item))));
                            ([ Gram.Skeyword "open";
                               Gram.Snterm
                                 (Gram.Entry.obj
@@ -1634,12 +1641,15 @@ New syntax:\
                            ([ Gram.Skeyword "type";
                               Gram.Snterm
                                 (Gram.Entry.obj
+                                   (opt_nonrec : 'opt_nonrec Gram.Entry.t));
+                              Gram.Snterm
+                                (Gram.Entry.obj
                                    (type_declaration :
                                      'type_declaration Gram.Entry.t)) ],
                             (Gram.Action.mk
-                               (fun (t : 'type_declaration) _
-                                  (_loc : Gram.Loc.t) ->
-                                  (Ast.SgTyp (_loc, t) : 'sig_item))));
+                               (fun (td : 'type_declaration)
+                                  (rf : 'opt_nonrec) _ (_loc : Gram.Loc.t) ->
+                                  (Ast.SgTyp ((_loc, rf, td)) : 'sig_item))));
                            ([ Gram.Skeyword "open";
                               Gram.Snterm
                                 (Gram.Entry.obj
@@ -8184,6 +8194,33 @@ New syntax:\
                             (Gram.Action.mk
                                (fun _ (_loc : Gram.Loc.t) ->
                                   (Ast.ReRecursive : 'opt_rec)))) ]) ]))
+                    ());
+               Gram.extend (opt_nonrec : 'opt_nonrec Gram.Entry.t)
+                 ((fun () ->
+                     (None,
+                      [ (None, None,
+                         [ ([],
+                            (Gram.Action.mk
+                               (fun (_loc : Gram.Loc.t) ->
+                                  (Ast.ReNil : 'opt_nonrec))));
+                           ([ Gram.Stoken
+                                (((function
+                                   | ANTIQUOT (("nonrec" | "anti"), _) ->
+                                       true
+                                   | _ -> false),
+                                  "ANTIQUOT ((\"nonrec\" | \"anti\"), _)")) ],
+                            (Gram.Action.mk
+                               (fun (__camlp4_0 : Gram.Token.t)
+                                  (_loc : Gram.Loc.t) ->
+                                  match __camlp4_0 with
+                                  | ANTIQUOT ((("nonrec" | "anti" as n)), s)
+                                      ->
+                                      (Ast.ReAnt (mk_anti n s) : 'opt_nonrec)
+                                  | _ -> assert false)));
+                           ([ Gram.Skeyword "nonrec" ],
+                            (Gram.Action.mk
+                               (fun _ (_loc : Gram.Loc.t) ->
+                                  (Ast.ReNonrecursive : 'opt_nonrec)))) ]) ]))
                     ());
                Gram.extend (opt_override : 'opt_override Gram.Entry.t)
                  ((fun () ->

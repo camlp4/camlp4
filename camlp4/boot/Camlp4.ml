@@ -842,7 +842,7 @@ module Sig =
           and meta_bool =
           | BTrue | BFalse | BAnt of string
           and rec_flag =
-          | ReRecursive | ReNil | ReAnt of string
+          | ReRecursive | ReNonrecursive | ReNil | ReAnt of string
           and direction_flag =
           | DiTo | DiDownto | DiAnt of string
           and mutable_flag =
@@ -1164,7 +1164,7 @@ module Sig =
           | (* open i *)
           SgOpn of loc * override_flag * ident
           | (* type t *)
-          SgTyp of loc * ctyp
+          SgTyp of loc * rec_flag * ctyp
           | (* value s : t *)
           SgVal of loc * string * ctyp
           | SgAnt of loc * string
@@ -1266,7 +1266,7 @@ module Sig =
           | (* open i *)
           StOpn of loc * override_flag * ident
           | (* type t *)
-          StTyp of loc * ctyp
+          StTyp of loc * rec_flag * ctyp
           | (* value (rec)? bi *)
           StVal of loc * rec_flag * binding
           | StAnt of loc * string
@@ -1796,7 +1796,7 @@ module Sig =
           and meta_bool =
           | BTrue | BFalse | BAnt of string
           and rec_flag =
-          | ReRecursive | ReNil | ReAnt of string
+          | ReRecursive | ReNonrecursive | ReNil | ReAnt of string
           and direction_flag =
           | DiTo | DiDownto | DiAnt of string
           and mutable_flag =
@@ -1965,7 +1965,7 @@ module Sig =
           | SgRecMod of loc * module_binding
           | SgMty of loc * string * module_type
           | SgOpn of loc * override_flag * ident
-          | SgTyp of loc * ctyp
+          | SgTyp of loc * rec_flag * ctyp
           | SgVal of loc * string * ctyp
           | SgAnt of loc * string
           and with_constr =
@@ -2021,7 +2021,7 @@ module Sig =
           | StRecMod of loc * module_binding
           | StMty of loc * string * module_type
           | StOpn of loc * override_flag * ident
-          | StTyp of loc * ctyp
+          | StTyp of loc * rec_flag * ctyp
           | StVal of loc * rec_flag * binding
           | StAnt of loc * string
           and class_type =
@@ -2821,6 +2821,8 @@ module Sig =
         val private_flag_quot : Ast.private_flag Gram.Entry.t
           
         val opt_rec : Ast.rec_flag Gram.Entry.t
+          
+        val opt_nonrec : Ast.rec_flag Gram.Entry.t
           
         val rec_flag_quot : Ast.rec_flag Gram.Entry.t
           
@@ -9559,6 +9561,10 @@ module Struct =
                               Ast.ExId (_loc,
                                 (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
                                    (Ast.IdUid (_loc, "ReNil")))))
+                          | Ast.ReNonrecursive ->
+                              Ast.ExId (_loc,
+                                (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
+                                   (Ast.IdUid (_loc, "ReNonrecursive")))))
                           | Ast.ReRecursive ->
                               Ast.ExId (_loc,
                                 (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
@@ -9588,15 +9594,17 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
                                 (meta_ctyp _loc x2))
-                          | Ast.SgTyp (x0, x1) ->
+                          | Ast.SgTyp (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
-                                   (Ast.ExId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "SgTyp")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ctyp _loc x1))
+                                   (Ast.ExApp (_loc,
+                                      (Ast.ExId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "SgTyp")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_rec_flag _loc x1))),
+                                (meta_ctyp _loc x2))
                           | Ast.SgOpn (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -9731,15 +9739,17 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_rec_flag _loc x1))),
                                 (meta_binding _loc x2))
-                          | Ast.StTyp (x0, x1) ->
+                          | Ast.StTyp (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
-                                   (Ast.ExId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "StTyp")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ctyp _loc x1))
+                                   (Ast.ExApp (_loc,
+                                      (Ast.ExId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "StTyp")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_rec_flag _loc x1))),
+                                (meta_ctyp _loc x2))
                           | Ast.StOpn (x0, x1, x2) ->
                               Ast.ExApp (_loc,
                                 (Ast.ExApp (_loc,
@@ -12025,6 +12035,10 @@ module Struct =
                               Ast.PaId (_loc,
                                 (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
                                    (Ast.IdUid (_loc, "ReNil")))))
+                          | Ast.ReNonrecursive ->
+                              Ast.PaId (_loc,
+                                (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
+                                   (Ast.IdUid (_loc, "ReNonrecursive")))))
                           | Ast.ReRecursive ->
                               Ast.PaId (_loc,
                                 (Ast.IdAcc (_loc, (Ast.IdUid (_loc, "Ast")),
@@ -12054,15 +12068,17 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_string _loc x1))),
                                 (meta_ctyp _loc x2))
-                          | Ast.SgTyp (x0, x1) ->
+                          | Ast.SgTyp (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
-                                   (Ast.PaId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "SgTyp")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ctyp _loc x1))
+                                   (Ast.PaApp (_loc,
+                                      (Ast.PaId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "SgTyp")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_rec_flag _loc x1))),
+                                (meta_ctyp _loc x2))
                           | Ast.SgOpn (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12197,15 +12213,17 @@ module Struct =
                                       (meta_loc _loc x0))),
                                    (meta_rec_flag _loc x1))),
                                 (meta_binding _loc x2))
-                          | Ast.StTyp (x0, x1) ->
+                          | Ast.StTyp (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
-                                   (Ast.PaId (_loc,
-                                      (Ast.IdAcc (_loc,
-                                         (Ast.IdUid (_loc, "Ast")),
-                                         (Ast.IdUid (_loc, "StTyp")))))),
-                                   (meta_loc _loc x0))),
-                                (meta_ctyp _loc x1))
+                                   (Ast.PaApp (_loc,
+                                      (Ast.PaId (_loc,
+                                         (Ast.IdAcc (_loc,
+                                            (Ast.IdUid (_loc, "Ast")),
+                                            (Ast.IdUid (_loc, "StTyp")))))),
+                                      (meta_loc _loc x0))),
+                                   (meta_rec_flag _loc x1))),
+                                (meta_ctyp _loc x2))
                           | Ast.StOpn (x0, x1, x2) ->
                               Ast.PaApp (_loc,
                                 (Ast.PaApp (_loc,
@@ -12517,9 +12535,10 @@ module Struct =
                       let _x = o#loc _x in
                       let _x_i1 = o#override_flag _x_i1 in
                       let _x_i2 = o#ident _x_i2 in StOpn (_x, _x_i1, _x_i2)
-                  | StTyp (_x, _x_i1) ->
+                  | StTyp (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
-                      let _x_i1 = o#ctyp _x_i1 in StTyp (_x, _x_i1)
+                      let _x_i1 = o#rec_flag _x_i1 in
+                      let _x_i2 = o#ctyp _x_i2 in StTyp (_x, _x_i1, _x_i2)
                   | StVal (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#rec_flag _x_i1 in
@@ -12575,9 +12594,10 @@ module Struct =
                       let _x = o#loc _x in
                       let _x_i1 = o#override_flag _x_i1 in
                       let _x_i2 = o#ident _x_i2 in SgOpn (_x, _x_i1, _x_i2)
-                  | SgTyp (_x, _x_i1) ->
+                  | SgTyp (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
-                      let _x_i1 = o#ctyp _x_i1 in SgTyp (_x, _x_i1)
+                      let _x_i1 = o#rec_flag _x_i1 in
+                      let _x_i2 = o#ctyp _x_i2 in SgTyp (_x, _x_i1, _x_i2)
                   | SgVal (_x, _x_i1, _x_i2) ->
                       let _x = o#loc _x in
                       let _x_i1 = o#string _x_i1 in
@@ -12593,6 +12613,7 @@ module Struct =
                 method rec_flag : rec_flag -> rec_flag =
                   function
                   | ReRecursive -> ReRecursive
+                  | ReNonrecursive -> ReNonrecursive
                   | ReNil -> ReNil
                   | ReAnt _x -> let _x = o#string _x in ReAnt _x
                 method rec_binding : rec_binding -> rec_binding =
@@ -13510,8 +13531,9 @@ module Struct =
                       let o = o#loc _x in
                       let o = o#override_flag _x_i1 in
                       let o = o#ident _x_i2 in o
-                  | StTyp (_x, _x_i1) ->
-                      let o = o#loc _x in let o = o#ctyp _x_i1 in o
+                  | StTyp (_x, _x_i1, _x_i2) ->
+                      let o = o#loc _x in
+                      let o = o#rec_flag _x_i1 in let o = o#ctyp _x_i2 in o
                   | StVal (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
                       let o = o#rec_flag _x_i1 in
@@ -13555,8 +13577,9 @@ module Struct =
                       let o = o#loc _x in
                       let o = o#override_flag _x_i1 in
                       let o = o#ident _x_i2 in o
-                  | SgTyp (_x, _x_i1) ->
-                      let o = o#loc _x in let o = o#ctyp _x_i1 in o
+                  | SgTyp (_x, _x_i1, _x_i2) ->
+                      let o = o#loc _x in
+                      let o = o#rec_flag _x_i1 in let o = o#ctyp _x_i2 in o
                   | SgVal (_x, _x_i1, _x_i2) ->
                       let o = o#loc _x in
                       let o = o#string _x_i1 in let o = o#ctyp _x_i2 in o
@@ -13570,6 +13593,7 @@ module Struct =
                 method rec_flag : rec_flag -> 'self_type =
                   function
                   | ReRecursive -> o
+                  | ReNonrecursive -> o
                   | ReNil -> o
                   | ReAnt _x -> let o = o#string _x in o
                 method rec_binding : rec_binding -> 'self_type =
@@ -14736,7 +14760,13 @@ module Struct =
             let mkrf =
               function
               | Ast.ReRecursive -> Recursive
-              | Ast.ReNil -> Nonrecursive
+              | Ast.ReNonrecursive | Ast.ReNil -> Nonrecursive
+              | _ -> assert false
+              
+            let mknrf =
+              function
+              | Ast.ReNonrecursive -> Nonrecursive
+              | Ast.ReRecursive | Ast.ReNil -> Recursive
               | _ -> assert false
               
             let mkli sloc s list =
@@ -16068,11 +16098,12 @@ module Struct =
                             popen_loc = mkloc loc;
                           })) ::
                       l
-              | SgTyp (loc, tdl) ->
+              | SgTyp (loc, rf, tdl) ->
+                  let rf = mknrf rf in
                   let ty =
                     (match mktype_decl_or_ext tdl `Unknown with
-                     | `Unknown -> Psig_type []
-                     | `Dcl l -> Psig_type l
+                     | `Unknown -> Psig_type ((rf, []))
+                     | `Dcl l -> Psig_type ((rf, l))
                      | `Ext e -> Psig_typext e)
                   in (mksig loc ty) :: l
               | SgVal (loc, n, t) ->
@@ -16265,11 +16296,12 @@ module Struct =
                             popen_loc = mkloc loc;
                           })) ::
                       l
-              | StTyp (loc, tdl) ->
+              | StTyp (loc, rf, tdl) ->
+                  let rf = mknrf rf in
                   let ty =
                     (match mktype_decl_or_ext tdl `Unknown with
-                     | `Unknown -> Pstr_type []
-                     | `Dcl l -> Pstr_type l
+                     | `Unknown -> Pstr_type ((rf, []))
+                     | `Dcl l -> Pstr_type ((rf, l))
                      | `Ext e -> Pstr_typext e)
                   in (mkstr loc ty) :: l
               | StVal (loc, rf, bi) ->
@@ -16589,14 +16621,14 @@ module Struct =
                     match super#sig_item sg with
                     | Ast.SgSem (_, (Ast.SgNil _), sg) |
                         Ast.SgSem (_, sg, (Ast.SgNil _)) -> sg
-                    | Ast.SgTyp (loc, (Ast.TyNil _)) -> Ast.SgNil loc
+                    | Ast.SgTyp ((loc, _, Ast.TyNil _)) -> Ast.SgNil loc
                     | sg -> sg
                 method str_item =
                   fun st ->
                     match super#str_item st with
                     | Ast.StSem (_, (Ast.StNil _), st) |
                         Ast.StSem (_, st, (Ast.StNil _)) -> st
-                    | Ast.StTyp (loc, (Ast.TyNil _)) -> Ast.StNil loc
+                    | Ast.StTyp ((loc, _, Ast.TyNil _)) -> Ast.StNil loc
                     | Ast.StVal (loc, _, (Ast.BiNil _)) -> Ast.StNil loc
                     | st -> st
                 method module_type =
@@ -19641,6 +19673,7 @@ module Printers =
                       method direction_flag :
                         formatter -> Ast.direction_flag -> unit
                       method rec_flag : formatter -> Ast.rec_flag -> unit
+                      method nonrec_flag : formatter -> Ast.rec_flag -> unit
                       method node : formatter -> 'b -> ('b -> Loc.t) -> unit
                       method patt : formatter -> Ast.patt -> unit
                       method patt1 : formatter -> Ast.patt -> unit
@@ -19961,7 +19994,13 @@ module Printers =
                   fun f ->
                     function
                     | Ast.ReRecursive -> pp f "rec@ "
-                    | Ast.ReNil -> ()
+                    | Ast.ReNonrecursive | Ast.ReNil -> ()
+                    | Ast.ReAnt s -> o#anti f s
+                method nonrec_flag =
+                  fun f ->
+                    function
+                    | Ast.ReNonrecursive -> pp f "nonrec@ "
+                    | Ast.ReRecursive | Ast.ReNil -> ()
                     | Ast.ReAnt s -> o#anti f s
                 method virtual_flag =
                   fun f ->
@@ -20702,9 +20741,9 @@ module Printers =
                       | Ast.SgOpn (_loc, ov, sl) ->
                           pp f "@[<2>open%a@ %a%(%)@]" o#override_flag ov
                             o#ident sl semisep
-                      | Ast.SgTyp (_, t) ->
-                          pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t
-                            semisep
+                      | Ast.SgTyp ((_, rf, t)) ->
+                          pp f "@[<hv0>@[<hv2>type%a %a@]%(%)@]"
+                            o#nonrec_flag rf o#ctyp t semisep
                       | Ast.SgVal (_, s, t) ->
                           pp f "@[<2>%s %a :@ %a%(%)@]" o#value_val o#var s
                             o#ctyp t semisep
@@ -20765,9 +20804,9 @@ module Printers =
                       | Ast.StOpn (_loc, ov, sl) ->
                           pp f "@[<2>open%a@ %a%(%)@]" o#override_flag ov
                             o#ident sl semisep
-                      | Ast.StTyp (_, t) ->
-                          pp f "@[<hv0>@[<hv2>type %a@]%(%)@]" o#ctyp t
-                            semisep
+                      | Ast.StTyp ((_, rf, t)) ->
+                          pp f "@[<hv0>@[<hv2>type%a %a@]%(%)@]"
+                            o#nonrec_flag rf o#ctyp t semisep
                       | Ast.StVal (_, r, bi) ->
                           pp f "@[<2>%s %a%a%(%)@]" o#value_let o#rec_flag r
                             o#binding bi semisep
@@ -21809,6 +21848,8 @@ module OCamlInitSyntax =
         let private_flag_quot = Gram.Entry.mk "private_flag_quot"
           
         let opt_rec = Gram.Entry.mk "opt_rec"
+          
+        let opt_nonrec = Gram.Entry.mk "opt_nonrec"
           
         let rec_flag_quot = Gram.Entry.mk "rec_flag_quot"
           
