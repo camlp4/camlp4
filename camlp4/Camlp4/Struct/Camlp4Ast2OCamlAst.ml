@@ -1182,8 +1182,8 @@ value varify_constructors var_names =
     | SgTyp loc tdl ->
       let ty =
         match mktype_decl_or_ext tdl `Unknown with
-        [ `Unknown -> Psig_type (Recursive, [])
-        | `Dcl l -> Psig_type (Recursive, l)
+        [ `Unknown -> Psig_type []
+        | `Dcl l -> Psig_type l
         | `Ext e -> Psig_typext e ]
       in
       [mksig loc ty :: l]
@@ -1290,8 +1290,8 @@ value varify_constructors var_names =
     | StTyp loc tdl ->
       let ty =
         match mktype_decl_or_ext tdl `Unknown with
-        [ `Unknown -> Pstr_type (Recursive, [])
-        | `Dcl l -> Pstr_type (Recursive, l)
+        [ `Unknown -> Pstr_type []
+        | `Dcl l -> Pstr_type l
         | `Ext e -> Pstr_typext e ]
       in
       [mkstr loc ty :: l]
