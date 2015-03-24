@@ -27,6 +27,20 @@ done
 # OCaml is already installed, this means we should have everything we
 # need. Just dump its configuration.
 
+ocaml_version=`ocamlc -version`
+major=`echo $ocaml_version | cut -d. -f1`
+minor=`echo $ocaml_version | cut -d. -f2`
+
+if [ $major -lt 4 -o \( $major -eq 4 -a $minor -lt 2 \) ]; then
+    echo "The standalone Camlp4 requires OCaml >= 4.02."
+    echo "For previous versions of OCaml use the Camlp4 distributed with OCaml."
+    exit 2
+elif [ $major -ne 4 -o $minor -ne 2 ]; then
+    echo "This version of Camlp4 is for OCaml 4.03 but you are using OCaml $ocaml_version."
+    echo "If building Camlp4 directly from git, use the $major.$minor branch."
+    exit 2
+fi
+
 ocamlc -config | sed 's/: /="/;s/$/"/' > config.sh
 ocamlc -config | sed 's/^/let /;s/: / = "/;s/$/"/' > myocamlbuild_config.ml
 
