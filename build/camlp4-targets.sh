@@ -28,9 +28,16 @@ CAMLP4_NATIVE="\
   camlp4/camlp4.native$EXE \
   camlp4/camlp4fulllib.cmxa"
 
+if [ "$OCAMLNAT" = "true" ]; then
+    CAMLP4_NATIVE="$CAMLP4_NATIVE camlp4/Camlp4Top.cmx"
+fi
+
 for i in camlp4boot camlp4r camlp4rf camlp4o camlp4of camlp4oof camlp4orf; do
   CAMLP4_BYTE="$CAMLP4_BYTE camlp4/$i.byte$EXE camlp4/$i.cma"
   CAMLP4_NATIVE="$CAMLP4_NATIVE camlp4/$i.native$EXE"
+  if [ "$OCAMLNAT" = "true" ]; then
+      CAMLP4_NATIVE="$CAMLP4_NATIVE camlp4/$i.cmxa"
+  fi
 done
 
 cd ./camlp4

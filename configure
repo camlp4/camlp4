@@ -65,6 +65,13 @@ else
     OB_FLAGS="-byte-plugin"
 fi
 
+COMPLIBS="`ocamlc -where`/compiler-libs"
+if [ -f "$COMPLIBS/opttoploop.cmi" ]; then
+    OCAMLNAT=true
+else
+    OCAMLNAT=false
+fi
+
 cat >> config.sh <<EOF
 A="$ext_lib"
 O="$ext_obj"
@@ -73,10 +80,12 @@ LIBDIR="$LIBDIR"
 BINDIR="$BINDIR"
 PKGDIR="$PKGDIR"
 OB_FLAGS=$OB_FLAGS
+OCAMLNAT=$OCAMLNAT
 EOF
 
 cat >> myocamlbuild_config.ml <<EOF
 let libdir="$LIBDIR"
 let bindir="$BINDIR"
 let pkgdir="$PKGDIR"
+let ocamlnat=$OCAMLNAT
 EOF
