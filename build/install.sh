@@ -150,5 +150,17 @@ installdir \
   Camlp4Bin.cm[iox] Camlp4Bin$O Camlp4Top.cm[io] \
   config/Camlp4_config.cmi camlp4prof.cm[iox] camlp4prof$O \
   $CAMLP4DIR
+if [ "$OCAMLNAT" = "true" ]; then
+  installdir \
+    camlp4o.cmxa camlp4of.cmxa camlp4oof.cmxa \
+    camlp4orf.cmxa camlp4r.cmxa camlp4rf.cmxa \
+    $CAMLP4DIR
+fi
 installlibdir camlp4lib$A camlp4fulllib$A $CAMLP4DIR
+if [ "$OCAMLNAT" = "true" ]; then
+  installlibdir \
+    camlp4o$A camlp4of$A camlp4oof$A \
+    camlp4orf$A camlp4r$A camlp4rf$A \
+    $CAMLP4DIR
+fi
 cd ..

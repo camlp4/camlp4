@@ -165,7 +165,15 @@ let () =
       "outcometree.cmi";
       "oprint.cmi";
       "toploop.cmi";
+      "topdirs.cmi";
     ] in
+
+    let import =
+      if Myocamlbuild_config.ocamlnat then
+        "opttoploop.cmi" :: "opttopdirs.cmi" :: import
+      else
+        import
+    in
 
     List.iter
       (fun fn ->
@@ -220,15 +228,32 @@ let () =
     let camlp4_bin = p4 "Camlp4Bin" in
     let top_rprint = top "Rprint" in
     let top_top = top "Top" in
+    let top_optrprint = top "OptRprint" in
+    let top_opttop = top "OptTop" in
     let camlp4Profiler = p4 "Camlp4Profiler" in
 
     let camlp4lib_cma = p4 "camlp4lib.cma" in
     let camlp4lib_cmxa = p4 "camlp4lib.cmxa" in
     let camlp4lib_lib = p4 ("camlp4lib"^C.ext_lib) in
+    let camlp4lib_mllib = p4 ("camlp4lib.mllib") in
 
     let special_modules =
       if Sys.file_exists "./boot/Profiler.cmo" then [camlp4Profiler] else []
     in
+
+    List.iter
+      (fun (src, dst) ->
+         let src = src-.-"ml" in
+         let dst = dst-.-"ml" in
+         rule dst
+           ~dep:src
+           ~prod:dst
+           (fun _ _ ->
+              Cmd(S[P"sed"; A"s/Toploop/Opttoploop/g;s/Topdirs/Opttopdirs/g";
+                    P src; Sh ">"; P dst])))
+      [ (top_top, top_opttop)
+      ; (top_rprint, top_optrprint)
+      ];
 
     let mk_camlp4_top_lib name modules =
       let name = "camlp4"/name in
@@ -242,7 +267,36 @@ let () =
         begin fun _ _ ->
           Cmd(S[!Options.ocamlc; A"-a"; T(tags_of_pathname cma++"ocaml"++"link"++"byte");
                 P camlp4lib_cma; A"-linkall"; atomize cmos; A"-o"; Px cma])
-        end
+        end;
+      if Myocamlbuild_config.ocamlnat then begin
+        let cmxa = name-.-"cmxa" in
+        let deps =
+          List.map
+            (fun dep ->
+               if dep = top_top then
+                 top_opttop
+               else if dep = top_rprint then
+                 top_optrprint
+               else
+                 dep)
+            deps
+        in
+        let cmxs = add_extensions [".cmx"] deps in
+        rule cmxa
+          ~deps:(camlp4lib_cmxa::camlp4lib_mllib::cmxs)
+          ~prods:[cmxa]
+          ~insert:(`before "ocaml: mllib & cmx* & o* -> cmxa & a")
+          begin fun _ _ ->
+            let camlp4lib_cmxs =
+              List.map
+                (fun m -> p4 (m-.-"cmx"))
+                (string_list_of_file camlp4lib_mllib)
+            in
+            Cmd(S[!Options.ocamlopt; A"-a";
+                  T(tags_of_pathname cma++"ocaml"++"link"++"native");
+                  atomize camlp4lib_cmxs; A"-linkall"; atomize cmxs; A"-o"; Px cmxa])
+          end
+      end
     in
 
     let mk_camlp4_bin name modules =
