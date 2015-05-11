@@ -28,11 +28,8 @@ type camlp4_token = Sig.camlp4_token ==
   | LIDENT        of string
   | UIDENT        of string
   | ESCAPED_IDENT of string
-  | INT           of int and string
-  | INT32         of int32 and string
-  | INT64         of int64 and string
-  | NATIVEINT     of nativeint and string
-  | FLOAT         of float and string
+  | INT           of string and option char
+  | FLOAT         of string and option char
   | CHAR          of char and string
   | STRING        of string and string
   | LABEL         of string

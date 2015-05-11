@@ -32,11 +32,10 @@ module Make (Loc : Sig.Loc)
     | SYMBOL s     -> sprintf "SYMBOL %S" s
     | LIDENT s     -> sprintf "LIDENT %S" s
     | UIDENT s     -> sprintf "UIDENT %S" s
-    | INT _ s      -> sprintf "INT %s" s
-    | INT32 _ s    -> sprintf "INT32 %sd" s
-    | INT64 _ s    -> sprintf "INT64 %sd" s
-    | NATIVEINT _ s-> sprintf "NATIVEINT %sd" s
-    | FLOAT _ s    -> sprintf "FLOAT %s" s
+    | INT s None       -> sprintf "INT %s" s
+    | INT s (Some m)   -> sprintf "INT %s%c" s m
+    | FLOAT s None     -> sprintf "FLOAT %s" s
+    | FLOAT s (Some m) -> sprintf "FLOAT %s%c" s m
     | CHAR _ s     -> sprintf "CHAR '%s'" s
     | STRING _ s   -> sprintf "STRING \"%s\"" s
                       (* here it's not %S since the string is already escaped *)
@@ -62,9 +61,9 @@ module Make (Loc : Sig.Loc)
 
   value extract_string =
     fun
-    [ KEYWORD s | SYMBOL s | LIDENT s | UIDENT s | INT _ s | INT32 _ s |
-      INT64 _ s | NATIVEINT _ s | FLOAT _ s | CHAR _ s | STRING _ s |
+    [ KEYWORD s | SYMBOL s | LIDENT s | UIDENT s | INT s None | FLOAT s None | CHAR _ s | STRING _ s |
       LABEL s | OPTLABEL s | COMMENT s | BLANKS s | ESCAPED_IDENT s -> s
+    | INT s (Some m) | FLOAT s (Some m) -> Printf.sprintf "%s%c" s m
     | tok ->
         invalid_arg ("Cannot extract a string from this token: "^
                      to_string tok) ];

@@ -2228,11 +2228,8 @@ module Sig =
       | LIDENT of string
       | UIDENT of string
       | ESCAPED_IDENT of string
-      | INT of int * string
-      | INT32 of int32 * string
-      | INT64 of int64 * string
-      | NATIVEINT of nativeint * string
-      | FLOAT of float * string
+      | INT of string * char option
+      | FLOAT of string * char option
       | CHAR of char * string
       | STRING of string * string
       | LABEL of string
@@ -3421,11 +3418,10 @@ module Struct =
               | SYMBOL s -> sprintf "SYMBOL %S" s
               | LIDENT s -> sprintf "LIDENT %S" s
               | UIDENT s -> sprintf "UIDENT %S" s
-              | INT (_, s) -> sprintf "INT %s" s
-              | INT32 (_, s) -> sprintf "INT32 %sd" s
-              | INT64 (_, s) -> sprintf "INT64 %sd" s
-              | NATIVEINT (_, s) -> sprintf "NATIVEINT %sd" s
-              | FLOAT (_, s) -> sprintf "FLOAT %s" s
+              | INT (s,None) -> sprintf "INT %s" s
+              | INT (s,Some m) -> sprintf "INT %s%c" s m
+              | FLOAT (s,None) -> sprintf "FLOAT %s" s
+              | FLOAT (s,Some m) -> sprintf "FLOAT %s%c" s m
               | CHAR (_, s) -> sprintf "CHAR '%s'" s
               | STRING (_, s) -> sprintf "STRING \"%s\"" s
               | LABEL s -> sprintf "LABEL %S" s
@@ -3451,10 +3447,10 @@ module Struct =
 
             let extract_string =
               function
-              | KEYWORD s | SYMBOL s | LIDENT s | UIDENT s | INT (_, s) |
-                  INT32 (_, s) | INT64 (_, s) | NATIVEINT (_, s) |
-                  FLOAT (_, s) | CHAR (_, s) | STRING (_, s) | LABEL s |
+              | KEYWORD s | SYMBOL s | LIDENT s | UIDENT s | INT (s, None) |
+                  FLOAT (s, None) | CHAR (_, s) | STRING (_, s) | LABEL s |
                   OPTLABEL s | COMMENT s | BLANKS s | ESCAPED_IDENT s -> s
+              | INT (s, Some m) | FLOAT (s, Some m) -> Printf.sprintf "%s%c" s m
               | tok ->
                   invalid_arg
                     ("Cannot extract a string from this token: " ^
@@ -6457,50 +6453,31 @@ module Struct =
                     Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos
                       lexbuf.Lexing.lex_curr_pos
                   in
-                    (try INT ((cvt_int_literal i), i)
-                     with
-                     | Failure _ ->
-                         err (Literal_overflow "int") (Loc.of_lexbuf lexbuf))
+                  INT (i, None)
               | 7 ->
                   let f =
                     Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos
                       lexbuf.Lexing.lex_curr_pos
                   in
-                    (try FLOAT ((float_of_string f), f)
-                     with
-                     | Failure _ ->
-                         err (Literal_overflow "float")
-                           (Loc.of_lexbuf lexbuf))
+                  FLOAT (f, None)
               | 8 ->
                   let i =
                     Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos
                       (lexbuf.Lexing.lex_curr_pos + (-1))
                   in
-                    (try INT32 ((cvt_int32_literal i), i)
-                     with
-                     | Failure _ ->
-                         err (Literal_overflow "int32")
-                           (Loc.of_lexbuf lexbuf))
+                  INT (i, Some 'l')
               | 9 ->
                   let i =
                     Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos
                       (lexbuf.Lexing.lex_curr_pos + (-1))
                   in
-                    (try INT64 ((cvt_int64_literal i), i)
-                     with
-                     | Failure _ ->
-                         err (Literal_overflow "int64")
-                           (Loc.of_lexbuf lexbuf))
+                  INT (i, Some 'L')
               | 10 ->
                   let i =
                     Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos
                       (lexbuf.Lexing.lex_curr_pos + (-1))
                   in
-                    (try NATIVEINT ((cvt_nativeint_literal i), i)
-                     with
-                     | Failure _ ->
-                         err (Literal_overflow "nativeint")
-                           (Loc.of_lexbuf lexbuf))
+                  INT (i, Some 'n')
               | 11 ->
                   (with_curr_loc string c;
                    let s = buff_contents c
@@ -22052,11 +22029,8 @@ module PreCast :
         | LIDENT of string
         | UIDENT of string
         | ESCAPED_IDENT of string
-        | INT of int * string
-        | INT32 of int32 * string
-        | INT64 of int64 * string
-        | NATIVEINT of nativeint * string
-        | FLOAT of float * string
+        | INT of string * char option
+        | FLOAT of string * char option
         | CHAR of char * string
         | STRING of string * string
         | LABEL of string
@@ -22126,11 +22100,8 @@ module PreCast :
         | LIDENT of string
         | UIDENT of string
         | ESCAPED_IDENT of string
-        | INT of int * string
-        | INT32 of int32 * string
-        | INT64 of int64 * string
-        | NATIVEINT of nativeint * string
-        | FLOAT of float * string
+        | INT of string * char option
+        | FLOAT of string * char option
         | CHAR of char * string
         | STRING of string * string
         | LABEL of string
