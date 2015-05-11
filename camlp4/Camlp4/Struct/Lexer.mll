@@ -68,7 +68,7 @@ module Make (Token : Sig.Camlp4Token)
       | Unterminated_string_in_comment
       | Comment_start
       | Comment_not_end
-      | Literal_overflow of string
+      | Invalid_literal of string
 
     exception E of t
 
@@ -90,12 +90,12 @@ module Make (Token : Sig.Camlp4Token)
           fprintf ppf "Quotation not terminated"
       | Unterminated_antiquot ->
           fprintf ppf "Antiquotation not terminated"
-      | Literal_overflow ty ->
-          fprintf ppf "Integer literal exceeds the range of representable integers of type %s" ty
       | Comment_start ->
           fprintf ppf "this is the start of a comment"
       | Comment_not_end ->
           fprintf ppf "this is not the end of a comment"
+      | Invalid_literal s ->
+          fprintf ppf "Invalid literal %s" s
 
     let to_string x =
       let b = Buffer.create 50 in
@@ -180,18 +180,6 @@ module Make (Token : Sig.Camlp4Token)
       pos_lnum = if absolute then line else pos.pos_lnum + line;
       pos_bol = pos.pos_cnum - chars;
     }
-
-    (* To convert integer literals, copied from "../parsing/lexer.mll" *)
-
-    let cvt_int_literal s =
-      - int_of_string ("-" ^ s)
-    let cvt_int32_literal s =
-      Int32.neg (Int32.of_string ("-" ^ s))
-    let cvt_int64_literal s =
-      Int64.neg (Int64.of_string ("-" ^ s))
-    let cvt_nativeint_literal s =
-      Nativeint.neg (Nativeint.of_string ("-" ^ s))
-
 
   let err error loc =
     raise(Loc.Exc_located(loc, Error.E error))
@@ -284,6 +272,8 @@ module Make (Token : Sig.Camlp4Token)
         { FLOAT(f, None) }
     | (float_literal as f) (literal_modifier as m)
         { FLOAT(f, Some m) }
+    | (float_literal | int_literal) identchar+
+      { err (Invalid_literal (Lexing.lexeme lexbuf)) (Loc.of_lexbuf lexbuf) }
     | '"'
         { with_curr_loc string c;
           let s = buff_contents c in STRING (TokenEval.string s, s)             }
