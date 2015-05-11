@@ -628,19 +628,19 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   ;
 
   value rec deep_mkrangepat loc c1 c2 =
-    if c1 = c2 then mkghpat loc (Ppat_constant (Const_char c1))
+    if c1 = c2 then mkghpat loc (Ppat_constant (PConst_char c1))
     else
       mkghpat loc
-        (Ppat_or (mkghpat loc (Ppat_constant (Const_char c1)))
+        (Ppat_or (mkghpat loc (Ppat_constant (PConst_char c1)))
           (deep_mkrangepat loc (Char.chr (Char.code c1 + 1)) c2))
   ;
 
   value rec mkrangepat loc c1 c2 =
     if c1 > c2 then mkrangepat loc c2 c1
-    else if c1 = c2 then mkpat loc (Ppat_constant (Const_char c1))
+    else if c1 = c2 then mkpat loc (Ppat_constant (PConst_char c1))
     else
       mkpat loc
-        (Ppat_or (mkghpat loc (Ppat_constant (Const_char c1)))
+        (Ppat_or (mkghpat loc (Ppat_constant (PConst_char c1)))
           (deep_mkrangepat loc (Char.chr (Char.code c1 + 1)) c2))
   ;
 
@@ -686,24 +686,12 @@ module Make (Ast : Sig.Camlp4Ast) = struct
               "this is not a constructor, it cannot be applied in a pattern" ]
     | PaArr loc p -> mkpat loc (Ppat_array (List.map patt (list_of_patt p [])))
     | PaChr loc s ->
-        mkpat loc (Ppat_constant (Const_char (char_of_char_token loc s)))
-    | PaInt loc s ->
-        let i = try int_of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int"
-        ] in mkpat loc (Ppat_constant (Const_int i))
-    | PaInt32 loc s ->
-        let i32 = try Int32.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int32"
-        ] in mkpat loc (Ppat_constant (Const_int32 i32))
-    | PaInt64 loc s ->
-        let i64 = try Int64.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int64"
-        ] in mkpat loc (Ppat_constant (Const_int64 i64))
-    | PaNativeInt loc s ->
-        let nati = try Nativeint.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type nativeint"
-        ] in mkpat loc (Ppat_constant (Const_nativeint nati))
-    | PaFlo loc s -> mkpat loc (Ppat_constant (Const_float (remove_underscores s)))
+        mkpat loc (Ppat_constant (PConst_char (char_of_char_token loc s)))
+    | PaInt loc s ->   mkpat loc (Ppat_constant (PConst_int (s, None)))
+    | PaInt32 loc s -> mkpat loc (Ppat_constant (PConst_int (s, Some 'l')))
+    | PaInt64 loc s -> mkpat loc (Ppat_constant (PConst_int (s, Some 'L')))
+    | PaNativeInt loc s -> mkpat loc (Ppat_constant (PConst_int (s, Some 'n')))
+    | PaFlo loc s -> mkpat loc (Ppat_constant (PConst_float (remove_underscores s, None)))
     | PaLab loc _ _ -> error loc "labeled pattern not allowed here"
     | PaOlb loc _ _ | PaOlbi loc _ _ _ -> error loc "labeled pattern not allowed here"
     | PaOrp loc p1 p2 -> mkpat loc (Ppat_or (patt p1) (patt p2))
@@ -721,7 +709,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         let is_closed = if wildcards = [] then Closed else Open in
         mkpat loc (Ppat_record (List.map mklabpat ps, is_closed))
     | PaStr loc s ->
-        mkpat loc (Ppat_constant (Const_string (string_of_string_token loc s) None))
+        mkpat loc (Ppat_constant (PConst_string (string_of_string_token loc s) None))
     | <:patt@loc< ($p1$, $p2$) >> ->
          mkpat loc (Ppat_tuple
            (List.map patt (list_of_patt p1 (list_of_patt p2 []))))
@@ -906,14 +894,14 @@ value varify_constructors var_names =
         mkexp loc e
     | ExAsr loc e -> mkexp loc (Pexp_assert (expr e))
     | ExChr loc s ->
-        mkexp loc (Pexp_constant (Const_char (char_of_char_token loc s)))
+        mkexp loc (Pexp_constant (PConst_char (char_of_char_token loc s)))
     | ExCoe loc e t1 t2 ->
         let t1 =
           match t1 with
           [ <:ctyp<>> -> None
           | t -> Some (ctyp t) ] in
         mkexp loc (Pexp_coerce (expr e) t1 (ctyp t2))
-    | ExFlo loc s -> mkexp loc (Pexp_constant (Const_float (remove_underscores s)))
+    | ExFlo loc s -> mkexp loc (Pexp_constant (PConst_float (remove_underscores s, None)))
     | ExFor loc p e1 e2 df el ->
         let e3 = ExSeq loc el in
         mkexp loc (Pexp_for (patt p) (expr e1) (expr e2) (mkdirection df) (expr e3))
@@ -928,22 +916,10 @@ value varify_constructors var_names =
     | ExFun loc a -> mkexp loc (Pexp_function (match_case a []))
     | ExIfe loc e1 e2 e3 ->
         mkexp loc (Pexp_ifthenelse (expr e1) (expr e2) (Some (expr e3)))
-    | ExInt loc s ->
-        let i = try int_of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int"
-        ] in mkexp loc (Pexp_constant (Const_int i))
-    | ExInt32 loc s ->
-        let i32 = try Int32.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int32"
-        ] in mkexp loc (Pexp_constant (Const_int32 i32))
-    | ExInt64 loc s ->
-        let i64 = try Int64.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type int64"
-        ] in mkexp loc (Pexp_constant (Const_int64 i64))
-    | ExNativeInt loc s ->
-        let nati = try Nativeint.of_string s with [
-          Failure _ -> error loc "Integer literal exceeds the range of representable integers of type nativeint"
-        ] in mkexp loc (Pexp_constant (Const_nativeint nati))
+    | ExInt loc s ->   mkexp loc (Pexp_constant (PConst_int (s, None)))
+    | ExInt32 loc s -> mkexp loc (Pexp_constant (PConst_int (s, Some 'l')))
+    | ExInt64 loc s -> mkexp loc (Pexp_constant (PConst_int (s, Some 'L')))
+    | ExNativeInt loc s -> mkexp loc (Pexp_constant (PConst_int (s, Some 'n')))
     | ExLab loc _ _ -> error loc "labeled expression not allowed here"
     | ExLaz loc e -> mkexp loc (Pexp_lazy (expr e))
     | ExLet loc rf bi e ->
@@ -986,7 +962,7 @@ value varify_constructors var_names =
           (Pexp_apply (mkexp loc (Pexp_ident (array_function loc "String" "get")))
             [(Nolabel, expr e1); (Nolabel, expr e2)])
     | ExStr loc s ->
-        mkexp loc (Pexp_constant (Const_string (string_of_string_token loc s) None))
+        mkexp loc (Pexp_constant (PConst_string (string_of_string_token loc s) None))
     | ExTry loc e a -> mkexp loc (Pexp_try (expr e) (match_case a []))
     | <:expr@loc< ($e1$, $e2$) >> ->
          mkexp loc (Pexp_tuple (List.map expr (list_of_expr e1 (list_of_expr e2 []))))
@@ -1469,7 +1445,7 @@ value varify_constructors var_names =
   value directive_arg =
     fun
     [ ExStr _ s -> Pdir_string s
-    | ExInt _ i -> Pdir_int (int_of_string i)
+    | ExInt _ i -> Pdir_int (i, None)
     | <:expr< True >> -> Pdir_bool True
     | <:expr< False >> -> Pdir_bool False
     | <:expr< >> -> Pdir_none
