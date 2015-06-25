@@ -86,7 +86,14 @@ let () =
         let dep = "camlp4"/"boot"/exe in
         let cmd =
           let ( / ) = Filename.concat in
-          "camlp4"/"boot"/exe
+          (*
+           * Workaround ocamlbuild problems on Windows by double-escaping.
+           * On systems using forward-slash, the calls to String.escaped will be
+           * no-ops anyway and the code will continue to work even once ocamlbuild
+           * correctly escapes output (the issue is trying to escape output for both cmd
+           * and bash)
+           *)
+          String.escaped (String.escaped ("camlp4"/"boot"/exe))
         in
         (Some dep, cmd)
     in
