@@ -865,9 +865,8 @@ end;
 -      [KEYWORD s] is the keyword [s].
 -      [LIDENT s] is the ident [s] starting with a lowercase letter.
 -      [UIDENT s] is the ident [s] starting with an uppercase letter.
--      [INT i s] (resp. [INT32 i s], [INT64 i s] and [NATIVEINT i s])
-        the integer constant [i] whose string source is [s].
--      [FLOAT f s] is the float constant [f] whose string source is [s].
+-      [INT s m] is the integer [s] with an optional modifier [m].
+-      [FLOAT s m] is the float [s] with an optional modifier [m].
 -      [STRING s s'] is the string constant [s] whose string source is [s'].
 -      [CHAR c s] is the character constant [c] whose string source is [s].
 -      [QUOTATION q] is a quotation [q], see {!Quotation.t} for more information.
@@ -888,11 +887,8 @@ type camlp4_token =
   | LIDENT        of string
   | UIDENT        of string
   | ESCAPED_IDENT of string
-  | INT           of int and string
-  | INT32         of int32 and string
-  | INT64         of int64 and string
-  | NATIVEINT     of nativeint and string
-  | FLOAT         of float and string
+  | INT           of string and option char
+  | FLOAT         of string and option char
   | CHAR          of char and string
   | STRING        of string and string
   | LABEL         of string

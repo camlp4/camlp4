@@ -8586,13 +8586,15 @@ New syntax:\
                      (None,
                       [ (None, None,
                          [ ([ Gram.Stoken
-                                (((function | INT (_, _) -> true | _ -> false),
-                                  "INT (_, _)")) ],
+                                (((function
+                                   | INT (_, None) -> true
+                                   | _ -> false),
+                                  "INT (_, None)")) ],
                             (Gram.Action.mk
                                (fun (__camlp4_0 : Gram.Token.t)
                                   (_loc : Gram.Loc.t) ->
                                   match __camlp4_0 with
-                                  | INT (_, s) -> (s : 'a_INT)
+                                  | INT (s, None) -> (s : 'a_INT)
                                   | _ -> assert false)));
                            ([ Gram.Stoken
                                 (((function
@@ -8614,14 +8616,14 @@ New syntax:\
                       [ (None, None,
                          [ ([ Gram.Stoken
                                 (((function
-                                   | INT32 (_, _) -> true
+                                   | INT (_, (Some 'l')) -> true
                                    | _ -> false),
-                                  "INT32 (_, _)")) ],
+                                  "INT (_, (Some 'l'))")) ],
                             (Gram.Action.mk
                                (fun (__camlp4_0 : Gram.Token.t)
                                   (_loc : Gram.Loc.t) ->
                                   match __camlp4_0 with
-                                  | INT32 (_, s) -> (s : 'a_INT32)
+                                  | INT (s, (Some 'l')) -> (s : 'a_INT32)
                                   | _ -> assert false)));
                            ([ Gram.Stoken
                                 (((function
@@ -8644,14 +8646,14 @@ New syntax:\
                       [ (None, None,
                          [ ([ Gram.Stoken
                                 (((function
-                                   | INT64 (_, _) -> true
+                                   | INT (_, (Some 'L')) -> true
                                    | _ -> false),
-                                  "INT64 (_, _)")) ],
+                                  "INT (_, (Some 'L'))")) ],
                             (Gram.Action.mk
                                (fun (__camlp4_0 : Gram.Token.t)
                                   (_loc : Gram.Loc.t) ->
                                   match __camlp4_0 with
-                                  | INT64 (_, s) -> (s : 'a_INT64)
+                                  | INT (s, (Some 'L')) -> (s : 'a_INT64)
                                   | _ -> assert false)));
                            ([ Gram.Stoken
                                 (((function
@@ -8674,14 +8676,14 @@ New syntax:\
                       [ (None, None,
                          [ ([ Gram.Stoken
                                 (((function
-                                   | NATIVEINT (_, _) -> true
+                                   | INT (_, (Some 'n')) -> true
                                    | _ -> false),
-                                  "NATIVEINT (_, _)")) ],
+                                  "INT (_, (Some 'n'))")) ],
                             (Gram.Action.mk
                                (fun (__camlp4_0 : Gram.Token.t)
                                   (_loc : Gram.Loc.t) ->
                                   match __camlp4_0 with
-                                  | NATIVEINT (_, s) -> (s : 'a_NATIVEINT)
+                                  | INT (s, (Some 'n')) -> (s : 'a_NATIVEINT)
                                   | _ -> assert false)));
                            ([ Gram.Stoken
                                 (((function
@@ -8706,14 +8708,14 @@ New syntax:\
                       [ (None, None,
                          [ ([ Gram.Stoken
                                 (((function
-                                   | FLOAT (_, _) -> true
+                                   | FLOAT (_, None) -> true
                                    | _ -> false),
-                                  "FLOAT (_, _)")) ],
+                                  "FLOAT (_, None)")) ],
                             (Gram.Action.mk
                                (fun (__camlp4_0 : Gram.Token.t)
                                   (_loc : Gram.Loc.t) ->
                                   match __camlp4_0 with
-                                  | FLOAT (_, s) -> (s : 'a_FLOAT)
+                                  | FLOAT (s, None) -> (s : 'a_FLOAT)
                                   | _ -> assert false)));
                            ([ Gram.Stoken
                                 (((function

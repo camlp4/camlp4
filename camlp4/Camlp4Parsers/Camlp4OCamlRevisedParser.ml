@@ -1795,23 +1795,23 @@ New syntax:\
     ;
     a_INT:
       [ [ `ANTIQUOT (""|"int"|"`int" as n) s -> mk_anti n s
-        | `INT _ s -> s ] ]
+        | `INT s None -> s ] ]
     ;
     a_INT32:
       [ [ `ANTIQUOT (""|"int32"|"`int32" as n) s -> mk_anti n s
-        | `INT32 _ s -> s ] ]
+        | `INT s (Some 'l') -> s ] ]
     ;
     a_INT64:
       [ [ `ANTIQUOT (""|"int64"|"`int64" as n) s -> mk_anti n s
-        | `INT64 _ s -> s ] ]
+        | `INT s (Some 'L') -> s ] ]
     ;
     a_NATIVEINT:
       [ [ `ANTIQUOT (""|"nativeint"|"`nativeint" as n) s -> mk_anti n s
-        | `NATIVEINT _ s -> s ] ]
+        | `INT s (Some 'n') -> s ] ]
     ;
     a_FLOAT:
       [ [ `ANTIQUOT (""|"flo"|"`flo" as n) s -> mk_anti n s
-        | `FLOAT _ s -> s ] ]
+        | `FLOAT s None -> s ] ]
     ;
     a_CHAR:
       [ [ `ANTIQUOT (""|"chr"|"`chr" as n) s -> mk_anti n s
