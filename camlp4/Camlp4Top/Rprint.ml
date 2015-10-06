@@ -368,7 +368,7 @@ and needs_semi =
   | Osig_type _ rs -> rs <> Orec_next
   | Osig_typext _ _
   | Osig_modtype _ _
-  | Osig_value _ _ _ -> True
+  | Osig_value _ -> True
   | Osig_ellipsis -> False ]
 and print_out_signature ppf =
   fun
@@ -414,7 +414,10 @@ and print_out_sig_item ppf =
       print_out_type_decl
           (if rs = Orec_next then "and" else "type")
           ppf td
-  | Osig_value name ty prims ->
+  | Osig_value { oval_name  = name
+               ; oval_type  = ty
+               ; oval_prims = prims
+               ; _ } ->
       let kwd = if prims = [] then "value" else "external" in
       let pr_prims ppf =
         fun
