@@ -786,6 +786,8 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       }
     | Ast.TyExt _ tn tp te ->
         pp f "@[<2>%a%a@] =@ %a" o#type_params tp o#ident tn o#ctyp te
+    | Ast.TyCom (loc, _, _) ->
+        Loc.raise loc (Failure "this construction is not allowed here")
     | t -> o#ctyp1 f t ];
 
     method ctyp1 f = fun
