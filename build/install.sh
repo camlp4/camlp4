@@ -20,12 +20,10 @@ cd `dirname $0`/..
 # since it will overwrite them and the user might have set them to
 # emulate $(DESTDIR) which is unfortunately not supported.
 SAVED_BINDIR="${BINDIR}"
-SAVED_LIBDIR="${LIBDIR}"
 
 . ./config.sh
 
 BINDIR="${SAVED_BINDIR:-${BINDIR}}"
-LIBDIR="${SAVED_LIBDIR:-${LIBDIR}}"
 
 not_installed=$PWD/_build/not_installed
 
@@ -106,7 +104,6 @@ installlibdir() {
 }
 
 mkdir -p $BINDIR
-mkdir -p $LIBDIR/camlp4
 
 cd _build
 

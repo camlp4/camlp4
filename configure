@@ -11,12 +11,6 @@ for i in "$@"; do
     --bindir=*)
       BINDIR=${i##*=}
       ;;
-    --libdir=*)
-      LIBDIR=${i##*=}
-      ;;
-    --pkgdir=*)
-      PKGDIR=${i##*=}
-      ;;
     *)
       echo "usage: ./configure [--bindir=<dir>] [--libdir=<dir>] [--pkgdir=<dir>]" 1>&2
       exit 2
@@ -41,15 +35,16 @@ else
 fi
 
 OCAMLC="`which ocamlc`"
-LIBDIR="${LIBDIR:-$standard_library}"
 BINDIR="${BINDIR:-`dirname $OCAMLC`}"
-PKGDIR="${PKGDIR:-$standard_library/camlp4}"
 
 cat >> config.sh <<EOF
 A="$ext_lib"
 O="$ext_obj"
 EXE="$ext_exe"
-LIBDIR="$LIBDIR"
 BINDIR="$BINDIR"
-PKGDIR="$PKGDIR"
+EOF
+
+OCAMLFIND_DESTDIR=`ocamlfind printconf destdir`
+cat >> myocamlbuild_config.ml <<EOF
+let ocamlfind_destdir = "$OCAMLFIND_DESTDIR"
 EOF

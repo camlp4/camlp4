@@ -22,7 +22,7 @@ let ocaml_standard_library = Camlp4_import.standard_library;;
 let camlp4_standard_library =
   try Sys.getenv "CAMLP4LIB"
   with Not_found ->
-    Filename.concat ocaml_standard_library "camlp4";;
+    Filename.concat Camlp4_import.ocamlfind_destdir "camlp4";;
 
 let version = Sys.ocaml_version;;
 let program_name = ref "camlp4";;
