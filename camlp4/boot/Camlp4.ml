@@ -16076,10 +16076,10 @@ module Struct =
               
             let rec deep_mkrangepat loc c1 c2 =
               if c1 = c2
-              then mkghpat loc (Ppat_constant (PConst_char c1))
+              then mkghpat loc (Ppat_constant (Pconst_char c1))
               else
                 mkghpat loc
-                  (Ppat_or ((mkghpat loc (Ppat_constant (PConst_char c1))),
+                  (Ppat_or ((mkghpat loc (Ppat_constant (Pconst_char c1))),
                      (deep_mkrangepat loc (Char.chr ((Char.code c1) + 1)) c2)))
               
             let rec mkrangepat loc c1 c2 =
@@ -16087,10 +16087,10 @@ module Struct =
               then mkrangepat loc c2 c1
               else
                 if c1 = c2
-                then mkpat loc (Ppat_constant (PConst_char c1))
+                then mkpat loc (Ppat_constant (Pconst_char c1))
                 else
                   mkpat loc
-                    (Ppat_or ((mkghpat loc (Ppat_constant (PConst_char c1))),
+                    (Ppat_or ((mkghpat loc (Ppat_constant (Pconst_char c1))),
                        (deep_mkrangepat loc (Char.chr ((Char.code c1) + 1))
                           c2)))
               
@@ -16141,19 +16141,19 @@ module Struct =
                   mkpat loc (Ppat_array (List.map patt (list_of_patt p [])))
               | PaChr (loc, s) ->
                   mkpat loc
-                    (Ppat_constant (PConst_char (char_of_char_token loc s)))
+                    (Ppat_constant (Pconst_char (char_of_char_token loc s)))
               | PaInt (loc, s) ->
-                  mkpat loc (Ppat_constant (PConst_int ((s, None))))
+                  mkpat loc (Ppat_constant (Pconst_integer ((s, None))))
               | PaInt32 (loc, s) ->
-                  mkpat loc (Ppat_constant (PConst_int ((s, (Some 'l')))))
+                  mkpat loc (Ppat_constant (Pconst_integer ((s, (Some 'l')))))
               | PaInt64 (loc, s) ->
-                  mkpat loc (Ppat_constant (PConst_int ((s, (Some 'L')))))
+                  mkpat loc (Ppat_constant (Pconst_integer ((s, (Some 'L')))))
               | PaNativeInt (loc, s) ->
-                  mkpat loc (Ppat_constant (PConst_int ((s, (Some 'n')))))
+                  mkpat loc (Ppat_constant (Pconst_integer ((s, (Some 'n')))))
               | PaFlo (loc, s) ->
                   mkpat loc
                     (Ppat_constant
-                       (PConst_float (((remove_underscores s), None))))
+                       (Pconst_float (((remove_underscores s), None))))
               | PaLab (loc, _, _) ->
                   error loc "labeled pattern not allowed here"
               | PaOlb (loc, _, _) | PaOlbi (loc, _, _, _) ->
@@ -16180,7 +16180,7 @@ module Struct =
               | PaStr (loc, s) ->
                   mkpat loc
                     (Ppat_constant
-                       (PConst_string ((string_of_string_token loc s), None)))
+                       (Pconst_string ((string_of_string_token loc s), None)))
               | Ast.PaTup (loc, (Ast.PaCom (_, p1, p2))) ->
                   mkpat loc
                     (Ppat_tuple
@@ -16399,7 +16399,7 @@ module Struct =
               | ExAsr (loc, e) -> mkexp loc (Pexp_assert (expr e))
               | ExChr (loc, s) ->
                   mkexp loc
-                    (Pexp_constant (PConst_char (char_of_char_token loc s)))
+                    (Pexp_constant (Pconst_char (char_of_char_token loc s)))
               | ExCoe (loc, e, t1, t2) ->
                   let t1 =
                     (match t1 with | Ast.TyNil _ -> None | t -> Some (ctyp t))
@@ -16407,7 +16407,7 @@ module Struct =
               | ExFlo (loc, s) ->
                   mkexp loc
                     (Pexp_constant
-                       (PConst_float (((remove_underscores s), None))))
+                       (Pconst_float (((remove_underscores s), None))))
               | ExFor (loc, p, e1, e2, df, el) ->
                   let e3 = ExSeq (loc, el)
                   in
@@ -16431,13 +16431,13 @@ module Struct =
                   mkexp loc
                     (Pexp_ifthenelse ((expr e1), (expr e2), (Some (expr e3))))
               | ExInt (loc, s) ->
-                  mkexp loc (Pexp_constant (PConst_int ((s, None))))
+                  mkexp loc (Pexp_constant (Pconst_integer ((s, None))))
               | ExInt32 (loc, s) ->
-                  mkexp loc (Pexp_constant (PConst_int ((s, (Some 'l')))))
+                  mkexp loc (Pexp_constant (Pconst_integer ((s, (Some 'l')))))
               | ExInt64 (loc, s) ->
-                  mkexp loc (Pexp_constant (PConst_int ((s, (Some 'L')))))
+                  mkexp loc (Pexp_constant (Pconst_integer ((s, (Some 'L')))))
               | ExNativeInt (loc, s) ->
-                  mkexp loc (Pexp_constant (PConst_int ((s, (Some 'n')))))
+                  mkexp loc (Pexp_constant (Pconst_integer ((s, (Some 'n')))))
               | ExLab (loc, _, _) ->
                   error loc "labeled expression not allowed here"
               | ExLaz (loc, e) -> mkexp loc (Pexp_lazy (expr e))
@@ -16490,7 +16490,7 @@ module Struct =
               | ExStr (loc, s) ->
                   mkexp loc
                     (Pexp_constant
-                       (PConst_string ((string_of_string_token loc s), None)))
+                       (Pconst_string ((string_of_string_token loc s), None)))
               | ExTry (loc, e, a) ->
                   mkexp loc (Pexp_try ((expr e), (match_case a [])))
               | Ast.ExTup (loc, (Ast.ExCom (_, e1, e2))) ->
