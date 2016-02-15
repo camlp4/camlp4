@@ -109,12 +109,14 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
 
   (* Yet another horrible hack, this one to improve error locations when parsing
      [{ blah }] in expressions *)
-  value test_label_longident_equal =
-    Gram.Entry.of_parser "label_longident_equal" (fun strm ->
+  value test_record_field =
+    Gram.Entry.of_parser "record_field" (fun strm ->
       let rec loop = fun
         [ [] -> ()
         | [ (UIDENT _, _) :: [ (KEYWORD ".", _) :: rest ] ] -> loop rest
         | [ (LIDENT _, _) :: [ (KEYWORD "=", _) :: _    ] ] -> ()
+        | [ (LIDENT _, _) :: [ (KEYWORD ";", _) :: _    ] ] -> ()
+        | [ (LIDENT _, _) ] -> ()
         | _ -> raise Stream.Failure
         ]
       in
@@ -329,7 +331,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
     expr: LEVEL "simple" (* LEFTA *)
       [ [ "false" -> <:expr< False >>
         | "true" -> <:expr< True >>
-        | "{"; test_label_longident_equal; lel = label_expr_list; "}" ->
+        | "{"; test_record_field; lel = label_expr_list; "}" ->
             <:expr< { $lel$ } >>
         | "{"; e = TRY [e = expr LEVEL "."; "with" -> e]; lel = label_expr_list; "}" ->
             <:expr< { ($e$) with $lel$ } >>
