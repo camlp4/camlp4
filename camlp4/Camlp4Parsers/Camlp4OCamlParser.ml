@@ -114,8 +114,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       let rec loop = fun
         [ [] -> ()
         | [ (UIDENT _, _) :: [ (KEYWORD ".", _) :: rest ] ] -> loop rest
-        | [ (LIDENT _, _) :: [ (KEYWORD "=", _) :: _    ] ] -> ()
-        | [ (LIDENT _, _) :: [ (KEYWORD ";", _) :: _    ] ] -> ()
+        | [ (LIDENT _, _) :: [ (KEYWORD ("="|";"|"}"), _) :: _    ] ] -> ()
         | [ (LIDENT _, _) ] -> ()
         | _ -> raise Stream.Failure
         ]
