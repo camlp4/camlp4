@@ -1,3 +1,10 @@
+4.02+7
+------
+
+* fix build process on Windows (David Allsopp)
+* do not loop on comma types (#99)
+* better parsing error for `{ expr with ...}`
+
 4.02+6
 ------
 
