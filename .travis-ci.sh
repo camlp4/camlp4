@@ -8,6 +8,14 @@ i386)
   sudo make install
   cd ..
   rm -rf ocaml
+
+  git clone git://github.com/ocaml/ocamlbuild
+  cd ocamlbuild
+  make
+  sudo make install
+  cd ..
+  rm -rf ocamlbuild
+
   ./configure && make && sudo make install
   ;;
 *)
