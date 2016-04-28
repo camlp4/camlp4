@@ -210,14 +210,33 @@ New syntax:\
     else "-" ^ n
   ;
 
-  value mkumin _loc f arg =
+  value mkumin _loc arg =
     match arg with
     [ <:expr< $int:n$ >> -> <:expr< $int:neg_string n$ >>
     | <:expr< $int32:n$ >> -> <:expr< $int32:neg_string n$ >>
     | <:expr< $int64:n$ >> -> <:expr< $int64:neg_string n$ >>
     | <:expr< $nativeint:n$ >> -> <:expr< $nativeint:neg_string n$ >>
     | <:expr< $flo:n$ >> -> <:expr< $flo:neg_string n$ >>
-    | _ -> <:expr< $lid:"~" ^ f$ $arg$ >> ];
+    | _ -> <:expr< $lid:"~-"$ $arg$ >> ];
+
+  value mkumin_f _loc arg =
+    match arg with
+    [ <:expr< $flo:n$ >> -> <:expr< $flo:neg_string n$ >>
+    | _ -> <:expr< $lid:"~-."$ $arg$ >> ];
+
+  value mkuplus _loc arg =
+    match arg with
+    [ <:expr< $int:n$ >> -> <:expr< $int:n$ >>
+    | <:expr< $int32:n$ >> -> <:expr< $int32:n$ >>
+    | <:expr< $int64:n$ >> -> <:expr< $int64:n$ >>
+    | <:expr< $nativeint:n$ >> -> <:expr< $nativeint:n$ >>
+    | <:expr< $flo:n$ >> -> <:expr< $flo:n$ >>
+    | _ -> <:expr< $lid:"~+"$ $arg$ >> ];
+
+  value mkuplus_f _loc arg =
+    match arg with
+    [ <:expr< $flo:n$ >> -> <:expr< $flo:n$ >>
+    | _ -> <:expr< $lid:"~+."$ $arg$ >> ];
 
   value mklistexp _loc last =
     loop True where rec loop top =
@@ -711,8 +730,10 @@ New syntax:\
         | e1 = SELF; "lsr"; e2 = SELF -> <:expr< $e1$ lsr $e2$ >>
         | e1 = SELF; op = infixop4; e2 = SELF -> <:expr< $op$ $e1$ $e2$ >> ]
       | "unary minus" NONA
-        [ "-"; e = SELF -> mkumin _loc "-" e
-        | "-."; e = SELF -> mkumin _loc "-." e ]
+        [ "-"; e = SELF -> mkumin _loc e
+        | "-."; e = SELF -> mkumin_f _loc e
+        | "+"; e = SELF -> mkuplus _loc e
+        | "+."; e = SELF -> mkuplus_f _loc e ]
       | "apply" LEFTA
         [ e1 = SELF; e2 = SELF -> <:expr< $e1$ $e2$ >>
         | "assert"; e = SELF -> mkassert _loc e
