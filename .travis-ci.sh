@@ -1,6 +1,7 @@
 case $XARCH in
 i386)
   uname -a
+
   git clone git://github.com/ocaml/ocaml
   cd ocaml
   ./configure
@@ -8,6 +9,14 @@ i386)
   sudo make install
   cd ..
   rm -rf ocaml
+
+  git clone git://github.com/ocaml/ocamlbuild
+  cd ocamlbuild
+  make
+  sudo make install
+  cd ..
+  rm -rf ocamlbuild
+
   ./configure && make && sudo make install
   ;;
 *)
