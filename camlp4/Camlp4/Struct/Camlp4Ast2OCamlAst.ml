@@ -252,7 +252,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   value rec ty_var_list_of_ctyp =
     fun
     [ <:ctyp< $t1$ $t2$ >> -> ty_var_list_of_ctyp t1 @ ty_var_list_of_ctyp t2
-    | <:ctyp< '$s$ >> -> [s]
+    | <:ctyp@loc< '$s$ >> -> [with_loc s loc]
     | _ -> assert False ];
 
   value attribute_fwd = ref (fun _ _ _ -> assert False);
@@ -348,7 +348,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     match fl with
     [ <:ctyp<>> -> acc
     | <:ctyp< $t1$; $t2$ >> -> meth_list t1 (meth_list t2 acc)
-    | <:ctyp< $lid:lab$ : $t$ >> -> [(lab, [], mkpolytype (ctyp t)) :: acc]
+    | <:ctyp@loc< $lid:lab$ : $t$ >> -> [(with_loc lab loc, [], mkpolytype (ctyp t)) :: acc]
     | _ -> assert False ]
 
   and package_type_constraints wc acc =
@@ -784,7 +784,8 @@ value varify_constructors var_names =
       | Ptyp_arrow label core_type core_type' ->
           Ptyp_arrow label (loop core_type) (loop core_type')
       | Ptyp_tuple lst -> Ptyp_tuple (List.map loop lst)
-      | Ptyp_constr ({ txt = Lident s }) [] when List.mem s var_names ->
+      | Ptyp_constr ({ txt = Lident s }) []
+          when List.exists (fun x -> s = x.txt) var_names ->
           Ptyp_var ("&" ^ s)
       | Ptyp_constr longident lst ->
           Ptyp_constr longident (List.map loop lst)
@@ -959,7 +960,7 @@ value varify_constructors var_names =
               mkexp _loc (Pexp_sequence (expr e) (loop el)) ]
         in
         loop (list_of_expr e [])
-    | ExSnd loc e s -> mkexp loc (Pexp_send (expr e) s)
+    | ExSnd loc e s -> mkexp loc (Pexp_send (expr e) (with_loc s loc))
     | ExSte loc e1 e2 ->
         mkexp loc
           (Pexp_apply (mkexp loc (Pexp_ident (array_function loc "String" "get")))
@@ -990,7 +991,7 @@ value varify_constructors var_names =
     | <:expr@loc< (module $me$) >> ->
         mkexp loc (Pexp_pack (module_expr me))
     | ExFUN loc i e ->
-        mkexp loc (Pexp_newtype i (expr e))
+        mkexp loc (Pexp_newtype (with_loc i loc) (expr e))
     | <:expr@loc< $_$,$_$ >> -> error loc "expr, expr: not allowed here"
     | <:expr@loc< $_$;$_$ >> ->
         error loc "expr; expr: not allowed here, use do {...} or [|...|] to surround them"
@@ -1019,12 +1020,13 @@ value varify_constructors var_names =
       (* this code is not pretty because it is temporary *)
       let rec id_to_string x =
         match x with
-            [ <:ctyp< $lid:x$ >> -> [x]
+            [ <:ctyp@loc< $lid:x$ >> -> [with_loc x loc]
             | <:ctyp< $x$ $y$ >> -> (id_to_string x) @ (id_to_string y)
             | _ -> assert False]
       in
       let vars = id_to_string vs in
-      let ampersand_vars = List.map (fun x -> "&" ^ x) vars in
+      let ampersand_vars = List.map (fun x ->
+        { loc = x.loc; txt = "&" ^ x.txt}) vars in
       let ty' = varify_constructors vars (ctyp ty) in
       let mkexp = mkexp _loc in
       let mkpat = mkpat _loc in
@@ -1370,11 +1372,11 @@ value varify_constructors var_names =
         class_sig_item csg1 (class_sig_item csg2 l)
     | CgInh loc ct -> [mkctf loc (Pctf_inherit (class_type ct)) :: l]
     | CgMth loc s pf t ->
-        [mkctf loc (Pctf_method (s, mkprivate pf, Concrete, mkpolytype (ctyp t))) :: l]
+        [mkctf loc (Pctf_method (with_loc s loc, mkprivate pf, Concrete, mkpolytype (ctyp t))) :: l]
     | CgVal loc s b v t ->
-        [mkctf loc (Pctf_val (s, mkmutable b, mkvirtual v, ctyp t)) :: l]
+        [mkctf loc (Pctf_val (with_loc s loc, mkmutable b, mkvirtual v, ctyp t)) :: l]
     | CgVir loc s b t ->
-        [mkctf loc (Pctf_method (s, mkprivate b, Virtual, mkpolytype (ctyp t))) :: l]
+        [mkctf loc (Pctf_method (with_loc s loc, mkprivate b, Virtual, mkpolytype (ctyp t))) :: l]
     | CgAnt _ _ -> assert False ]
   and class_expr =
     fun
@@ -1424,7 +1426,7 @@ value varify_constructors var_names =
     | <:class_str_item< $cst1$; $cst2$ >> ->
         class_str_item cst1 (class_str_item cst2 l)
     | CrInh loc ov ce pb ->
-        let opb = if pb = "" then None else Some pb in
+        let opb = if pb = "" then None else Some (with_loc pb loc) in
         [mkcf loc (Pcf_inherit (override_flag loc ov) (class_expr ce) opb) :: l]
     | CrIni loc e -> [mkcf loc (Pcf_initializer (expr e)) :: l]
     | CrMth loc s ov pf e t ->
