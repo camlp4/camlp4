@@ -30,14 +30,14 @@ module Make (Ast : Camlp4.Sig.Ast) = struct
     let str =
       let buf = Buffer.create 2047 in
       let () = Stream.iter (Buffer.add_char buf) strm
-      in Buffer.contents buf in
+      in Buffer.to_bytes buf in
     let magic_len = String.length ast_magic in
-    let buffer = String.create magic_len in
+    let buffer = Bytes.create magic_len in
     do {
-      String.blit str 0 buffer 0 magic_len;
-      if buffer = ast_magic then ()
-      else failwith (Format.sprintf "Bad magic: %S vs %S" buffer ast_magic);
-      Marshal.from_string str magic_len;
+      Bytes.blit str 0 buffer 0 magic_len;
+      if Bytes.to_string buffer = ast_magic then ()
+      else failwith (Format.sprintf "Bad magic: %S vs %S" (Bytes.to_string buffer) ast_magic);
+      Marshal.from_bytes str magic_len;
     };
 
   open Camlp4.PreCast;
