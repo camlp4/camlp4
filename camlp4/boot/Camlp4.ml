@@ -15410,16 +15410,17 @@ module Struct =
               with | (Failure _ as exn) -> Loc.raise loc exn
               
             let remove_underscores s =
-              let l = String.length s in
+              let s = Bytes.of_string s in
+              let l = Bytes.length s in
               let rec remove src dst =
                 if src >= l
-                then if dst >= l then s else String.sub s 0 dst
+                then if dst >= l then s else Bytes.sub s 0 dst
                 else
-                  (match s.[src] with
+                  (match Bytes.get s src with
                    | '_' -> remove (src + 1) dst
                    | c -> (Bytes.set s dst c; remove (src + 1) (dst + 1)))
-              in remove 0 0
-              
+              in Bytes.to_string (remove 0 0)
+
             let mkloc = Loc.to_ocaml_location
               
             let mkghloc loc = Loc.to_ocaml_location (Loc.ghostify loc)
