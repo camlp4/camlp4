@@ -41,8 +41,10 @@ module Make (Ast : Camlp4.Sig.Ast) = struct
     };
 
   open Camlp4.PreCast;
-  value parse_implem = parse Camlp4_config.camlp4_ast_impl_magic_number;
-  value parse_interf = parse Camlp4_config.camlp4_ast_intf_magic_number;
+  value parse_implem ?directive_handler =
+    parse Camlp4_config.camlp4_ast_impl_magic_number ?directive_handler;
+  value parse_interf ?directive_handler =
+    parse Camlp4_config.camlp4_ast_intf_magic_number ?directive_handler;
 
 end;
 
