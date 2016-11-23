@@ -54,12 +54,12 @@ else
     ext_exe=""
 fi
 
-OCAMLC="`which ocamlc`"
+OCAMLC="`command -v ocamlc`"
 LIBDIR="${LIBDIR:-$standard_library}"
 BINDIR="${BINDIR:-`dirname $OCAMLC`}"
 PKGDIR="${PKGDIR:-$standard_library}"
 
-if [ -x "`which ocamlopt`" ]; then
+if [ -x "`command -v ocamlopt`" ]; then
     OB_FLAGS=""
 else
     OB_FLAGS="-byte-plugin"
