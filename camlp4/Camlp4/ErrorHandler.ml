@@ -164,11 +164,7 @@ value print ppf = gen_print ppf default_handler;
 value try_print ppf = gen_print ppf (fun _ -> raise);
 
 value to_string exn =
-  let buf = Buffer.create 128 in
-  let () = bprintf buf "%a" print exn in
-  Buffer.contents buf;
+  Format.asprintf "%a" print exn;
 
 value try_to_string exn =
-  let buf = Buffer.create 128 in
-  let () = bprintf buf "%a" try_print exn in
-  Buffer.contents buf;
+  Format.asprintf "%a" try_print exn;

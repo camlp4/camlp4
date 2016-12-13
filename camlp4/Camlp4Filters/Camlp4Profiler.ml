@@ -53,10 +53,8 @@ module Make (AstFilters : Camlp4.Sig.AstFilters) = struct
   end;
 
   value decorate_this_expr e id =
-    let buf = Buffer.create 42 in
     let _loc = Ast.loc_of_expr e in
-    let () = Format.bprintf buf "%s @@ %a@?" id Loc.dump _loc in
-    let s = Buffer.contents buf in
+    let s = Format.asprintf "%s @@ %a@?" id Loc.dump _loc in
     <:expr< let () = Camlp4prof.count $`str:s$ in $e$ >>;
 
   value rec decorate_fun id =
