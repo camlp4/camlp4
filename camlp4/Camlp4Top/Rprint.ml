@@ -69,7 +69,7 @@ value print_out_value ppf tree =
     | Oval_char c -> fprintf ppf "'%s'" (Char.escaped c)
     | Oval_string s ->
         try fprintf ppf "\"%s\"" (String.escaped s) with
-        [ Invalid_argument "String.create" -> fprintf ppf "<huge string>" ]
+        [ Invalid_argument _ -> fprintf ppf "<huge string>" ]
     | Oval_list tl ->
         fprintf ppf "@[<1>[%a]@]" (print_tree_list print_tree ";") tl
     | Oval_array tl ->
@@ -210,7 +210,8 @@ and print_simple_out_type ppf =
       }
   | Otyp_alias _ _ | Otyp_poly _ _ | Otyp_open
   | Otyp_arrow _ _ _ | Otyp_constr _ [_ :: _] as ty ->
-      fprintf ppf "@[<1>(%a)@]" print_out_type ty ]
+      fprintf ppf "@[<1>(%a)@]" print_out_type ty
+  | Otyp_attribute (_, _) -> ()]
   in
   print_tkind ppf
 and print_out_constr ppf (name, tyl, ret) =

@@ -34,9 +34,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
   value pp = new PP.printer ~comments:False ();
 
   value string_of_patt patt =
-    let buf = Buffer.create 42 in
-    let () = Format.bprintf buf "%a@?" pp#patt patt in
-    let str = Buffer.contents buf in
+    let str = Format.asprintf "%a@?" pp#patt patt in
     if str = "" then assert False else str;
 
   value split_ext = ref False;

@@ -34,7 +34,7 @@ value (interfaces, options, includes) =
     | ["-vnum" :: _] ->
         do { printf "%s@." version; exit 0 }
     | [ arg :: args ] when check_suffix arg ".cmi" ->
-        let basename = String.capitalize (Filename.chop_suffix
+        let basename = String.capitalize_ascii (Filename.chop_suffix
                          (Filename.basename arg) ".cmi") in
         self ([ basename :: interf ], opts, incl) args
     | [ arg :: args ] ->

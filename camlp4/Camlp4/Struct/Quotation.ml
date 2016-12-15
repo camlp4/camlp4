@@ -116,8 +116,7 @@ module Make (Ast : Sig.Camlp4Ast)
       in fprintf ppf "@\n%a@]@." ErrorHandler.print exn;
 
     value to_string x =
-      let b = Buffer.create 50 in
-      let () = bprintf b "%a" print x in Buffer.contents b;
+      Format.asprintf "%a" print x;
   end;
   let module M = ErrorHandler.Register Error in ();
   open Error;

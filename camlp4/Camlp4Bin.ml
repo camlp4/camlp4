@@ -67,7 +67,7 @@ value rewrite_and_load n x =
     end
   end in
   do {
-    match (n, String.lowercase x) with
+    match (n, String.lowercase_ascii x) with
     [ ("Parsers"|"", "pa_r.cmo"      | "r"  | "ocamlr" | "ocamlrevised" | "camlp4ocamlrevisedparser.cmo") -> load [pa_r]
     | ("Parsers"|"", "rr" | "reloaded" | "ocamlreloaded" | "camlp4ocamlreloadedparser.cmo") -> load [pa_rr]
     | ("Parsers"|"", "pa_o.cmo"      | "o"  | "ocaml" | "camlp4ocamlparser.cmo") -> load [pa_r; pa_o]
