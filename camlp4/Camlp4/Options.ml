@@ -27,11 +27,11 @@ value rec action_arg s sl =
         match sl with
         [ [s :: sl] ->
             try do { f (bool_of_string s); Some sl } with
-            [ Invalid_argument "bool_of_string" -> None ]
+            [ Invalid_argument _ -> None ]
         | [] -> None ]
       else
         try do { f (bool_of_string s); Some sl } with
-        [ Invalid_argument "bool_of_string" -> None ]
+        [ Invalid_argument _ -> None ]
   | Arg.Set r -> if s = "" then do { r.val := True; Some sl } else None
   | Arg.Clear r -> if s = "" then do { r.val := False; Some sl } else None
   | Arg.Rest f -> do { List.iter f [s :: sl]; Some [] }
@@ -52,21 +52,21 @@ value rec action_arg s sl =
         match sl with
         [ [s :: sl] ->
             try do { f (int_of_string s); Some sl } with
-            [ Failure "int_of_string" -> None ]
+            [ Failure _ -> None ]
         | [] -> None ]
       else
         try do { f (int_of_string s); Some sl } with
-        [ Failure "int_of_string" -> None ]
+        [ Failure _ -> None ]
   | Arg.Set_int r ->
       if s = "" then
         match sl with
         [ [s :: sl] ->
             try do { r.val := (int_of_string s); Some sl } with
-            [ Failure "int_of_string" -> None ]
+            [ Failure _ -> None ]
         | [] -> None ]
       else
         try do { r.val := (int_of_string s); Some sl } with
-        [ Failure "int_of_string" -> None ]
+        [ Failure _ -> None ]
   | Arg.Float f ->
       if s = "" then
         match sl with
@@ -181,7 +181,7 @@ value add name spec descr =
 
 value fold f init =
   let spec_list = init_spec_list.val @ ext_spec_list.val in
-  let specs = Sort.list (fun (k1, _, _) (k2, _, _) -> k1 >= k2) spec_list in
+  let specs = List.sort (fun (k1, _, _) (k2, _, _) -> String.compare k2 k1) spec_list in
   List.fold_right f specs init;
 
 value parse anon_fun argv =
