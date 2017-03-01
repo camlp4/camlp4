@@ -3,6 +3,7 @@ i386)
   uname -a
 
   git clone git://github.com/ocaml/ocaml
+  git checkout 4.05
   cd ocaml
   ./configure
   make world.opt
