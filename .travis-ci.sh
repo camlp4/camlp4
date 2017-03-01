@@ -2,8 +2,7 @@ case $XARCH in
 i386)
   uname -a
 
-  git clone git://github.com/ocaml/ocaml
-  git checkout 4.05
+  git clone git://github.com/ocaml/ocaml -b 4.05 --depth 1
   cd ocaml
   ./configure
   make world.opt
