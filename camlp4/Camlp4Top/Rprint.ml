@@ -67,9 +67,22 @@ value print_out_value ppf tree =
     | Oval_nativeint i -> fprintf ppf "%ndn" i
     | Oval_float f -> fprintf ppf "%.12g" f
     | Oval_char c -> fprintf ppf "'%s'" (Char.escaped c)
-    | Oval_string s ->
-        try fprintf ppf "\"%s\"" (String.escaped s) with
-        [ Invalid_argument _ -> fprintf ppf "<huge string>" ]
+    | Oval_string (s,maxlen,kind) ->
+              begin try
+               let len = String.length s in
+                fprintf ppf "%s%S%s"
+                  (match kind with [
+                    Ostr_string -> ""
+                  | Ostr_bytes -> "Bytes.of_string "])
+                  (if len > maxlen then String.sub s 0 maxlen else s)
+                  (if len > maxlen then
+                      Printf.sprintf
+                        "... (* string length %d; truncated *)" len
+                   else ""
+                  )
+                with [Invalid_argument _ (* "String.create" *)->
+                      fprintf ppf "<huge string>" ]
+        end
     | Oval_list tl ->
         fprintf ppf "@[<1>[%a]@]" (print_tree_list print_tree ";") tl
     | Oval_array tl ->
