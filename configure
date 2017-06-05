@@ -41,8 +41,8 @@ elif [ $major -ne 4 -o $minor -ne 6 ]; then
     exit 2
 fi
 
-ocamlc -config | sed 's/: /="/;s/$/"/' > config.sh
-ocamlc -config | sed 's/^/let /;s/: / = "/;s/$/"/' > myocamlbuild_config.ml
+ocamlc -config | tr -d '\015' | sed 's/: /="/;s/$/"/' > config.sh
+ocamlc -config | tr -d '\015' | sed 's/^/let /;s/: / = "/;s/$/"/' > myocamlbuild_config.ml
 
 # Add a few things to config.sh
 
