@@ -15708,12 +15708,13 @@ module Struct =
             and row_field =
               function
               | Ast.TyNil _ -> []
-              | Ast.TyVrn (_, i) -> [ Rtag ((conv_con i), [], true, []) ]
-              | Ast.TyOfAmp (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((conv_con i), [], true,
+              | Ast.TyVrn (loc, i) ->
+                  [ Rtag (with_loc (conv_con i) loc, [], true, []) ]
+              | Ast.TyOfAmp (loc, (Ast.TyVrn (_, i)), t) ->
+                  [ Rtag (with_loc (conv_con i) loc, [], true,
                       (List.map ctyp (list_of_ctyp t []))) ]
-              | Ast.TyOf (_, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((conv_con i), [], false,
+              | Ast.TyOf (loc, (Ast.TyVrn (_, i)), t) ->
+                  [ Rtag (with_loc (conv_con i) loc, [], false,
                       (List.map ctyp (list_of_ctyp t []))) ]
               | Ast.TyOr (_, t1, t2) -> (row_field t1) @ (row_field t2)
               | t -> [ Rinherit (ctyp t) ]
@@ -15727,7 +15728,7 @@ module Struct =
               | Ast.TyNil _ -> acc
               | Ast.TySem (_, t1, t2) -> meth_list t1 (meth_list t2 acc)
               | Ast.TyCol (_, (Ast.TyId (_, (Ast.IdLid (loc, lab)))), t) ->
-                  (with_loc lab loc, [], (mkpolytype (ctyp t))) :: acc
+                  (Otag (with_loc lab loc, [], (mkpolytype (ctyp t)))) :: acc
               | _ -> assert false
             and package_type_constraints wc acc =
               match wc with
@@ -16269,7 +16270,7 @@ module Struct =
                       Ptyp_constr (longident, (List.map loop lst))
                   | Ptyp_object ((lst, o)) ->
                       Ptyp_object
-                        (((List.map (fun (s, a, t) -> (s, a, (loop t))) lst),
+                        (((List.map (fun (Otag (s, a, t)) -> Otag (s, a, (loop t))) lst),
                           o))
                   | Ptyp_class (longident, lst) ->
                       Ptyp_class ((longident, (List.map loop lst)))
