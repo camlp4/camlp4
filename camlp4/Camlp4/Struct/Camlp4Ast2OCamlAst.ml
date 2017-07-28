@@ -335,9 +335,12 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyTup loc _ -> error loc "this construction is not allowed here" ]
   and row_field = fun
     [ <:ctyp<>> -> []
-    | <:ctyp< `$i$ >> -> [Rtag (conv_con i) [] True []]
-    | <:ctyp< `$i$ of & $t$ >> -> [Rtag (conv_con i) [] True (List.map ctyp (list_of_ctyp t []))]
-    | <:ctyp< `$i$ of $t$ >> -> [Rtag (conv_con i) [] False (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp@loc< `$i$ >> ->
+        [Rtag (with_loc (conv_con i) loc) [] True []]
+    | <:ctyp@loc< `$i$ of & $t$ >> ->
+        [Rtag (with_loc (conv_con i) loc) [] True (List.map ctyp (list_of_ctyp t []))]
+    | <:ctyp@loc< `$i$ of $t$ >> ->
+        [Rtag (with_loc (conv_con i) loc) [] False (List.map ctyp (list_of_ctyp t []))]
     | <:ctyp< $t1$ | $t2$ >> -> row_field t1 @ row_field t2
     | t -> [Rinherit (ctyp t)] ]
   and name_tags = fun
@@ -348,7 +351,8 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     match fl with
     [ <:ctyp<>> -> acc
     | <:ctyp< $t1$; $t2$ >> -> meth_list t1 (meth_list t2 acc)
-    | <:ctyp@loc< $lid:lab$ : $t$ >> -> [(with_loc lab loc, [], mkpolytype (ctyp t)) :: acc]
+    | <:ctyp@loc< $lid:lab$ : $t$ >> ->
+        [Otag (with_loc lab loc) [] (mkpolytype (ctyp t)) :: acc]
     | _ -> assert False ]
 
   and package_type_constraints wc acc =
@@ -790,7 +794,7 @@ value varify_constructors var_names =
       | Ptyp_constr longident lst ->
           Ptyp_constr longident (List.map loop lst)
       | Ptyp_object (lst, o) ->
-          Ptyp_object (List.map (fun (s, a, t) -> (s, a, loop t)) lst, o)
+          Ptyp_object (List.map (fun [ Otag s a t -> Otag s a (loop t) ]) lst, o)
       | Ptyp_class longident lst ->
           Ptyp_class (longident, List.map loop lst)
       | Ptyp_alias core_type string ->
