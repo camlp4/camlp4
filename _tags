@@ -17,6 +17,9 @@
 # We want -g everywhere it's possible
 true: debug
 
+# Enforce safe-string
+true: safe_string
+
 <camlp4/**/*>: use_import
 <camlp4/**/*.{byte,native}>: use_dynlink
 <camlp4/config/gen_import.*>: use_ocamlcommon
