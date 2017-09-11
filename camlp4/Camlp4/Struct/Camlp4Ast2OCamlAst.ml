@@ -77,15 +77,16 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   ;
 
   value remove_underscores s =
-    let l = String.length s in
+    let s = Bytes.of_string s in
+    let l = Bytes.length s in
     let rec remove src dst =
       if src >= l then
-        if dst >= l then s else String.sub s 0 dst
+        if dst >= l then s else Bytes.sub s 0 dst
       else
-        match s.[src] with
+        match Bytes.get s src with
         [ '_' -> remove (src + 1) dst
         |  c  -> do { Bytes.set s dst c; remove (src + 1) (dst + 1) } ]
-    in remove 0 0
+    in Bytes.to_string (remove 0 0)
   ;
 
   value mkloc = Loc.to_ocaml_location;
