@@ -780,7 +780,7 @@ value varify_constructors var_names =
       | Ptyp_constr longident lst ->
           Ptyp_constr longident (List.map loop lst)
       | Ptyp_object (lst, o) ->
-          Ptyp_object (List.map (fun [ Otag s a t -> Otag s a (loop t) ]) lst, o)
+          Ptyp_object (List.map loop_object_field lst, o)
       | Ptyp_class longident lst ->
           Ptyp_class (longident, List.map loop lst)
       | Ptyp_alias core_type string ->
@@ -796,7 +796,11 @@ value varify_constructors var_names =
 ]
     in
     {(t) with ptyp_desc = desc}
-  and loop_row_field x  =
+  and loop_object_field x =
+    match x with
+      [ Otag s a t -> Otag s a (loop t)
+      | Oinherit t -> Oinherit (loop t) ]
+  and loop_row_field x =
     match x with
       [ Rtag(label,attrs,flag,lst) ->
           Rtag(label,attrs,flag,List.map loop lst)
