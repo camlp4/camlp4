@@ -16049,24 +16049,11 @@ module Struct =
                   (Pwith_module ((long_uident i1), (long_uident i2))) :: acc
               | Ast.WcTyS (loc, id_tpl, ct) ->
                   (mkwithtyp
-                     (fun lid x ->
-                        let _ =
-                          match lid with
-                          | { Location.txt = Lident _ } -> ()
-                          | _ ->
-                              Loc.raise loc
-                                (Failure
-                                   "substitution of types with module paths isn't allowed")
-                        in Pwith_typesubst x)
-                     loc id_tpl ct) ::
+                     (fun lid x -> Pwith_typesubst (lid, x)) loc id_tpl ct) ::
                     acc
-              | Ast.WcMoS (loc, i1, i2) ->
-                  (match long_uident i1 with
-                   | { txt = Lident s; loc = loc } ->
-                       (Pwith_modsubst ({ txt = s; loc = loc; },
-                          (long_uident i2))) ::
-                         acc
-                   | _ -> error loc "bad 'with module :=' constraint")
+              | Ast.WcMoS (_, i1, i2) ->
+                  (Pwith_modsubst (long_uident i1, long_uident i2)) ::
+                    acc
               | Ast.WcAnd (_, wc1, wc2) -> mkwithc wc1 (mkwithc wc2 acc)
               | Ast.WcAnt (loc, _) ->
                   error loc "bad with constraint (antiquotation)"

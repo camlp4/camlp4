@@ -604,24 +604,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:with_constr< module $i1$ = $i2$ >> ->
         [(Pwith_module (long_uident i1) (long_uident i2)) :: acc]
     | <:with_constr@loc< type $id_tpl$ := $ct$ >> ->
-        [mkwithtyp (fun lid x ->
-                     let _ =
-                       match lid with
-                         [ { Location.txt = Lident _ } -> ()
-                         | _ ->
-                           Loc.raise loc
-                             (Failure
-                                "substitution of types with module paths isn't allowed")
-                         ]
-                     in
-                     Pwith_typesubst x) loc id_tpl ct :: acc]
-    | <:with_constr@loc< module $i1$ := $i2$ >> (*WcMoS _ i1 i2*) ->
-        match long_uident i1 with
-        [ {txt=Lident s; loc} ->
-          [(Pwith_modsubst {txt=s;loc} (long_uident i2)) ::
-           acc]
-        | _ -> error loc "bad 'with module :=' constraint"
-        ]
+        [mkwithtyp (fun lid x -> Pwith_typesubst lid x) loc id_tpl ct :: acc]
+    | <:with_constr< module $i1$ := $i2$ >> (*WcMoS _ i1 i2*) ->
+        [(Pwith_modsubst (long_uident i1) (long_uident i2)) :: acc]
     | <:with_constr< $wc1$ and $wc2$ >> -> mkwithc wc1 (mkwithc wc2 acc)
     | <:with_constr@loc< $anti:_$ >> ->
          error loc "bad with constraint (antiquotation)" ];
