@@ -367,7 +367,7 @@ New syntax:\
             then String.sub n 1 (len - 1)
             else "-" ^ n
           
-        let mkumin _loc f arg =
+        let mkumin _loc arg =
           match arg with
           | Ast.ExInt (_, n) -> Ast.ExInt (_loc, (neg_string n))
           | Ast.ExInt32 (_, n) -> Ast.ExInt32 (_loc, (neg_string n))
@@ -375,8 +375,33 @@ New syntax:\
           | Ast.ExNativeInt (_, n) -> Ast.ExNativeInt (_loc, (neg_string n))
           | Ast.ExFlo (_, n) -> Ast.ExFlo (_loc, (neg_string n))
           | _ ->
-              Ast.ExApp (_loc,
-                (Ast.ExId (_loc, (Ast.IdLid (_loc, ("~" ^ f))))), arg)
+              Ast.ExApp (_loc, (Ast.ExId (_loc, (Ast.IdLid (_loc, "~-")))),
+                arg)
+          
+        let mkumin_f _loc arg =
+          match arg with
+          | Ast.ExFlo (_, n) -> Ast.ExFlo (_loc, (neg_string n))
+          | _ ->
+              Ast.ExApp (_loc, (Ast.ExId (_loc, (Ast.IdLid (_loc, "~-.")))),
+                arg)
+          
+        let mkuplus _loc arg =
+          match arg with
+          | Ast.ExInt (_, n) -> Ast.ExInt (_loc, n)
+          | Ast.ExInt32 (_, n) -> Ast.ExInt32 (_loc, n)
+          | Ast.ExInt64 (_, n) -> Ast.ExInt64 (_loc, n)
+          | Ast.ExNativeInt (_, n) -> Ast.ExNativeInt (_loc, n)
+          | Ast.ExFlo (_, n) -> Ast.ExFlo (_loc, n)
+          | _ ->
+              Ast.ExApp (_loc, (Ast.ExId (_loc, (Ast.IdLid (_loc, "~+")))),
+                arg)
+          
+        let mkuplus_f _loc arg =
+          match arg with
+          | Ast.ExFlo (_, n) -> Ast.ExFlo (_loc, n)
+          | _ ->
+              Ast.ExApp (_loc, (Ast.ExId (_loc, (Ast.IdLid (_loc, "~+.")))),
+                arg)
           
         let mklistexp _loc last =
           let rec loop top =
@@ -2396,14 +2421,22 @@ New syntax:\
                                     'expr)))) ]);
                         ((Some "unary minus"),
                          (Some Camlp4.Sig.Grammar.NonA),
-                         [ ([ Gram.Skeyword "-."; Gram.Sself ],
+                         [ ([ Gram.Skeyword "+."; Gram.Sself ],
                             (Gram.Action.mk
                                (fun (e : 'expr) _ (_loc : Gram.Loc.t) ->
-                                  (mkumin _loc "-." e : 'expr))));
+                                  (mkuplus_f _loc e : 'expr))));
+                           ([ Gram.Skeyword "+"; Gram.Sself ],
+                            (Gram.Action.mk
+                               (fun (e : 'expr) _ (_loc : Gram.Loc.t) ->
+                                  (mkuplus _loc e : 'expr))));
+                           ([ Gram.Skeyword "-."; Gram.Sself ],
+                            (Gram.Action.mk
+                               (fun (e : 'expr) _ (_loc : Gram.Loc.t) ->
+                                  (mkumin_f _loc e : 'expr))));
                            ([ Gram.Skeyword "-"; Gram.Sself ],
                             (Gram.Action.mk
                                (fun (e : 'expr) _ (_loc : Gram.Loc.t) ->
-                                  (mkumin _loc "-" e : 'expr)))) ]);
+                                  (mkumin _loc e : 'expr)))) ]);
                         ((Some "apply"), (Some Camlp4.Sig.Grammar.LeftA),
                          [ ([ Gram.Skeyword "lazy"; Gram.Sself ],
                             (Gram.Action.mk
@@ -11778,9 +11811,7 @@ module G =
         let pp = new PP.printer ~comments: false ()
           
         let string_of_patt patt =
-          let buf = Buffer.create 42 in
-          let () = Format.bprintf buf "%a@?" pp#patt patt in
-          let str = Buffer.contents buf
+          let str = Format.asprintf "%a@?" pp#patt patt
           in if str = "" then assert false else str
           
         let split_ext = ref false
@@ -16038,7 +16069,7 @@ module B =
                (add_to_loaded_modules n;
                 DynLoader.load dyn_loader (n ^ objext)))
       in
-        ((match (n, (String.lowercase x)) with
+        ((match (n, (String.lowercase_ascii x)) with
           | (("Parsers" | ""),
              ("pa_r.cmo" | "r" | "ocamlr" | "ocamlrevised" |
                 "camlp4ocamlrevisedparser.cmo"))
