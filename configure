@@ -6,6 +6,7 @@ unset LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
 
 set -e
 
+PINNED=0
 for i in "$@"; do
   case $i in
     --bindir=*)
@@ -16,6 +17,9 @@ for i in "$@"; do
       ;;
     --pkgdir=*)
       PKGDIR=${i##*=}
+      ;;
+    --pinned*)
+      PINNED=1
       ;;
     *)
       echo "usage: ./configure [--bindir=<dir>] [--libdir=<dir>] [--pkgdir=<dir>]" 1>&2
@@ -37,7 +41,14 @@ if [ $major -lt 4 -o \( $major -eq 4 -a $minor -lt 2 \) ]; then
     exit 2
 elif [ $major -ne 4 -o $minor -ne 7 ]; then
     echo "This version of Camlp4 is for OCaml 4.07 but you are using OCaml $ocaml_version."
-    echo "If building Camlp4 directly from git, use the $major.$minor branch."
+    if [ -d .git ] ; then
+      if [ $PINNED -eq 1 ] ; then
+        echo "You've used the wrong opam pin URL for this switch.">&2
+        echo "Try https://github.com/ocaml/camlp4.git#$major.$minor instead">&2
+      else
+        echo "You appear to be building Camlp4 from git, so try the $major.$minor branch."
+      fi
+    fi
     exit 2
 fi
 

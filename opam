@@ -5,7 +5,7 @@ maintainer: "jeremie@dimino.org"
 homepage: "https://github.com/ocaml/camlp4"
 license: "LGPLv2"
 build: [
-  ["./configure" "--bindir=%{bin}%" "--libdir=%{lib}%/ocaml" "--pkgdir=%{lib}%"]
+  ["./configure" "--bindir=%{bin}%" "--libdir=%{lib}%/ocaml" "--pkgdir=%{lib}%" "--pinned"]
   [make "clean"]
   [make "all"] {ocaml-native-dynlink}
   [make "byte"] {!ocaml-native-dynlink}
