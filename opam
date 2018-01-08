@@ -1,4 +1,5 @@
 opam-version: "1.2"
+version: "4.02+trunk"
 maintainer: "jeremie@dimino.org"
 homepage: "https://github.com/ocaml/camlp4"
 bug-reports: "https://github.com/ocaml/camlp4/issues"
@@ -6,7 +7,8 @@ dev-repo: "https://github.com/ocaml/camlp4.git"
 license: "LGPLv2"
 build: [
   ["./configure" "--bindir=%{bin}%" "--libdir=%{lib}%/ocaml" "--pkgdir=%{lib}%"]
-  [make "all"]
+  [make "all"] {ocaml-native-dynlink}
+  [make "byte"] {!ocaml-native-dynlink}
 ]
 install: [make "install" "install-META"]
 depends: ["ocamlfind" {build}]
