@@ -76,7 +76,7 @@ let () =
       else
         let exe =
           "camlp4boot" ^
-          if !Options.native_plugin then
+          if C.ocamlnat then
             (* If we are using a native plugin, we might as well use a native
                preprocessor. *)
             ".native"
