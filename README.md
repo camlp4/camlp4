@@ -1,28 +1,26 @@
 camlp4
 ======
 
-Camlp4 is a software system for writing extensible parsers for
-programming languages. It provides a set of OCaml libraries that are
-used to define grammars as well as loadable syntax extensions of such
-grammars. Camlp4 stands for Caml Preprocessor and Pretty-Printer and
-one of its most important applications is the definition of
-domain-specific extensions of the syntax of OCaml.
+Camlp4 was a software system for writing extensible parsers for
+programming languages. Since 2017, Camlp4 is not actively maintained
+anymore, and only receives occasional fixes for compatibility with new
+OCaml versions. Maintainers of Camlp4-using projects are actively
+encouraged to switch to other systems:
 
-Camlp4 was part of the official OCaml distribution until its version
-4.01.0. Since then it has been replaced by a simpler system which is
-easier to maintain and to learn: ppx rewriters and extension points.
+- For new projects or actively-moving projects, we recommend adopting
+  ppx attributes and extensions, which is now the preferred way to
+  perform AST transformations on OCaml programs.
 
-Installation
-------------
+- For slow-moving projects or users of other Camlp4 features
+  (extensible grammars), switching to the (maintained)
+  [Camlp5](https://github.com/camlp5/camlp5) variant of the
+  preprocessor should be easy.
 
-You should have OCaml installed. To build and install camlp4, type:
-
-    ./configure
-    make all
-    make install
-
-If you don't want or can't build the native code version, replace
-`make all` by `make`.
+Unless you are interested in taking over maintainance of Camlp4, we
+prefer not to receive request for new features or changes --
+contribution efforts should rather go to the ppx ecosystem or
+Camlp5. Minor patches to improve compatibility with new OCaml versions
+are welcome.
 
 Building from git
 -----------------
