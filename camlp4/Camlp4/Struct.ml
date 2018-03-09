@@ -1,1 +1,15 @@
-include Camlp4_Struct;
+module AstFilters         = Struct_AstFilters;
+module Camlp4Ast          = Struct_Camlp4Ast;
+module Camlp4Ast2OCamlAst = Struct_Camlp4Ast2OCamlAst;
+module CleanAst           = Struct_CleanAst;
+module CommentFilter      = Struct_CommentFilter;
+module DynLoader          = Struct_DynLoader;
+module EmptyError         = Struct_EmptyError;
+module EmptyPrinter       = Struct_EmptyPrinter;
+module FreeVars           = Struct_FreeVars;
+module Lexer              = Struct_Lexer;
+module Loc                = Struct_Loc;
+module Quotation          = Struct_Quotation;
+module Token              = Struct_Token;
+module Grammar            = Struct_Grammar;
+module DynAst             = Struct_DynAst;

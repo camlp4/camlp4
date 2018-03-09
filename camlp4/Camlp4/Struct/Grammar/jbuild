@@ -1,4 +1,0 @@
-(library
- ((name Camlp4_Struct_Grammar)
-  (public_name camlp4.Struct.Grammar)
-  (preprocess (action (run ${SCOPE_ROOT}/camlp4/boot/camlp4boot.exe ${<})))))

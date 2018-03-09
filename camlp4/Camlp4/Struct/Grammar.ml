@@ -1,1 +1,13 @@
-include Camlp4_Struct_Grammar;
+module Delete    = Struct_Grammar_Delete;
+module Dynamic   = Struct_Grammar_Dynamic;
+module Entry     = Struct_Grammar_Entry;
+module Failed    = Struct_Grammar_Failed;
+module Find      = Struct_Grammar_Find;
+module Fold      = Struct_Grammar_Fold;
+module Insert    = Struct_Grammar_Insert;
+module Parser    = Struct_Grammar_Parser;
+module Print     = Struct_Grammar_Print;
+module Search    = Struct_Grammar_Search;
+module Static    = Struct_Grammar_Static;
+module Structure = Struct_Grammar_Structure;
+module Tools     = Struct_Grammar_Tools;
