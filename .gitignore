@@ -3,3 +3,5 @@ config.sh
 myocamlbuild_config.ml
 camlp4/boot/*.old
 camlp4/META
+*.merlin
+*.install

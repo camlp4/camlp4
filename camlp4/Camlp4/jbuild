@@ -1,0 +1,5 @@
+(library
+ ((name Camlp4)
+  (public_name camlp4)
+  (libraries (Camlp4_Struct Camlp4_Printers))
+  (preprocess (action (run ${SCOPE_ROOT}/camlp4/boot/camlp4boot.exe)))))

@@ -1,0 +1,13 @@
+(library
+ ((name Camlp4_config)
+  (public_name camlp4.config)
+  (modules (Camlp4_config Camlp4_import))))
+
+(executable
+ ((name gen_import)
+  (modules (gen_import))
+  (libraries (compiler-libs.common))))
+
+(rule
+ (with-stdout-to Camlp4_import.ml
+  (chdir ${SCOPE_ROOT} (run ${exe:gen_import.exe} ${ocaml_where}))))

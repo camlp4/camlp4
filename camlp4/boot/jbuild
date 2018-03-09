@@ -1,0 +1,5 @@
+(executable
+ ((name camlp4boot)
+  (modules (camlp4boot camlp4))
+  (libraries (compiler-libs camlp4.config dynlink))
+  (flags (:standard -w -8-3-5))))

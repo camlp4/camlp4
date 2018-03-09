@@ -5,6 +5,9 @@ DESTDIR=
 
 OB += $(OB_FLAGS)
 
+blah:
+	jbuilder build
+
 .PHONY: default
 default: byte
 
