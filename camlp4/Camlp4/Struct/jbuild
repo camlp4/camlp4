@@ -1,1 +1,3 @@
 (ocamllex (Lexer))
+
+(rule (copy# ${SCOPE_ROOT}/camlp4/boot/Camlp4Ast.ml Camlp4Ast.ml))

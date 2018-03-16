@@ -125,6 +125,12 @@
    (cat "Struct/Camlp4Ast2OCamlAst.ml"))))
 
 (rule
+ (with-stdout-to Struct_Camlp4Ast.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Camlp4Ast.ml\"\n")
+   (cat "Struct/Camlp4Ast.ml"))))
+
+(rule
  (with-stdout-to Struct_AstFilters.ml
   (progn
    (echo "# 1 \"camlp4/Camlp4/Struct/AstFilters.ml\"\n")
