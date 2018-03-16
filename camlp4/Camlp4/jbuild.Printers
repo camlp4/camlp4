@@ -2,14 +2,14 @@
 (rule
  (with-stdout-to Printers_OCamlr.mli
   (progn
-   (echo "module OCaml = Printers_OCaml\n")
+   (echo "module OCaml = Printers_OCaml;\n")
    (echo "# 1 \"camlp4/Camlp4/Printers/OCamlr.mli\"\n")
    (cat "Printers/OCamlr.mli"))))
 
 (rule
  (with-stdout-to Printers_OCamlr.ml
   (progn
-   (echo "module OCaml = Printers_OCaml\n")
+   (echo "module OCaml = Printers_OCaml;\n")
    (echo "# 1 \"camlp4/Camlp4/Printers/OCamlr.ml\"\n")
    (cat "Printers/OCamlr.ml"))))
 
