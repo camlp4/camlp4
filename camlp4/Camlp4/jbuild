@@ -1,6 +1,8 @@
 (library
  ((name Camlp4)
   (public_name camlp4)
+  (libraries (ocaml-migrate-parsetree camlp4.config))
+  (flags (:standard -open Migrate_parsetree.Ast_406))
   (preprocessor_deps (Camlp4Ast.partial.ml))
   (preprocess (action
                (chdir ${SCOPE_ROOT}
@@ -24,7 +26,7 @@
 
 (rule
  ((targets (jbuild.Struct.gen))
-  (deps    ((glob_files Struct/Grammar/*.{ml,mli})))
+  (deps    ((glob_files Struct/*.{ml,mli})))
   (action  (chdir ${ROOT}
             (run build/pack_dir.exe ${exe:../boot/camlp4boot.exe}
              ${path-no-dep:.} Struct)))))
