@@ -5,8 +5,7 @@ DESTDIR=
 
 OB += $(OB_FLAGS)
 
-blah:
-	jbuilder build
+blah: update-jbuilds
 
 .PHONY: default
 default: byte
@@ -33,6 +32,10 @@ install-META: camlp4/META
 
 camlp4/META: camlp4/META.in
 	sed -e s/@@VERSION@@/${version}/g $? > $@
+
+.PHONE: update-jbuilds
+update-jbuilds:
+	jbuilder build @update-jbuilds --auto-promote
 
 .PHONY: bootstrap
 bootstrap:

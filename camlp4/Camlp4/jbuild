@@ -3,53 +3,36 @@
   (public_name camlp4)
   (preprocess (action (run ${SCOPE_ROOT}/camlp4/boot/camlp4boot.exe ${<})))))
 
-(rule (copy# Printers/DumpCamlp4Ast.ml  Printers_DumpCamlp4Ast.ml))
-(rule (copy# Printers/DumpCamlp4Ast.mli Printers_DumpCamlp4Ast.mli))
-(rule (copy# Printers/DumpOCamlAst.ml   Printers_DumpOCamlAst.ml))
-(rule (copy# Printers/DumpOCamlAst.mli  Printers_DumpOCamlAst.mli))
-(rule (copy# Printers/Null.ml           Printers_Null.ml))
-(rule (copy# Printers/Null.mli          Printers_Null.mli))
-(rule (copy# Printers/OCaml.ml          Printers_OCaml.ml))
-(rule (copy# Printers/OCaml.mli         Printers_OCaml.mli))
-(rule (copy# Printers/OCamlr.ml         Printers_OCamlr.ml))
-(rule (copy# Printers/OCamlr.mli        Printers_OCamlr.mli))
+(rule
+ ((targets (jbuild.Printers.gen))
+  (deps    ((glob_files Printers/*.{ml,mli})))
+  (action  (chdir ${ROOT}
+            (run build/pack_dir.exe ${exe:../boot/camlp4boot.exe}
+             ${path-no-dep:.} Printers)))))
 
-(rule (copy# Struct/Grammar/Delete.ml    Struct_Grammar_Delete.ml))
-(rule (copy# Struct/Grammar/Dynamic.ml   Struct_Grammar_Dynamic.ml))
-(rule (copy# Struct/Grammar/Entry.ml     Struct_Grammar_Entry.ml))
-(rule (copy# Struct/Grammar/Failed.ml    Struct_Grammar_Failed.ml))
-(rule (copy# Struct/Grammar/Find.ml      Struct_Grammar_Find.ml))
-(rule (copy# Struct/Grammar/Fold.ml      Struct_Grammar_Fold.ml))
-(rule (copy# Struct/Grammar/Fold.mli     Struct_Grammar_Fold.mli))
-(rule (copy# Struct/Grammar/Insert.ml    Struct_Grammar_Insert.ml))
-(rule (copy# Struct/Grammar/Parser.ml    Struct_Grammar_Parser.ml))
-(rule (copy# Struct/Grammar/Parser.mli   Struct_Grammar_Parser.mli))
-(rule (copy# Struct/Grammar/Print.ml     Struct_Grammar_Print.ml))
-(rule (copy# Struct/Grammar/Print.mli    Struct_Grammar_Print.mli))
-(rule (copy# Struct/Grammar/Search.ml    Struct_Grammar_Search.ml))
-(rule (copy# Struct/Grammar/Static.ml    Struct_Grammar_Static.ml))
-(rule (copy# Struct/Grammar/Structure.ml Struct_Grammar_Structure.ml))
-(rule (copy# Struct/Grammar/Tools.ml     Struct_Grammar_Tools.ml))
+(alias
+ ((name update-jbuilds)
+  (action (diff jbuild.Printers jbuild.Printers.gen))))
 
-(rule (copy# Struct/AstFilters.ml          Struct_AstFilters.ml))
-(rule (copy# Struct/Camlp4Ast2OCamlAst.ml  Struct_Camlp4Ast2OCamlAst.ml))
-(rule (copy# Struct/Camlp4Ast2OCamlAst.mli Struct_Camlp4Ast2OCamlAst.mli))
-(rule (copy# Struct/CleanAst.ml            Struct_CleanAst.ml))
-(rule (copy# Struct/CommentFilter.ml       Struct_CommentFilter.ml))
-(rule (copy# Struct/CommentFilter.mli      Struct_CommentFilter.mli))
-(rule (copy# Struct/DynAst.ml              Struct_DynAst.ml))
-(rule (copy# Struct/DynLoader.ml           Struct_DynLoader.ml))
-(rule (copy# Struct/DynLoader.mli          Struct_DynLoader.mli))
-(rule (copy# Struct/EmptyError.ml          Struct_EmptyError.ml))
-(rule (copy# Struct/EmptyError.mli         Struct_EmptyError.mli))
-(rule (copy# Struct/EmptyPrinter.ml        Struct_EmptyPrinter.ml))
-(rule (copy# Struct/EmptyPrinter.mli       Struct_EmptyPrinter.mli))
-(rule (copy# Struct/FreeVars.ml            Struct_FreeVars.ml))
-(rule (copy# Struct/FreeVars.mli           Struct_FreeVars.mli))
-(rule (copy# Struct/Grammar.ml             Struct_Grammar.ml))
-(rule (copy# Struct/Lexer.ml               Struct_Lexer.ml))
-(rule (copy# Struct/Loc.ml                 Struct_Loc.ml))
-(rule (copy# Struct/Loc.mli                Struct_Loc.mli))
-(rule (copy# Struct/Quotation.ml           Struct_Quotation.ml))
-(rule (copy# Struct/Token.ml               Struct_Token.ml))
-(rule (copy# Struct/Token.mli              Struct_Token.mli))
+
+(rule
+ ((targets (jbuild.Struct.gen))
+  (deps    ((glob_files Struct/Grammar/*.{ml,mli})))
+  (action  (chdir ${ROOT}
+            (run build/pack_dir.exe ${exe:../boot/camlp4boot.exe}
+             ${path-no-dep:.} Struct)))))
+
+(alias
+ ((name update-jbuilds)
+  (action (diff jbuild.Struct jbuild.Struct.gen))))
+
+(rule
+ ((targets (jbuild.Struct_Grammar.gen))
+  (deps    ((glob_files Struct/Grammar/*.{ml,mli})))
+  (action  (chdir ${ROOT}
+            (run build/pack_dir.exe ${exe:../boot/camlp4boot.exe}
+             ${path-no-dep:.} Struct/Grammar)))))
+
+(alias
+ ((name update-jbuilds)
+  (action (diff jbuild.Struct_Grammar jbuild.Struct_Grammar.gen))))

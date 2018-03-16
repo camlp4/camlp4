@@ -1,0 +1,62 @@
+
+(rule
+ (with-stdout-to Printers_OCamlr
+  (progn
+   (echo "module OCaml = Printers_OCaml\n")
+   (echo "# 1 \"camlp4/Camlp4/Printers/OCamlr\"\n")
+   (cat "Printers/OCamlr"))))
+
+(rule
+ (with-stdout-to Printers_OCamlr
+  (progn
+   (echo "module OCaml = Printers_OCaml\n")
+   (echo "# 1 \"camlp4/Camlp4/Printers/OCamlr\"\n")
+   (cat "Printers/OCamlr"))))
+
+(rule
+ (with-stdout-to Printers_OCaml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/OCaml\"\n")
+   (cat "Printers/OCaml"))))
+
+(rule
+ (with-stdout-to Printers_OCaml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/OCaml\"\n")
+   (cat "Printers/OCaml"))))
+
+(rule
+ (with-stdout-to Printers_Null
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/Null\"\n")
+   (cat "Printers/Null"))))
+
+(rule
+ (with-stdout-to Printers_Null
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/Null\"\n")
+   (cat "Printers/Null"))))
+
+(rule
+ (with-stdout-to Printers_DumpOCamlAst
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/DumpOCamlAst\"\n")
+   (cat "Printers/DumpOCamlAst"))))
+
+(rule
+ (with-stdout-to Printers_DumpOCamlAst
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/DumpOCamlAst\"\n")
+   (cat "Printers/DumpOCamlAst"))))
+
+(rule
+ (with-stdout-to Printers_DumpCamlp4Ast
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/DumpCamlp4Ast\"\n")
+   (cat "Printers/DumpCamlp4Ast"))))
+
+(rule
+ (with-stdout-to Printers_DumpCamlp4Ast
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Printers/DumpCamlp4Ast\"\n")
+   (cat "Printers/DumpCamlp4Ast"))))
