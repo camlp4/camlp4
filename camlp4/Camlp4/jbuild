@@ -1,7 +1,10 @@
 (library
  ((name Camlp4)
   (public_name camlp4)
-  (preprocess (action (run ${SCOPE_ROOT}/camlp4/boot/camlp4boot.exe ${<})))))
+  (preprocessor_deps (Camlp4Ast.partial.ml))
+  (preprocess (action
+               (chdir ${SCOPE_ROOT}
+                (run camlp4/boot/camlp4boot.exe ${<}))))))
 
 (include jbuild.Printers)
 (include jbuild.Struct)
