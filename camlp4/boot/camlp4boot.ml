@@ -16282,7 +16282,9 @@ You should give the -noassert option to the ocaml compiler instead.@."
       if ((String.length s) > 0) && (s.[0] = '+')
       then Filename.concat alt (String.sub s 1 ((String.length s) - 1))
       else s
-      
+
+    let ignore_files = ref []
+    
     let initial_spec_list =
       [ ("-I",
          (Arg.String
@@ -16329,12 +16331,18 @@ You should give the -noassert option to the ocaml compiler instead.@."
          "<name>  Load the printer Camlp4Printers/<name>.cm(o|a|xs)");
         ("-filter", (Arg.String (rewrite_and_load "Filters")),
          "<name>  Load the filter Camlp4Filters/<name>.cm(o|a|xs)");
+        ("-ignore-file", (Arg.String (fun s -> ignore_files := s :: !ignore_files)),
+         "<file> Do not rewrite teh following file");
         ("-ignore", (Arg.String ignore), "ignore the next argument");
         ("--", (Arg.Unit ignore), "Deprecated, does nothing") ]
       
     let _ = Options.init initial_spec_list
       
     let anon_fun name =
+      if List.mem (Filename.basename name) !ignore_files then begin
+        let n = Printf.ksprintf Sys.command "cat %s" (Filename.quote name) in
+        if n <> 0 then exit n
+      end else
       input_file
         (if Filename.check_suffix name ".mli"
          then Intf name

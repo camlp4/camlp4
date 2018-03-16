@@ -98,6 +98,7 @@ let () =
       pr " (with-stdout-to %s_%s" prefix base;
       pr "  (progn";
       List.iter deps ~f:(fun m ->
-          pr {|   (echo "module %s = %s_%s;\n")|} m prefix m);
+          pr {|   (echo "module %s = %s_%s%s\n")|} m prefix m
+            (if base = "Lexer.ml" then "" else ";"));
       pr {|   (echo "# 1 \"%s\"\n")|} (Filename.concat dir base);
       pr  "   (cat %S))))" (Filename.concat sub_dir base))

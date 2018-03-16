@@ -4,9 +4,10 @@
   (libraries (ocaml-migrate-parsetree camlp4.config))
   (flags (:standard -open Migrate_parsetree.Ast_406))
   (preprocessor_deps (Camlp4Ast.partial.ml))
-  (preprocess (action
-               (chdir ${SCOPE_ROOT}
-                (run camlp4/boot/camlp4boot.exe ${<}))))))
+  (preprocess
+   (action
+    (chdir ${SCOPE_ROOT}
+     (run camlp4/boot/camlp4boot.exe -ignore-file Struct_Lexer.ml ${<}))))))
 
 (include jbuild.Printers)
 (include jbuild.Struct)
