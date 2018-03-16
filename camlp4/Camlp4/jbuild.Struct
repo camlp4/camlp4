@@ -1,0 +1,138 @@
+
+(rule
+ (with-stdout-to Struct_Token.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Token.mli\"\n")
+   (cat "Struct/Token.mli"))))
+
+(rule
+ (with-stdout-to Struct_Token.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Token.ml\"\n")
+   (cat "Struct/Token.ml"))))
+
+(rule
+ (with-stdout-to Struct_Quotation.ml
+  (progn
+   (echo "module DynAst = Struct_DynAst;\n")
+   (echo "# 1 \"camlp4/Camlp4/Struct/Quotation.ml\"\n")
+   (cat "Struct/Quotation.ml"))))
+
+(rule
+ (with-stdout-to Struct_Loc.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Loc.mli\"\n")
+   (cat "Struct/Loc.mli"))))
+
+(rule
+ (with-stdout-to Struct_Loc.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Loc.ml\"\n")
+   (cat "Struct/Loc.ml"))))
+
+(rule
+ (with-stdout-to Struct_Grammar.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar.ml\"\n")
+   (cat "Struct/Grammar.ml"))))
+
+(rule
+ (with-stdout-to Struct_FreeVars.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/FreeVars.mli\"\n")
+   (cat "Struct/FreeVars.mli"))))
+
+(rule
+ (with-stdout-to Struct_FreeVars.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/FreeVars.ml\"\n")
+   (cat "Struct/FreeVars.ml"))))
+
+(rule
+ (with-stdout-to Struct_EmptyPrinter.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/EmptyPrinter.mli\"\n")
+   (cat "Struct/EmptyPrinter.mli"))))
+
+(rule
+ (with-stdout-to Struct_EmptyPrinter.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/EmptyPrinter.ml\"\n")
+   (cat "Struct/EmptyPrinter.ml"))))
+
+(rule
+ (with-stdout-to Struct_EmptyError.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/EmptyError.mli\"\n")
+   (cat "Struct/EmptyError.mli"))))
+
+(rule
+ (with-stdout-to Struct_EmptyError.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/EmptyError.ml\"\n")
+   (cat "Struct/EmptyError.ml"))))
+
+(rule
+ (with-stdout-to Struct_DynLoader.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/DynLoader.mli\"\n")
+   (cat "Struct/DynLoader.mli"))))
+
+(rule
+ (with-stdout-to Struct_DynLoader.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/DynLoader.ml\"\n")
+   (cat "Struct/DynLoader.ml"))))
+
+(rule
+ (with-stdout-to Struct_DynAst.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/DynAst.ml\"\n")
+   (cat "Struct/DynAst.ml"))))
+
+(rule
+ (with-stdout-to Struct_CommentFilter.mli
+  (progn
+   (echo "module Loc = Struct_Loc;\n")
+   (echo "# 1 \"camlp4/Camlp4/Struct/CommentFilter.mli\"\n")
+   (cat "Struct/CommentFilter.mli"))))
+
+(rule
+ (with-stdout-to Struct_CommentFilter.ml
+  (progn
+   (echo "module Loc = Struct_Loc;\n")
+   (echo "# 1 \"camlp4/Camlp4/Struct/CommentFilter.ml\"\n")
+   (cat "Struct/CommentFilter.ml"))))
+
+(rule
+ (with-stdout-to Struct_CleanAst.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/CleanAst.ml\"\n")
+   (cat "Struct/CleanAst.ml"))))
+
+(rule
+ (with-stdout-to Struct_Camlp4Ast2OCamlAst.mli
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/Camlp4Ast2OCamlAst.mli\"\n")
+   (cat "Struct/Camlp4Ast2OCamlAst.mli"))))
+
+(rule
+ (with-stdout-to Struct_Camlp4Ast2OCamlAst.ml
+  (progn
+   (echo "module Loc = Struct_Loc;\n")
+   (echo "module Token = Struct_Token;\n")
+   (echo "# 1 \"camlp4/Camlp4/Struct/Camlp4Ast2OCamlAst.ml\"\n")
+   (cat "Struct/Camlp4Ast2OCamlAst.ml"))))
+
+(rule
+ (with-stdout-to Struct_AstFilters.ml
+  (progn
+   (echo "# 1 \"camlp4/Camlp4/Struct/AstFilters.ml\"\n")
+   (cat "Struct/AstFilters.ml"))))
+
+(rule
+ (with-stdout-to Struct_Lexer.ml
+  (progn
+   (echo "module Token = Struct_Token;\n")
+   (echo "# 1 \"camlp4/Camlp4/Struct/Lexer.ml\"\n")
+   (cat "Struct/Lexer.ml"))))

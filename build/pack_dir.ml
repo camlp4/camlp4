@@ -48,31 +48,41 @@ let () =
         String.capitalize_ascii (Filename.basename (fst (split_ext s))))
     |> Sset.of_list
   in
-  let rec read_deps ic acc =
-    match input_line ic with
-    | exception End_of_file -> begin
-        match Unix.close_process_in ic with
-        | WEXITED 0 -> acc
-        | WEXITED n -> exit n
-        | WSIGNALED n -> exit n
-        | WSTOPPED _ -> assert false
-      end
-    | line ->
-        let i = String.index line ':' in
-        let fn = String.sub line ~pos:0 ~len:i in
+  let read_deps pp files =
+    let rec loop ic acc =
+      match input_line ic with
+      | exception End_of_file -> begin
+          match Unix.close_process_in ic with
+          | WEXITED 0 -> acc
+          | WEXITED n -> exit n
+          | WSIGNALED n -> exit n
+          | WSTOPPED _ -> assert false
+        end
+      | line ->
+          let i = String.index line ':' in
+          let fn = String.sub line ~pos:0 ~len:i in
         let deps =
           split_words (String.sub line ~pos:(i + 1)
                          ~len:(String.length line - (i + 1)))
           |> List.filter ~f:(fun m -> Sset.mem m modules)
-        in
-        read_deps ic ((fn, deps) :: acc)
-  in
-  let deps =
+          in
+          loop ic ((fn, deps) :: acc)
+    in
     let cmd =
       Printf.sprintf
-        "ocamldep -modules -pp %s %s" pp (String.concat ~sep:" " files)
+        "ocamldep -modules %s %s"
+        (match pp with
+         | None -> ""
+         | Some s -> "-pp " ^ s)
+        (String.concat ~sep:" " files)
     in
-    read_deps (Unix.open_process_in cmd) []
+    loop (Unix.open_process_in cmd) []
+  in
+  let deps =
+    read_deps (Some pp)
+      (List.filter files ~f:(fun fn -> Filename.basename fn <> "Lexer.ml"))
+    @ read_deps None
+      (List.filter files ~f:(fun fn -> Filename.basename fn = "Lexer.ml"))
   in
   let prefix =
     String.split_on_char sub_dir ~sep:'/'
