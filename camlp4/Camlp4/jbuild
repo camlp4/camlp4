@@ -3,6 +3,10 @@
   (public_name camlp4)
   (preprocess (action (run ${SCOPE_ROOT}/camlp4/boot/camlp4boot.exe ${<})))))
 
+(include jbuild.Printers)
+(include jbuild.Struct)
+(include jbuild.Struct_Grammar)
+
 (rule
  ((targets (jbuild.Printers.gen))
   (deps    ((glob_files Printers/*.{ml,mli})))

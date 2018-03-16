@@ -1,19 +1,19 @@
 
 (rule
- (with-stdout-to Struct_Grammar_Tools
+ (with-stdout-to Struct_Grammar_Tools.ml
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Tools\"\n")
-   (cat "Struct/Grammar/Tools"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Tools.ml\"\n")
+   (cat "Struct/Grammar/Tools.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Structure
+ (with-stdout-to Struct_Grammar_Structure.ml
   (progn
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Structure\"\n")
-   (cat "Struct/Grammar/Structure"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Structure.ml\"\n")
+   (cat "Struct/Grammar/Structure.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Static
+ (with-stdout-to Struct_Grammar_Static.ml
   (progn
    (echo "module Delete = Struct_Grammar_Delete\n")
    (echo "module Entry = Struct_Grammar_Entry\n")
@@ -21,99 +21,99 @@
    (echo "module Insert = Struct_Grammar_Insert\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Static\"\n")
-   (cat "Struct/Grammar/Static"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Static.ml\"\n")
+   (cat "Struct/Grammar/Static.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Search
+ (with-stdout-to Struct_Grammar_Search.ml
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Search\"\n")
-   (cat "Struct/Grammar/Search"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Search.ml\"\n")
+   (cat "Struct/Grammar/Search.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Print
+ (with-stdout-to Struct_Grammar_Print.mli
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Print\"\n")
-   (cat "Struct/Grammar/Print"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Print.mli\"\n")
+   (cat "Struct/Grammar/Print.mli"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Print
+ (with-stdout-to Struct_Grammar_Print.ml
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Print\"\n")
-   (cat "Struct/Grammar/Print"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Print.ml\"\n")
+   (cat "Struct/Grammar/Print.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Parser
+ (with-stdout-to Struct_Grammar_Parser.mli
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Parser\"\n")
-   (cat "Struct/Grammar/Parser"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Parser.mli\"\n")
+   (cat "Struct/Grammar/Parser.mli"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Parser
+ (with-stdout-to Struct_Grammar_Parser.ml
   (progn
    (echo "module Failed = Struct_Grammar_Failed\n")
    (echo "module Print = Struct_Grammar_Print\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Parser\"\n")
-   (cat "Struct/Grammar/Parser"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Parser.ml\"\n")
+   (cat "Struct/Grammar/Parser.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Insert
+ (with-stdout-to Struct_Grammar_Insert.ml
   (progn
    (echo "module Parser = Struct_Grammar_Parser\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Insert\"\n")
-   (cat "Struct/Grammar/Insert"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Insert.ml\"\n")
+   (cat "Struct/Grammar/Insert.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Fold
+ (with-stdout-to Struct_Grammar_Fold.mli
   (progn
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Fold\"\n")
-   (cat "Struct/Grammar/Fold"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Fold.mli\"\n")
+   (cat "Struct/Grammar/Fold.mli"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Fold
+ (with-stdout-to Struct_Grammar_Fold.ml
   (progn
    (echo "module Failed = Struct_Grammar_Failed\n")
    (echo "module Parser = Struct_Grammar_Parser\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Fold\"\n")
-   (cat "Struct/Grammar/Fold"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Fold.ml\"\n")
+   (cat "Struct/Grammar/Fold.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Find
+ (with-stdout-to Struct_Grammar_Find.ml
   (progn
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Find\"\n")
-   (cat "Struct/Grammar/Find"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Find.ml\"\n")
+   (cat "Struct/Grammar/Find.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Failed
+ (with-stdout-to Struct_Grammar_Failed.ml
   (progn
    (echo "module Print = Struct_Grammar_Print\n")
    (echo "module Search = Struct_Grammar_Search\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Failed\"\n")
-   (cat "Struct/Grammar/Failed"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Failed.ml\"\n")
+   (cat "Struct/Grammar/Failed.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Entry
+ (with-stdout-to Struct_Grammar_Entry.ml
   (progn
    (echo "module Print = Struct_Grammar_Print\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Entry\"\n")
-   (cat "Struct/Grammar/Entry"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Entry.ml\"\n")
+   (cat "Struct/Grammar/Entry.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Dynamic
+ (with-stdout-to Struct_Grammar_Dynamic.ml
   (progn
    (echo "module Delete = Struct_Grammar_Delete\n")
    (echo "module Entry = Struct_Grammar_Entry\n")
@@ -121,15 +121,15 @@
    (echo "module Insert = Struct_Grammar_Insert\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Dynamic\"\n")
-   (cat "Struct/Grammar/Dynamic"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Dynamic.ml\"\n")
+   (cat "Struct/Grammar/Dynamic.ml"))))
 
 (rule
- (with-stdout-to Struct_Grammar_Delete
+ (with-stdout-to Struct_Grammar_Delete.ml
   (progn
    (echo "module Parser = Struct_Grammar_Parser\n")
    (echo "module Print = Struct_Grammar_Print\n")
    (echo "module Structure = Struct_Grammar_Structure\n")
    (echo "module Tools = Struct_Grammar_Tools\n")
-   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Delete\"\n")
-   (cat "Struct/Grammar/Delete"))))
+   (echo "# 1 \"camlp4/Camlp4/Struct/Grammar/Delete.ml\"\n")
+   (cat "Struct/Grammar/Delete.ml"))))

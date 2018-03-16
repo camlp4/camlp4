@@ -59,19 +59,13 @@ let () =
       end
     | line ->
         let i = String.index line ':' in
-        let unit =
-          String.sub line ~pos:0 ~len:i
-          |> Filename.basename
-          |> split_ext
-          |> fst
-          |> String.capitalize_ascii
-        in
+        let fn = String.sub line ~pos:0 ~len:i in
         let deps =
           split_words (String.sub line ~pos:(i + 1)
                          ~len:(String.length line - (i + 1)))
           |> List.filter ~f:(fun m -> Sset.mem m modules)
         in
-        read_deps ic ((unit, deps) :: acc)
+        read_deps ic ((fn, deps) :: acc)
   in
   let deps =
     let cmd =
