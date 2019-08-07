@@ -94,10 +94,10 @@ module Make (Ast : Sig.Camlp4Ast) = struct
 
   value with_loc txt loc = Location.mkloc txt (mkloc loc);
 
-  value mktyp loc d = {ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = []};
-  value mkpat loc d = {ppat_desc = d; ppat_loc = mkloc loc; ppat_attributes = []};
-  value mkghpat loc d = {ppat_desc = d; ppat_loc = mkghloc loc; ppat_attributes = []};
-  value mkexp loc d = {pexp_desc = d; pexp_loc = mkloc loc; pexp_attributes = []};
+  value mktyp loc d = {ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = [];ptyp_loc_stack=[]};
+  value mkpat loc d = {ppat_desc = d; ppat_loc = mkloc loc; ppat_attributes = [];ppat_loc_stack=[]};
+  value mkghpat loc d = {ppat_desc = d; ppat_loc = mkghloc loc; ppat_attributes = [];ppat_loc_stack=[]};
+  value mkexp loc d = {pexp_desc = d; pexp_loc = mkloc loc; pexp_attributes = [];pexp_loc_stack=[]};
   value mkmty loc d = {pmty_desc = d; pmty_loc = mkloc loc; pmty_attributes = []};
   value mksig loc d = {psig_desc = d; psig_loc = mkloc loc};
   value mkmod loc d = {pmod_desc = d; pmod_loc = mkloc loc; pmod_attributes = []};
@@ -334,16 +334,17 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyNil loc
     | TyOpn loc
     | TyTup loc _ -> error loc "this construction is not allowed here" ]
-  and row_field = fun
+and row_field =
+    let mk loc x = { prf_loc = mkloc loc; prf_desc = x; prf_attributes = [] } in fun
     [ <:ctyp<>> -> []
     | <:ctyp@loc< `$i$ >> ->
-        [Rtag (with_loc (conv_con i) loc) [] True []]
+        [mk loc (Rtag (with_loc (conv_con i) loc) True [])]
     | <:ctyp@loc< `$i$ of & $t$ >> ->
-        [Rtag (with_loc (conv_con i) loc) [] True (List.map ctyp (list_of_ctyp t []))]
+        [mk loc (Rtag (with_loc (conv_con i) loc) True (List.map ctyp (list_of_ctyp t [])))]
     | <:ctyp@loc< `$i$ of $t$ >> ->
-        [Rtag (with_loc (conv_con i) loc) [] False (List.map ctyp (list_of_ctyp t []))]
+        [mk loc (Rtag (with_loc (conv_con i) loc) False (List.map ctyp (list_of_ctyp t [])))]
     | <:ctyp< $t1$ | $t2$ >> -> row_field t1 @ row_field t2
-    | t -> [Rinherit (ctyp t)] ]
+    | t -> [mk (Ast.loc_of_ctyp t) (Rinherit (ctyp t))] ]
   and name_tags = fun
     [ <:ctyp< $t1$ $t2$ >> -> name_tags t1 @ name_tags t2
     | <:ctyp< `$s$ >> -> [s]
@@ -353,7 +354,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     [ <:ctyp<>> -> acc
     | <:ctyp< $t1$; $t2$ >> -> meth_list t1 (meth_list t2 acc)
     | <:ctyp@loc< $lid:lab$ : $t$ >> ->
-        [Otag (with_loc lab loc) [] (mkpolytype (ctyp t)) :: acc]
+        [{ pof_loc = mkloc loc
+         ; pof_desc = Otag (with_loc lab loc) (mkpolytype (ctyp t))
+         ; pof_attributes = []} :: acc]
     | _ -> assert False ]
 
   and package_type_constraints wc acc =
@@ -379,8 +382,9 @@ module Make (Ast : Sig.Camlp4Ast) = struct
      ptype_private = tp; ptype_manifest = tm; ptype_loc = mkloc loc;
      ptype_attributes = []}
   ;
-  value mktypext path tl tc tp =
-    {ptyext_path = path;
+  value mktypext loc path tl tc tp =
+  {ptyext_loc=loc;
+       ptyext_path = path;
      ptyext_params = tl;
      ptyext_constructors = tc;
      ptyext_private = tp;
@@ -504,7 +508,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
         else
           type_ext path tl loc True t
     | <:ctyp< [ $t$ ] >> ->
-      mktypext path tl
+      mktypext (mkloc loc) path tl
         (List.map mkextension_constructor (list_of_ctyp t []))
         (mkprivate' pflag)
     | _ ->
@@ -551,6 +555,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     { ptyp_desc       = ty
     ; ptyp_loc        = mkloc loc
     ; ptyp_attributes = []
+    ; ptyp_loc_stack  = []
     };
 
   value ptyp_var loc s = core_type loc (Ptyp_var s);
@@ -797,15 +802,19 @@ value varify_constructors var_names =
     in
     {(t) with ptyp_desc = desc}
   and loop_object_field x =
-    match x with
-      [ Otag s a t -> Otag s a (loop t)
+    let pof_desc =
+      match x.pof_desc with
+      [ Otag s t -> Otag s (loop t)
       | Oinherit t -> Oinherit (loop t) ]
+      in { (x) with pof_desc }
   and loop_row_field x =
-    match x with
-      [ Rtag(label,attrs,flag,lst) ->
-          Rtag(label,attrs,flag,List.map loop lst)
+      let prf_desc =
+        match x.prf_desc with
+      [ Rtag(label,flag,lst) ->
+          Rtag(label,flag,List.map loop lst)
       | Rinherit t ->
           Rinherit (loop t) ]
+      in {(x) with prf_desc}
   in
   loop;
 
@@ -978,7 +987,14 @@ value varify_constructors var_names =
         mkexp loc (Pexp_while (expr e1) (expr e2))
     | ExOpI loc i ov e ->
         let fresh = override_flag loc ov in
-        mkexp loc (Pexp_open fresh (long_uident i) (expr e))
+        mkexp loc (Pexp_open ({popen_loc = mkloc loc
+                              ;popen_override=fresh
+                              ;popen_attributes=[]
+                              ;popen_expr= {pmod_desc = Pmod_ident (long_uident i)
+                                           ;pmod_loc = mkloc loc
+                                           ;pmod_attributes = []
+                                           }
+                              }, (expr e)))
     | <:expr@loc< (module $me$ : $pt$) >> ->
         mkexp loc (Pexp_constraint (mkexp loc (Pexp_pack (module_expr me)),
                     mktyp loc (Ptyp_package (package_type pt))))
@@ -1144,16 +1160,25 @@ value varify_constructors var_names =
     | <:sig_item< $sg1$; $sg2$ >> -> sig_item sg1 (sig_item sg2 l)
     | SgDir _ _ _ -> l
     | <:sig_item@loc< exception $uid:s$ >> ->
-        [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl (Pcstr_tuple [], None)
-                                   ; pext_attributes = []
-                                   ; pext_loc        = mkloc loc })
+        [mksig loc (Psig_exception { ptyexn_constructor =
+                                       {
+                                         pext_name = with_loc (conv_con s) loc;
+                                         pext_kind = Pext_decl (((Pcstr_tuple []), None));
+                                         pext_attributes = [];
+                                         pext_loc = mkloc loc;
+                                       };
+                                     ptyexn_loc = mkloc loc;
+                                     ptyexn_attributes = []
+                                   })
          :: l]
     | <:sig_item@loc< exception $uid:s$ of $t$ >> ->
-        [mksig loc (Psig_exception { pext_name       = with_loc (conv_con s) loc
+        [mksig loc (Psig_exception { ptyexn_loc = mkloc loc
+                                   ; ptyexn_attributes = []
+                                   ; ptyexn_constructor =
+                                       { pext_name       = with_loc (conv_con s) loc
                                    ; pext_kind       = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t [])), None)
                                    ; pext_attributes = []
-                                   ; pext_loc        = mkloc loc })
+                                   ; pext_loc        = mkloc loc } })
          :: l]
     | SgExc _ _ -> assert False (*FIXME*)
     | SgExt loc n t sl -> [mksig loc (Psig_value (mkvalue_desc loc (with_loc n loc) t (list_of_meta_list sl))) :: l]
@@ -1172,7 +1197,7 @@ value varify_constructors var_names =
         [mksig loc (Psig_modtype {pmtd_loc=mkloc loc; pmtd_name=with_loc n loc; pmtd_type=si; pmtd_attributes=[]}) :: l]
     | SgOpn loc ov id ->
         let fresh = override_flag loc ov in
-        [mksig loc (Psig_open {popen_override=fresh; popen_lid=long_uident id;
+        [mksig loc (Psig_open {popen_override=fresh; popen_expr=long_uident id;
                                popen_attributes=[]; popen_loc = mkloc loc}) :: l]
     | SgTyp loc rf tdl ->
       let rf = mknrf rf in
@@ -1242,22 +1267,29 @@ value varify_constructors var_names =
     | <:str_item< $st1$; $st2$ >> -> str_item st1 (str_item st2 l)
     | StDir _ _ _ -> l
     | <:str_item@loc< exception $uid:s$ >> ->
-        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl (Pcstr_tuple [], None)
-                                   ; pext_attributes = []
-                                   ; pext_loc        = mkloc loc })
+        [mkstr loc (Pstr_exception {ptyexn_loc=mkloc loc
+                                   ;ptyexn_attributes=[]
+                                   ; ptyexn_constructor =
+                                       { pext_name       = with_loc (conv_con s) loc
+                                       ; pext_kind       = Pext_decl (Pcstr_tuple [], None)
+                                       ; pext_attributes = []
+                                       ; pext_loc        = mkloc loc } })
          :: l ]
     | <:str_item@loc< exception $uid:s$ of $t$ >> ->
-        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t [])), None)
+        [mkstr loc (Pstr_exception {ptyexn_loc=mkloc loc
+                                   ;ptyexn_attributes=[]
+                                   ; ptyexn_constructor ={ pext_name       = with_loc (conv_con s) loc
+                                                         ; pext_kind       = Pext_decl (Pcstr_tuple (List.map ctyp (list_of_ctyp t [])), None)
                                    ; pext_attributes = []
-                                   ; pext_loc        = mkloc loc })
+                                   ; pext_loc        = mkloc loc } })
          :: l ]
     | <:str_item@loc< exception $uid:s$ = $i$ >> ->
-        [mkstr loc (Pstr_exception { pext_name       = with_loc (conv_con s) loc
-                                   ; pext_kind       = Pext_rebind (long_uident ~conv_con i)
-                                   ; pext_attributes = []
-                                   ; pext_loc        = mkloc loc })
+        [mkstr loc (Pstr_exception {ptyexn_loc=mkloc loc
+                                   ;ptyexn_attributes=[]
+                                   ; ptyexn_constructor ={ pext_name       = with_loc (conv_con s) loc
+                                                         ; pext_kind       = Pext_rebind (long_uident ~conv_con i)
+                                                         ; pext_attributes = []
+                                                         ; pext_loc        = mkloc loc } })
          :: l ]
     | <:str_item@loc< exception $uid:_$ of $_$ = $_$ >> ->
         error loc "type in exception alias"
@@ -1280,7 +1312,9 @@ value varify_constructors var_names =
     | StOpn loc ov id ->
         let fresh = override_flag loc ov in
         [mkstr loc (Pstr_open {popen_override=fresh;
-                               popen_lid=long_uident id;
+                               popen_expr={pmod_desc = Pmod_ident(long_uident id);
+                                           pmod_loc = mkloc loc;
+                                           pmod_attributes=[]};
                                popen_attributes=[];
                                popen_loc=mkloc loc}) :: l]
     | StTyp loc rf tdl ->
@@ -1441,24 +1475,38 @@ value varify_constructors var_names =
   value sig_item ast = sig_item ast [];
   value str_item ast = str_item ast [];
 
-  value directive_arg =
-    fun
-    [ ExStr _ s -> Pdir_string s
-    | ExInt _ i -> Pdir_int (i, None)
-    | <:expr< True >> -> Pdir_bool True
-    | <:expr< False >> -> Pdir_bool False
-    | <:expr< >> -> Pdir_none
-    | e -> Pdir_ident (ident_noloc (ident_of_expr e)) ]
+  value directive_arg x =
+    let x = match x with
+    [ ExStr loc s -> Some (loc, Pdir_string s)
+    | ExInt loc i -> Some (loc, Pdir_int (i, None))
+    | <:expr@loc< True >> -> Some (loc, Pdir_bool True)
+    | <:expr@loc< False >> -> Some (loc, Pdir_bool False)
+    | <:expr< >> -> None
+    | e -> Some (Ast.loc_of_expr e, Pdir_ident (ident_noloc (ident_of_expr e))) ]
+    in
+    match x with
+    [ None -> None
+    | Some (loc, x) ->
+      Some {
+        pdira_desc = x;
+        pdira_loc = mkloc loc
+      } ]
   ;
 
   value phrase =
     fun
-    [ StDir _ d arg -> Ptop_dir d (directive_arg arg)
+      [ StDir loc d arg ->
+        Ptop_dir {pdir_name = with_loc d loc
+                 ;pdir_arg = (directive_arg arg)
+                 ;pdir_loc = mkloc loc}
     | si -> Ptop_def (str_item si) ]
   ;
 
   value attribute loc s str =
-    (with_loc s loc, PStr (str_item str));
+    { attr_name = with_loc s loc
+    ; attr_payload = PStr (str_item str)
+    ; attr_loc = mkloc loc
+    };
 
   value () =
     attribute_fwd.val := attribute;

@@ -31,7 +31,7 @@ value cautious f ppf arg =
 
 value rec print_ident ppf =
   fun
-  [ Oide_ident s -> fprintf ppf "%s" s
+  [ Oide_ident s -> fprintf ppf "%s" s.printed_name
   | Oide_dot id s -> fprintf ppf "%a.%s" print_ident id s
   | Oide_apply id1 id2 ->
       fprintf ppf "%a(%a)" print_ident id1 print_ident id2 ]
@@ -87,8 +87,8 @@ value print_out_value ppf tree =
         fprintf ppf "@[<1>[%a]@]" (print_tree_list print_tree ";") tl
     | Oval_array tl ->
         fprintf ppf "@[<2>[|%a|]@]" (print_tree_list print_tree ";") tl
-    | Oval_constr (Oide_ident "true") [] -> fprintf ppf "True"
-    | Oval_constr (Oide_ident "false") [] -> fprintf ppf "False"
+    | Oval_constr (Oide_ident { printed_name = "true" }) [] -> fprintf ppf "True"
+    | Oval_constr (Oide_ident { printed_name = "false" }) [] -> fprintf ppf "False"
     | Oval_constr name [] -> print_ident ppf name
     | Oval_variant name None -> fprintf ppf "`%s" name
     | Oval_stuff s -> fprintf ppf "%s" s
@@ -105,7 +105,7 @@ value print_out_value ppf tree =
     | [(name, tree) :: fields] ->
         let name =
           match name with
-          [ Oide_ident "contents" -> Oide_ident "val"
+          [ Oide_ident { printed_name = "contents" } -> Oide_ident { printed_name = "val" }
           | x -> x ]
         in
         do {
@@ -210,7 +210,7 @@ and print_simple_out_type ppf =
   | Otyp_abstract -> fprintf ppf "<abstract>"
   | Otyp_module (p, n, tyl) ->
       do {
-          fprintf ppf "@[<1>(module %s" p;
+          fprintf ppf "@[<1>(module %a" print_ident p;
           let first = ref True in
           List.iter2
             (fun s t ->

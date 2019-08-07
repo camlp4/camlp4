@@ -64,7 +64,6 @@ value load =
     do {
       if not _initialized.val then
         try do {
-          Dynlink.init ();
           Dynlink.allow_unsafe_modules True;
          _initialized.val := True
         }

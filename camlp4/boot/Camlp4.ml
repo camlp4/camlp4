@@ -15425,17 +15425,36 @@ module Struct =
             let with_loc txt loc = Location.mkloc txt (mkloc loc)
               
             let mktyp loc d =
-              { ptyp_desc = d; ptyp_loc = mkloc loc; ptyp_attributes = []; }
+              {
+                ptyp_desc = d;
+                ptyp_loc = mkloc loc;
+                ptyp_attributes = [];
+                ptyp_loc_stack = [];
+              }
               
             let mkpat loc d =
-              { ppat_desc = d; ppat_loc = mkloc loc; ppat_attributes = []; }
+              {
+                ppat_desc = d;
+                ppat_loc = mkloc loc;
+                ppat_attributes = [];
+                ppat_loc_stack = [];
+              }
               
             let mkghpat loc d =
-              { ppat_desc = d; ppat_loc = mkghloc loc; ppat_attributes = [];
+              {
+                ppat_desc = d;
+                ppat_loc = mkghloc loc;
+                ppat_attributes = [];
+                ppat_loc_stack = [];
               }
               
             let mkexp loc d =
-              { pexp_desc = d; pexp_loc = mkloc loc; pexp_attributes = []; }
+              {
+                pexp_desc = d;
+                pexp_loc = mkloc loc;
+                pexp_attributes = [];
+                pexp_loc_stack = [];
+              }
               
             let mkmty loc d =
               { pmty_desc = d; pmty_loc = mkloc loc; pmty_attributes = []; }
@@ -15704,18 +15723,23 @@ module Struct =
                   TyTup (loc, _) ->
                   error loc "this construction is not allowed here"
             and row_field =
-              function
-              | Ast.TyNil _ -> []
-              | Ast.TyVrn (loc, i) ->
-                  [ Rtag ((with_loc (conv_con i) loc), [], true, []) ]
-              | Ast.TyOfAmp (loc, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((with_loc (conv_con i) loc), [], true,
-                      (List.map ctyp (list_of_ctyp t []))) ]
-              | Ast.TyOf (loc, (Ast.TyVrn (_, i)), t) ->
-                  [ Rtag ((with_loc (conv_con i) loc), [], false,
-                      (List.map ctyp (list_of_ctyp t []))) ]
-              | Ast.TyOr (_, t1, t2) -> (row_field t1) @ (row_field t2)
-              | t -> [ Rinherit (ctyp t) ]
+              let mk loc x =
+                { prf_loc = mkloc loc; prf_desc = x; prf_attributes = []; }
+              in
+                function
+                | Ast.TyNil _ -> []
+                | Ast.TyVrn (loc, i) ->
+                    [ mk loc (Rtag ((with_loc (conv_con i) loc), true, [])) ]
+                | Ast.TyOfAmp (loc, (Ast.TyVrn (_, i)), t) ->
+                    [ mk loc
+                        (Rtag ((with_loc (conv_con i) loc), true,
+                           (List.map ctyp (list_of_ctyp t [])))) ]
+                | Ast.TyOf (loc, (Ast.TyVrn (_, i)), t) ->
+                    [ mk loc
+                        (Rtag ((with_loc (conv_con i) loc), false,
+                           (List.map ctyp (list_of_ctyp t [])))) ]
+                | Ast.TyOr (_, t1, t2) -> (row_field t1) @ (row_field t2)
+                | t -> [ mk (Ast.loc_of_ctyp t) (Rinherit (ctyp t)) ]
             and name_tags =
               function
               | Ast.TyApp (_, t1, t2) -> (name_tags t1) @ (name_tags t2)
@@ -15726,8 +15750,12 @@ module Struct =
               | Ast.TyNil _ -> acc
               | Ast.TySem (_, t1, t2) -> meth_list t1 (meth_list t2 acc)
               | Ast.TyCol (loc, (Ast.TyId (_, (Ast.IdLid (_, lab)))), t) ->
-                  (Otag ((with_loc lab loc), [], (mkpolytype (ctyp t)))) ::
-                    acc
+                  {
+                    pof_loc = mkloc loc;
+                    pof_desc =
+                      Otag ((with_loc lab loc), (mkpolytype (ctyp t)));
+                    pof_attributes = [];
+                  } :: acc
               | _ -> assert false
             and package_type_constraints wc acc =
               match wc with
@@ -15759,8 +15787,9 @@ module Struct =
                 ptype_attributes = [];
               }
               
-            let mktypext path tl tc tp =
+            let mktypext loc path tl tc tp =
               {
+                ptyext_loc = loc;
                 ptyext_path = path;
                 ptyext_params = tl;
                 ptyext_constructors = tc;
@@ -15927,7 +15956,7 @@ module Struct =
                       "multiple private keyword used, use only one instead"
                   else type_ext path tl loc true t
               | Ast.TySum (_, t) ->
-                  mktypext path tl
+                  mktypext (mkloc loc) path tl
                     (List.map mkextension_constructor (list_of_ctyp t []))
                     (mkprivate' pflag)
               | _ -> error loc "invalid type extension"
@@ -15982,7 +16011,12 @@ module Struct =
               | _ -> assert false
               
             let core_type loc ty =
-              { ptyp_desc = ty; ptyp_loc = mkloc loc; ptyp_attributes = []; }
+              {
+                ptyp_desc = ty;
+                ptyp_loc = mkloc loc;
+                ptyp_attributes = [];
+                ptyp_loc_stack = [];
+              }
               
             let ptyp_var loc s = core_type loc (Ptyp_var s)
               
@@ -16276,14 +16310,18 @@ module Struct =
                   | Ptyp_extension x -> Ptyp_extension x
                 in { (t) with ptyp_desc = desc; }
               and loop_object_field x =
-                match x with
-                | Otag (s, a, t) -> Otag (s, a, (loop t))
-                | Oinherit t -> Oinherit (loop t)
+                let pof_desc =
+                  match x.pof_desc with
+                  | Otag (s, t) -> Otag (s, (loop t))
+                  | Oinherit t -> Oinherit (loop t)
+                in { (x) with pof_desc = pof_desc; }
               and loop_row_field x =
-                match x with
-                | Rtag ((label, attrs, flag, lst)) ->
-                    Rtag ((label, attrs, flag, (List.map loop lst)))
-                | Rinherit t -> Rinherit (loop t)
+                let prf_desc =
+                  match x.prf_desc with
+                  | Rtag ((label, flag, lst)) ->
+                      Rtag ((label, flag, (List.map loop lst)))
+                  | Rinherit t -> Rinherit (loop t)
+                in { (x) with prf_desc = prf_desc; }
               in loop
               
             let rec expr =
@@ -16517,7 +16555,20 @@ module Struct =
                   in mkexp loc (Pexp_while ((expr e1), (expr e2)))
               | ExOpI (loc, i, ov, e) ->
                   let fresh = override_flag loc ov
-                  in mkexp loc (Pexp_open (fresh, (long_uident i), (expr e)))
+                  in
+                    mkexp loc
+                      (Pexp_open
+                         (({
+                             popen_loc = mkloc loc;
+                             popen_override = fresh;
+                             popen_attributes = [];
+                             popen_expr =
+                               {
+                                 pmod_desc = Pmod_ident (long_uident i);
+                                 pmod_loc = mkloc loc;
+                                 pmod_attributes = [];
+                               };
+                           }, (expr e))))
               | Ast.ExPkg (loc, (Ast.MeTyc (_, me, pt))) ->
                   mkexp loc
                     (Pexp_constraint
@@ -16731,10 +16782,16 @@ module Struct =
                   (mksig loc
                      (Psig_exception
                         {
-                          pext_name = with_loc (conv_con s) loc;
-                          pext_kind = Pext_decl (((Pcstr_tuple []), None));
-                          pext_attributes = [];
-                          pext_loc = mkloc loc;
+                          ptyexn_constructor =
+                            {
+                              pext_name = with_loc (conv_con s) loc;
+                              pext_kind =
+                                Pext_decl (((Pcstr_tuple []), None));
+                              pext_attributes = [];
+                              pext_loc = mkloc loc;
+                            };
+                          ptyexn_loc = mkloc loc;
+                          ptyexn_attributes = [];
                         })) ::
                     l
               | Ast.SgExc (loc,
@@ -16742,14 +16799,19 @@ module Struct =
                   (mksig loc
                      (Psig_exception
                         {
-                          pext_name = with_loc (conv_con s) loc;
-                          pext_kind =
-                            Pext_decl
-                              (((Pcstr_tuple
-                                   (List.map ctyp (list_of_ctyp t []))),
-                                None));
-                          pext_attributes = [];
-                          pext_loc = mkloc loc;
+                          ptyexn_loc = mkloc loc;
+                          ptyexn_attributes = [];
+                          ptyexn_constructor =
+                            {
+                              pext_name = with_loc (conv_con s) loc;
+                              pext_kind =
+                                Pext_decl
+                                  (((Pcstr_tuple
+                                       (List.map ctyp (list_of_ctyp t []))),
+                                    None));
+                              pext_attributes = [];
+                              pext_loc = mkloc loc;
+                            };
                         })) ::
                     l
               | SgExc (_, _) -> assert false
@@ -16803,7 +16865,7 @@ module Struct =
                        (Psig_open
                           {
                             popen_override = fresh;
-                            popen_lid = long_uident id;
+                            popen_expr = long_uident id;
                             popen_attributes = [];
                             popen_loc = mkloc loc;
                           })) ::
@@ -16913,10 +16975,16 @@ module Struct =
                   (mkstr loc
                      (Pstr_exception
                         {
-                          pext_name = with_loc (conv_con s) loc;
-                          pext_kind = Pext_decl (((Pcstr_tuple []), None));
-                          pext_attributes = [];
-                          pext_loc = mkloc loc;
+                          ptyexn_loc = mkloc loc;
+                          ptyexn_attributes = [];
+                          ptyexn_constructor =
+                            {
+                              pext_name = with_loc (conv_con s) loc;
+                              pext_kind =
+                                Pext_decl (((Pcstr_tuple []), None));
+                              pext_attributes = [];
+                              pext_loc = mkloc loc;
+                            };
                         })) ::
                     l
               | Ast.StExc (loc,
@@ -16925,14 +16993,19 @@ module Struct =
                   (mkstr loc
                      (Pstr_exception
                         {
-                          pext_name = with_loc (conv_con s) loc;
-                          pext_kind =
-                            Pext_decl
-                              (((Pcstr_tuple
-                                   (List.map ctyp (list_of_ctyp t []))),
-                                None));
-                          pext_attributes = [];
-                          pext_loc = mkloc loc;
+                          ptyexn_loc = mkloc loc;
+                          ptyexn_attributes = [];
+                          ptyexn_constructor =
+                            {
+                              pext_name = with_loc (conv_con s) loc;
+                              pext_kind =
+                                Pext_decl
+                                  (((Pcstr_tuple
+                                       (List.map ctyp (list_of_ctyp t []))),
+                                    None));
+                              pext_attributes = [];
+                              pext_loc = mkloc loc;
+                            };
                         })) ::
                     l
               | Ast.StExc (loc, (Ast.TyId (_, (Ast.IdUid (_, s)))),
@@ -16940,10 +17013,16 @@ module Struct =
                   (mkstr loc
                      (Pstr_exception
                         {
-                          pext_name = with_loc (conv_con s) loc;
-                          pext_kind = Pext_rebind (long_uident ~conv_con i);
-                          pext_attributes = [];
-                          pext_loc = mkloc loc;
+                          ptyexn_loc = mkloc loc;
+                          ptyexn_attributes = [];
+                          ptyexn_constructor =
+                            {
+                              pext_name = with_loc (conv_con s) loc;
+                              pext_kind =
+                                Pext_rebind (long_uident ~conv_con i);
+                              pext_attributes = [];
+                              pext_loc = mkloc loc;
+                            };
                         })) ::
                     l
               | Ast.StExc (loc,
@@ -17001,7 +17080,12 @@ module Struct =
                        (Pstr_open
                           {
                             popen_override = fresh;
-                            popen_lid = long_uident id;
+                            popen_expr =
+                              {
+                                pmod_desc = Pmod_ident (long_uident id);
+                                pmod_loc = mkloc loc;
+                                pmod_attributes = [];
+                              };
                             popen_attributes = [];
                             popen_loc = mkloc loc;
                           })) ::
@@ -17228,22 +17312,43 @@ module Struct =
               
             let str_item ast = str_item ast []
               
-            let directive_arg =
-              function
-              | ExStr (_, s) -> Pdir_string s
-              | ExInt (_, i) -> Pdir_int ((i, None))
-              | Ast.ExId (_, (Ast.IdUid (_, "True"))) -> Pdir_bool true
-              | Ast.ExId (_, (Ast.IdUid (_, "False"))) -> Pdir_bool false
-              | Ast.ExNil _ -> Pdir_none
-              | e -> Pdir_ident (ident_noloc (ident_of_expr e))
+            let directive_arg x =
+              let x =
+                match x with
+                | ExStr (loc, s) -> Some ((loc, (Pdir_string s)))
+                | ExInt (loc, i) -> Some ((loc, (Pdir_int ((i, None)))))
+                | Ast.ExId (loc, (Ast.IdUid (_, "True"))) ->
+                    Some ((loc, (Pdir_bool true)))
+                | Ast.ExId (loc, (Ast.IdUid (_, "False"))) ->
+                    Some ((loc, (Pdir_bool false)))
+                | Ast.ExNil _ -> None
+                | e ->
+                    Some
+                      (((Ast.loc_of_expr e),
+                        (Pdir_ident (ident_noloc (ident_of_expr e)))))
+              in
+                match x with
+                | None -> None
+                | Some ((loc, x)) ->
+                    Some { pdira_desc = x; pdira_loc = mkloc loc; }
               
             let phrase =
               function
-              | StDir (_, d, arg) -> Ptop_dir (d, (directive_arg arg))
+              | StDir (loc, d, arg) ->
+                  Ptop_dir
+                    {
+                      pdir_name = with_loc d loc;
+                      pdir_arg = directive_arg arg;
+                      pdir_loc = mkloc loc;
+                    }
               | si -> Ptop_def (str_item si)
               
             let attribute loc s str =
-              ((with_loc s loc), (PStr (str_item str)))
+              {
+                attr_name = with_loc s loc;
+                attr_payload = PStr (str_item str);
+                attr_loc = mkloc loc;
+              }
               
             let () = attribute_fwd := attribute
               
@@ -17503,9 +17608,7 @@ module Struct =
               (if not !_initialized
                then
                  (try
-                    (Dynlink.init ();
-                     Dynlink.allow_unsafe_modules true;
-                     _initialized := true)
+                    (Dynlink.allow_unsafe_modules true; _initialized := true)
                   with
                   | Dynlink.Error e ->
                       raise

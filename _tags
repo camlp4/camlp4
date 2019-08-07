@@ -27,7 +27,7 @@ true: safe_string
 <camlp4/*.{byte,native}>: use_unix
 <camlp4/camlp4boot.*>: -use_unix
 
-#<**/*.ml*>: warn_error(A-3)
+#<**/*.ml*>: warn_error(A-3), warn(-3)
 
 # The tag "camlp4boot" is for preprocessing using camlp4/boot/camlp4boot.byte
 <camlp4/**/*.ml*>: camlp4boot, warn_Z
