@@ -1,5 +1,5 @@
 opam-version: "1.2"
-version: "4.08"
+version: "4.09"
 authors: ["Daniel de Rauglaudre" "Nicolas Pouillard"]
 maintainer: "jeremie@dimino.org"
 homepage: "https://github.com/ocaml/camlp4"
