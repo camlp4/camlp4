@@ -366,11 +366,11 @@ value rec print_out_module_type ppf =
   | Omty_signature sg ->
       fprintf ppf "@[<hv 2>sig@ %a@;<1 -2>end@]"
         Toploop.print_out_signature.val sg
-  | Omty_functor name None mty_res ->
-      fprintf ppf "@[<2>functor@ (%s) ->@ %a@]" name
+  | Omty_functor None mty_res ->
+      fprintf ppf "@[<2>functor@ () ->@ %a@]"
         print_out_module_type mty_res
-  | Omty_functor name (Some mty_arg) mty_res ->
-      fprintf ppf "@[<2>functor@ (%s : %a) ->@ %a@]" name
+  | Omty_functor (Some name mty_arg) mty_res ->
+      fprintf ppf "@[<2>functor@ (%s : %a) ->@ %a@]" (match name with [ None -> "_" | Some n -> n ])
         print_out_module_type mty_arg print_out_module_type mty_res
   | Omty_abstract -> () ]
 and needs_semi =
