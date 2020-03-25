@@ -16216,7 +16216,7 @@ module Struct =
               | PaVrn (loc, s) ->
                   mkpat loc (Ppat_variant ((conv_con s), None))
               | PaLaz (loc, p) -> mkpat loc (Ppat_lazy (patt p))
-              | PaMod (loc, m) -> mkpat loc (Ppat_unpack (with_loc m loc))
+              | PaMod (loc, m) -> mkpat loc (Ppat_unpack (with_loc (Some m) loc))
               | PaExc (loc, p) -> mkpat loc (Ppat_exception (patt p))
               | PaAtt (loc, s, str, e) ->
                   let e = patt e
@@ -16483,7 +16483,7 @@ module Struct =
                      | bi -> mkexp loc (Pexp_let ((mkrf rf), bi, e)))
               | ExLmd (loc, i, me, e) ->
                   mkexp loc
-                    (Pexp_letmodule ((with_loc i loc), (module_expr me),
+                    (Pexp_letmodule ((with_loc (Some i) loc), (module_expr me),
                        (expr e)))
               | ExMat (loc, e, a) ->
                   mkexp loc (Pexp_match ((expr e), (match_case a [])))
@@ -16735,11 +16735,10 @@ module Struct =
               | Ast.MtId (loc, i) -> mkmty loc (Pmty_ident (long_uident i))
               | Ast.MtFun ((loc, "*", Ast.MtNil _, mt)) ->
                   mkmty loc
-                    (Pmty_functor ((with_loc "*" loc), None,
-                       (module_type mt)))
+                    (Pmty_functor (Unit, (module_type mt)))
               | Ast.MtFun (loc, n, nt, mt) ->
                   mkmty loc
-                    (Pmty_functor ((with_loc n loc), (Some (module_type nt)),
+                    (Pmty_functor (Named ((with_loc (Some n) loc), (module_type nt)),
                        (module_type mt)))
               | Ast.MtQuo (loc, _) ->
                   error loc "module type variable not allowed here"
@@ -16835,7 +16834,7 @@ module Struct =
                      (Psig_module
                         {
                           pmd_loc = mkloc loc;
-                          pmd_name = with_loc n loc;
+                          pmd_name = with_loc (Some n) loc;
                           pmd_type = module_type mt;
                           pmd_attributes = [];
                         })) ::
@@ -16890,7 +16889,7 @@ module Struct =
               | Ast.MbCol (loc, s, mt) ->
                   {
                     pmd_loc = mkloc loc;
-                    pmd_name = with_loc s loc;
+                    pmd_name = with_loc (Some s) loc;
                     pmd_type = module_type mt;
                     pmd_attributes = [];
                   } :: acc
@@ -16902,7 +16901,7 @@ module Struct =
               | Ast.MbColEq (loc, s, mt, me) ->
                   {
                     pmb_loc = mkloc loc;
-                    pmb_name = with_loc s loc;
+                    pmb_name = with_loc (Some s) loc;
                     pmb_expr =
                       {
                         pmod_loc = Location.none;
@@ -16923,11 +16922,10 @@ module Struct =
                     (Pmod_apply ((module_expr me1), (module_expr me2)))
               | Ast.MeFun ((loc, "*", Ast.MtNil _, me)) ->
                   mkmod loc
-                    (Pmod_functor ((with_loc "*" loc), None,
-                       (module_expr me)))
+                    (Pmod_functor (Unit, (module_expr me)))
               | Ast.MeFun (loc, n, mt, me) ->
                   mkmod loc
-                    (Pmod_functor ((with_loc n loc), (Some (module_type mt)),
+                    (Pmod_functor (Named ((with_loc (Some n) loc), (module_type mt)),
                        (module_expr me)))
               | Ast.MeStr (loc, sl) ->
                   mkmod loc (Pmod_structure (str_item sl []))
@@ -17050,7 +17048,7 @@ module Struct =
                      (Pstr_module
                         {
                           pmb_loc = mkloc loc;
-                          pmb_name = with_loc n loc;
+                          pmb_name = with_loc (Some n) loc;
                           pmb_expr = module_expr me;
                           pmb_attributes = [];
                         })) ::

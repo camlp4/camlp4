@@ -713,7 +713,7 @@ and row_field =
     | PaTyp loc i -> mkpat loc (Ppat_type (long_type_ident i))
     | PaVrn loc s -> mkpat loc (Ppat_variant (conv_con s) None)
     | PaLaz loc p -> mkpat loc (Ppat_lazy (patt p))
-    | PaMod loc m -> mkpat loc (Ppat_unpack (with_loc m loc))
+    | PaMod loc m -> mkpat loc (Ppat_unpack (with_loc (Some m) loc))
     | PaExc loc p -> mkpat loc (Ppat_exception (patt p))
     | PaAtt loc s str e ->
         let e = patt e in
@@ -931,7 +931,7 @@ value varify_constructors var_names =
         match binding bi [] with
         [ [] -> e
         | bi -> mkexp loc (Pexp_let (mkrf rf) bi e) ]
-    | ExLmd loc i me e -> mkexp loc (Pexp_letmodule (with_loc i loc) (module_expr me) (expr e))
+    | ExLmd loc i me e -> mkexp loc (Pexp_letmodule (with_loc (Some i) loc) (module_expr me) (expr e))
     | ExMat loc e a -> mkexp loc (Pexp_match (expr e) (match_case a []))
     | ExNew loc id -> mkexp loc (Pexp_new (long_type_ident id))
     | ExObj loc po cfl ->
@@ -1132,9 +1132,9 @@ value varify_constructors var_names =
     [ <:module_type@loc<>> -> error loc "abstract/nil module type not allowed here"
     | <:module_type@loc< $id:i$ >> -> mkmty loc (Pmty_ident (long_uident i))
     | Ast.MtFun(loc, "*", Ast.MtNil _, mt) ->
-        mkmty loc (Pmty_functor (with_loc "*" loc) None (module_type mt))
+        mkmty loc (Pmty_functor Unit (module_type mt))
     | <:module_type@loc< functor ($n$ : $nt$) -> $mt$ >> ->
-        mkmty loc (Pmty_functor (with_loc n loc) (Some (module_type nt)) (module_type mt))
+        mkmty loc (Pmty_functor (Named (with_loc (Some n) loc) (module_type nt)) (module_type mt))
     | <:module_type@loc< '$_$ >> -> error loc "module type variable not allowed here"
     | <:module_type@loc< sig $sl$ end >> ->
         mkmty loc (Pmty_signature (sig_item sl []))
@@ -1185,7 +1185,7 @@ value varify_constructors var_names =
     | SgInc loc mt -> [mksig loc (Psig_include {pincl_mod=module_type mt;
                                                 pincl_attributes=[];
                                                 pincl_loc = mkloc loc}) :: l]
-    | SgMod loc n mt -> [mksig loc (Psig_module {pmd_loc=mkloc loc; pmd_name=with_loc n loc; pmd_type=module_type mt; pmd_attributes=[]}) :: l]
+    | SgMod loc n mt -> [mksig loc (Psig_module {pmd_loc=mkloc loc; pmd_name=with_loc (Some n) loc; pmd_type=module_type mt; pmd_attributes=[]}) :: l]
     | SgRecMod loc mb ->
         [mksig loc (Psig_recmodule (module_sig_binding mb [])) :: l]
     | SgMty loc n mt ->
@@ -1215,7 +1215,7 @@ value varify_constructors var_names =
     [ <:module_binding< $x$ and $y$ >> ->
         module_sig_binding x (module_sig_binding y acc)
     | <:module_binding@loc< $s$ : $mt$ >> ->
-        [{pmd_loc=mkloc loc; pmd_name=with_loc s loc; pmd_type=module_type mt; pmd_attributes=[]} :: acc]
+        [{pmd_loc=mkloc loc; pmd_name=with_loc (Some s) loc; pmd_type=module_type mt; pmd_attributes=[]} :: acc]
     | _ -> assert False ]
   and module_str_binding x acc =
     match x with
@@ -1223,7 +1223,7 @@ value varify_constructors var_names =
         module_str_binding x (module_str_binding y acc)
     | <:module_binding@loc< $s$ : $mt$ = $me$ >> ->
         [{pmb_loc=mkloc loc;
-          pmb_name=with_loc s loc;
+          pmb_name=with_loc (Some s) loc;
           pmb_expr=
           {pmod_loc=Location.none;
            pmod_desc=Pmod_constraint(module_expr me,module_type mt);
@@ -1238,9 +1238,9 @@ value varify_constructors var_names =
     | <:module_expr@loc< $me1$ $me2$ >> ->
         mkmod loc (Pmod_apply (module_expr me1) (module_expr me2))
     | Ast.MeFun(loc, "*", Ast.MtNil _, me) ->
-        mkmod loc (Pmod_functor (with_loc "*" loc) None (module_expr me))
+        mkmod loc (Pmod_functor Unit (module_expr me))
     | <:module_expr@loc< functor ($n$ : $mt$) -> $me$ >> ->
-        mkmod loc (Pmod_functor (with_loc n loc) (Some (module_type mt)) (module_expr me))
+        mkmod loc (Pmod_functor (Named (with_loc (Some n) loc) (module_type mt)) (module_expr me))
     | <:module_expr@loc< struct $sl$ end >> ->
         mkmod loc (Pmod_structure (str_item sl []))
     | <:module_expr@loc< ($me$ : $mt$) >> ->
@@ -1299,7 +1299,7 @@ value varify_constructors var_names =
     | StInc loc me -> [mkstr loc (Pstr_include {pincl_mod=module_expr me;
                                                 pincl_attributes=[];
                                                 pincl_loc=mkloc loc}) :: l]
-    | StMod loc n me -> [mkstr loc (Pstr_module {pmb_loc=mkloc loc; pmb_name=with_loc n loc;pmb_expr=module_expr me;pmb_attributes=[]}) :: l]
+    | StMod loc n me -> [mkstr loc (Pstr_module {pmb_loc=mkloc loc; pmb_name=with_loc (Some n) loc;pmb_expr=module_expr me;pmb_attributes=[]}) :: l]
     | StRecMod loc mb ->
         [mkstr loc (Pstr_recmodule (module_str_binding mb [])) :: l]
     | StMty loc n mt ->
