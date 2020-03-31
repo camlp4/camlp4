@@ -16,8 +16,6 @@ to other systems:
   [Camlp5](https://github.com/camlp5/camlp5) variant of the
   preprocessor should be easy.
 
-If you would like to take over Camlp4, please get in touch with @diml.
-
 Building from git
 -----------------
 
