@@ -7,6 +7,7 @@ unset LC_ALL LC_CTYPE LC_COLLATE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
 set -e
 
 PINNED=0
+SKIP_VERSION_CHECK=0
 for i in "$@"; do
   case $i in
     --bindir=*)
@@ -20,6 +21,9 @@ for i in "$@"; do
       ;;
     --pinned*)
       PINNED=1
+      ;;
+    --skip-version-check)
+      SKIP_VERSION_CHECK=1
       ;;
     *)
       echo "usage: ./configure [--bindir=<dir>] [--libdir=<dir>] [--pkgdir=<dir>]" 1>&2
@@ -39,6 +43,8 @@ if [ $major -lt 4 -o \( $major -eq 4 -a $minor -lt 2 \) ]; then
     echo "The standalone Camlp4 requires OCaml >= 4.02."
     echo "For previous versions of OCaml use the Camlp4 distributed with OCaml."
     exit 2
+elif [ $SKIP_VERSION_CHECK -eq 1 ]; then
+    echo "Skipping OCaml version check"
 elif [ $major -ne 4 -o $minor -ne 10 ]; then
     echo "This version of Camlp4 is for OCaml 4.10 but you are using OCaml $ocaml_version."
     if [ -d .git ] ; then
