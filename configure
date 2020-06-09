@@ -39,14 +39,18 @@ ocaml_version=`ocamlc -version`
 major=`echo $ocaml_version | cut -d. -f1`
 minor=`echo $ocaml_version | cut -d. -f2`
 
+camlp4_version=4.11
+camlp4_major=`echo $camlp4_version | cut -d. -f1`
+camlp4_minor=`echo $camlp4_version | cut -d. -f2`
+
 if [ $major -lt 4 -o \( $major -eq 4 -a $minor -lt 2 \) ]; then
     echo "The standalone Camlp4 requires OCaml >= 4.02."
     echo "For previous versions of OCaml use the Camlp4 distributed with OCaml."
     exit 2
 elif [ $SKIP_VERSION_CHECK -eq 1 ]; then
     echo "Skipping OCaml version check"
-elif [ $major -ne 4 -o $minor -ne 11 ]; then
-    echo "This version of Camlp4 is for OCaml 4.10 but you are using OCaml $ocaml_version."
+elif [ $major -ne $camlp4_major -o $minor -ne $camlp4_minor ]; then
+    echo "This version of Camlp4 is for OCaml $camlp4_version but you are using OCaml $ocaml_version."
     if [ -d .git ] ; then
       if [ $PINNED -eq 1 ] ; then
         echo "You've used the wrong opam pin URL for this switch.">&2

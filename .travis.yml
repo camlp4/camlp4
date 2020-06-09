@@ -1,11 +1,8 @@
 language: c
 script: bash -ex .travis-ci.sh
 env:
-  - OCAML_BRANCH=4.10
-    XARCH=i386
   - OCAML_BRANCH=4.11
     XARCH=i386
-    CONFIGURE_ARGS=--skip-version-check
   - OCAML_BRANCH=trunk
     XARCH=i386
     CONFIGURE_ARGS=--skip-version-check
