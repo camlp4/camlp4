@@ -704,7 +704,7 @@ and row_field =
         let is_closed = if wildcards = [] then Closed else Open in
         mkpat loc (Ppat_record (List.map mklabpat ps, is_closed))
     | PaStr loc s ->
-        mkpat loc (Ppat_constant (Pconst_string (string_of_string_token loc s) None))
+        mkpat loc (Ppat_constant (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None))
     | <:patt@loc< ($p1$, $p2$) >> ->
          mkpat loc (Ppat_tuple
            (List.map patt (list_of_patt p1 (list_of_patt p2 []))))
@@ -969,7 +969,7 @@ value varify_constructors var_names =
           (Pexp_apply (mkexp loc (Pexp_ident (array_function loc "String" "get")))
             [(Nolabel, expr e1); (Nolabel, expr e2)])
     | ExStr loc s ->
-        mkexp loc (Pexp_constant (Pconst_string (string_of_string_token loc s) None))
+        mkexp loc (Pexp_constant (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None))
     | ExTry loc e a -> mkexp loc (Pexp_try (expr e) (match_case a []))
     | <:expr@loc< ($e1$, $e2$) >> ->
          mkexp loc (Pexp_tuple (List.map expr (list_of_expr e1 (list_of_expr e2 []))))

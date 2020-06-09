@@ -16204,7 +16204,7 @@ module Struct =
               | PaStr (loc, s) ->
                   mkpat loc
                     (Ppat_constant
-                       (Pconst_string ((string_of_string_token loc s), None)))
+                       (Pconst_string ((string_of_string_token loc s), Loc.to_ocaml_location loc, None)))
               | Ast.PaTup (loc, (Ast.PaCom (_, p1, p2))) ->
                   mkpat loc
                     (Ppat_tuple
@@ -16529,7 +16529,7 @@ module Struct =
               | ExStr (loc, s) ->
                   mkexp loc
                     (Pexp_constant
-                       (Pconst_string ((string_of_string_token loc s), None)))
+                       (Pconst_string ((string_of_string_token loc s), Loc.to_ocaml_location loc, None)))
               | ExTry (loc, e, a) ->
                   mkexp loc (Pexp_try ((expr e), (match_case a [])))
               | Ast.ExTup (loc, (Ast.ExCom (_, e1, e2))) ->
