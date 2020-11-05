@@ -546,9 +546,9 @@ and row_field =
   value rec type_parameters t acc =
     match t with
     [ <:ctyp< $t1$ $t2$ >> -> type_parameters t1 (type_parameters t2 acc)
-    | <:ctyp< +'$s$ >> -> [(s, Covariant) :: acc]
-    | <:ctyp< -'$s$ >> -> [(s, Contravariant) :: acc]
-    | <:ctyp< '$s$ >> -> [(s, Invariant) :: acc]
+    | <:ctyp< +'$s$ >> -> [(s, (Covariant, NoInjectivity)) :: acc]
+    | <:ctyp< -'$s$ >> -> [(s, (Contravariant, NoInjectivity)) :: acc]
+    | <:ctyp< '$s$ >> -> [(s, (NoVariance, NoInjectivity)) :: acc]
     | _ -> assert False ];
 
   value core_type loc ty =
@@ -564,20 +564,20 @@ and row_field =
   value rec optional_type_parameters t acc =
     match t with
     [ <:ctyp< $t1$ $t2$ >> -> optional_type_parameters t1 (optional_type_parameters t2 acc)
-    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, Covariant) :: acc]
-    | Ast.TyAnP loc  -> [(ptyp_any loc, Covariant) :: acc]
-    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, Contravariant) :: acc]
-    | Ast.TyAnM loc -> [(ptyp_any loc, Contravariant) :: acc]
-    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, Invariant) :: acc]
-    | Ast.TyAny loc -> [(ptyp_any loc, Invariant) :: acc]
+    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, (Covariant, NoInjectivity)) :: acc]
+    | Ast.TyAnP loc  -> [(ptyp_any loc, (Covariant, NoInjectivity)) :: acc]
+    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, (Contravariant, NoInjectivity)) :: acc]
+    | Ast.TyAnM loc -> [(ptyp_any loc, (Contravariant, NoInjectivity)) :: acc]
+    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, (NoVariance, NoInjectivity)) :: acc]
+    | Ast.TyAny loc -> [(ptyp_any loc, (NoVariance, NoInjectivity)) :: acc]
     | _ -> assert False ];
 
   value rec class_parameters t acc =
     match t with
     [ <:ctyp< $t1$, $t2$ >> -> class_parameters t1 (class_parameters t2 acc)
-    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, Covariant) :: acc]
-    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, Contravariant) :: acc]
-    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, Invariant) :: acc]
+    | <:ctyp@loc< +'$s$ >> -> [(ptyp_var loc s, (Covariant, NoInjectivity)) :: acc]
+    | <:ctyp@loc< -'$s$ >> -> [(ptyp_var loc s, (Contravariant, NoInjectivity)) :: acc]
+    | <:ctyp@loc< '$s$ >> -> [(ptyp_var loc s, (NoVariance, NoInjectivity)) :: acc]
     | _ -> assert False ];
 
   value rec type_parameters_and_type_name t acc =

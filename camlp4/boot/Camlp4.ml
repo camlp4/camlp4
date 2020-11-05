@@ -16005,9 +16005,9 @@ module Struct =
               match t with
               | Ast.TyApp (_, t1, t2) ->
                   type_parameters t1 (type_parameters t2 acc)
-              | Ast.TyQuP (_, s) -> (s, Covariant) :: acc
-              | Ast.TyQuM (_, s) -> (s, Contravariant) :: acc
-              | Ast.TyQuo (_, s) -> (s, Invariant) :: acc
+              | Ast.TyQuP (_, s) -> (s, (Covariant, NoInjectivity)) :: acc
+              | Ast.TyQuM (_, s) -> (s, (Contravariant, NoInjectivity)) :: acc
+              | Ast.TyQuo (_, s) -> (s, (NoVariance, NoInjectivity)) :: acc
               | _ -> assert false
               
             let core_type loc ty =
@@ -16027,23 +16027,23 @@ module Struct =
               | Ast.TyApp (_, t1, t2) ->
                   optional_type_parameters t1
                     (optional_type_parameters t2 acc)
-              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), Covariant) :: acc
-              | Ast.TyAnP loc -> ((ptyp_any loc), Covariant) :: acc
+              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), (Covariant, NoInjectivity)) :: acc
+              | Ast.TyAnP loc -> ((ptyp_any loc), (Covariant, NoInjectivity)) :: acc
               | Ast.TyQuM (loc, s) ->
-                  ((ptyp_var loc s), Contravariant) :: acc
-              | Ast.TyAnM loc -> ((ptyp_any loc), Contravariant) :: acc
-              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), Invariant) :: acc
-              | Ast.TyAny loc -> ((ptyp_any loc), Invariant) :: acc
+                  ((ptyp_var loc s), (Contravariant, NoInjectivity)) :: acc
+              | Ast.TyAnM loc -> ((ptyp_any loc), (Contravariant, NoInjectivity)) :: acc
+              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), (NoVariance, NoInjectivity)) :: acc
+              | Ast.TyAny loc -> ((ptyp_any loc), (NoVariance, NoInjectivity)) :: acc
               | _ -> assert false
               
             let rec class_parameters t acc =
               match t with
               | Ast.TyCom (_, t1, t2) ->
                   class_parameters t1 (class_parameters t2 acc)
-              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), Covariant) :: acc
+              | Ast.TyQuP (loc, s) -> ((ptyp_var loc s), (Covariant, NoInjectivity)) :: acc
               | Ast.TyQuM (loc, s) ->
-                  ((ptyp_var loc s), Contravariant) :: acc
-              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), Invariant) :: acc
+                  ((ptyp_var loc s), (Contravariant, NoInjectivity)) :: acc
+              | Ast.TyQuo (loc, s) -> ((ptyp_var loc s), (NoVariance, NoInjectivity)) :: acc
               | _ -> assert false
               
             let rec type_parameters_and_type_name t acc =

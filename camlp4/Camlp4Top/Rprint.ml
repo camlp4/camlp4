@@ -303,9 +303,11 @@ and print_ty_label ppf lab =
   if lab <> "" then fprintf ppf "%s%s:" (if lab.[0] = '?' then "" else "~") lab else ()
 ;
 
-value type_parameter ppf (ty, (co, cn)) =
-  fprintf ppf "%s%s%s"
-    (if not cn then "+" else if not co then "-" else "")
+value type_parameter ppf (ty, (var, inj)) =
+  let open Asttypes in
+  fprintf ppf "%s%s%s%s"
+    (match inj with [ Injective -> "!" | NoInjectivity -> "" ])
+    (match var with [ Covariant -> "+" | Contravariant -> "-" | NoVariance -> "" ])
     (if ty = "_" then "" else "'")
     ty
 ;
