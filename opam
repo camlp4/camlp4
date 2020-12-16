@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "4.11"
+version: "4.12"
 authors: ["Daniel de Rauglaudre" "Nicolas Pouillard"]
 maintainer: "ygrek@autistici.org"
 homepage: "https://github.com/camlp4/camlp4"
