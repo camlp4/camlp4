@@ -16137,7 +16137,7 @@ module Struct =
                   (Ast.PaTup (_, (Ast.PaAny loc_any)))) ->
                   mkpat loc
                     (Ppat_construct ((lident_with_loc (conv_con s) sloc),
-                       (Some (mkpat loc_any Ppat_any))))
+                       (Some ([], mkpat loc_any Ppat_any))))
               | (PaApp (loc, _, _) as f) ->
                   let (f, al) = patt_fa [] f in
                   let al = List.map patt al
@@ -16148,7 +16148,7 @@ module Struct =
                            (match al with
                             | [ a ] -> a
                             | _ -> mkpat loc (Ppat_tuple al))
-                         in mkpat loc (Ppat_construct (li, (Some a)))
+                         in mkpat loc (Ppat_construct (li, (Some ([], a))))
                      | Ppat_variant (s, None) ->
                          let a =
                            (match al with

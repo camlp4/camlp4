@@ -39,7 +39,7 @@ ocaml_version=`ocamlc -version`
 major=`echo $ocaml_version | cut -d. -f1`
 minor=`echo $ocaml_version | cut -d. -f2`
 
-camlp4_version=4.12
+camlp4_version=4.13
 camlp4_major=`echo $camlp4_version | cut -d. -f1`
 camlp4_minor=`echo $camlp4_version | cut -d. -f2`
 

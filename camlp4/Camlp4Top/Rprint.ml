@@ -208,16 +208,16 @@ and print_simple_out_type ppf =
       fprintf ppf "@[<hv 2>{ %a }@]"
         (print_list print_out_label (fun ppf -> fprintf ppf ";@ ")) lbls
   | Otyp_abstract -> fprintf ppf "<abstract>"
-  | Otyp_module (p, n, tyl) ->
+  | Otyp_module (p, fl) ->
       do {
           fprintf ppf "@[<1>(module %a" print_ident p;
           let first = ref True in
-          List.iter2
-            (fun s t ->
+          List.iter
+            (fun (s, t) ->
               let sep = if first.val then do { first.val := False; "with" } else "and" in
               fprintf ppf " %s type %s = %a" sep s print_out_type t
             )
-            n tyl;
+            fl;
           fprintf ppf ")@]"
       }
   | Otyp_alias _ _ | Otyp_poly _ _ | Otyp_open
