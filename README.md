@@ -30,3 +30,12 @@ Building from git
 Camlp4 branches try to follow OCaml ones. To build with the trunk of
 OCaml, you need to use the trunk branch of Camlp4. To build for a
 specific version, for instance 4.02.1, use the 4.02 branch of Camlp4.
+
+Updating to new OCaml version checklist
+---------------------------------------
+
+1. Update code :)
+2. Update camlp4_version in configure
+3. Update version field in opam file
+4. Update CI to use new version (TBD currently there is travis but it is not working)
+5. Branch and tag to match previous versions
