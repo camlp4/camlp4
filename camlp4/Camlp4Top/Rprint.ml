@@ -226,7 +226,12 @@ and print_simple_out_type ppf =
   | Otyp_attribute (_, _) -> ()]
   in
   print_tkind ppf
-and print_out_constr ppf (name, tyl, ret) =
+and print_out_constr ppf constr =
+  let {
+    ocstr_name = name;
+    ocstr_args = tyl;
+    ocstr_return_type = ret;
+  } = constr in
   match (tyl,ret) with
   [ ([], None) -> fprintf ppf "%s" name
   | ([], Some r) -> fprintf ppf "@[<2>%s:@ %a@]" name print_out_type r
@@ -261,7 +266,7 @@ and print_out_extension_constructor ppf ext =
   fprintf ppf "@[<hv 2>type %t +=%s@;<1 2>%a@]"
     print_extended_type
     (if ext.oext_private = Asttypes.Private then " private" else "")
-    print_out_constr (ext.oext_name, ext.oext_args, ext.oext_ret_type)
+    print_out_constr {ocstr_name = ext.oext_name; ocstr_args = ext.oext_args; ocstr_return_type = ext.oext_ret_type}
 and print_fields rest ppf =
   fun
   [ [] ->
@@ -409,7 +414,7 @@ and print_out_sig_item ppf =
         name Toploop.print_out_class_type.val clt
   | Osig_typext ext Oext_exception ->
       fprintf ppf "@[<2>exception %a@]"
-        print_out_constr (ext.oext_name, ext.oext_args, ext.oext_ret_type)
+        print_out_constr {ocstr_name = ext.oext_name; ocstr_args = ext.oext_args; ocstr_return_type = ext.oext_ret_type}
   | Osig_typext ext _es ->
       print_out_extension_constructor ppf ext
   | Osig_modtype name Omty_abstract ->
