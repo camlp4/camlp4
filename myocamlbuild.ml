@@ -58,11 +58,7 @@ end
 
 let () =
   dispatch begin function
-  | Before_options ->
-    Options.use_ocamlfind := false
-
   | After_options ->
-    Options.use_ocamlfind := false;
     Options.make_links := false
 
   | After_rules ->

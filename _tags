@@ -21,17 +21,18 @@ true: debug
 true: safe_string
 
 <camlp4/**/*>: use_import
-<camlp4/**/*.{byte,native}>: use_dynlink
+<camlp4/**/*.{byte,native}>: package(dynlink), package(camlp-streams)
 <camlp4/config/gen_import.*>: use_ocamlcommon
 
-<camlp4/*.{byte,native}>: use_unix
-<camlp4/camlp4boot.*>: -use_unix
+<camlp4/*.{byte,native}>: package(unix)
+<camlp4/camlp4boot.*>: -package(unix)
 
-<camlp4/boot/Camlp4.ml>: use_dynlink
-<camlp4/Camlp4/Struct/DynLoader.ml>: use_dynlink
-<camlp4/Camlp4Printers/Camlp4AutoPrinter.ml>: use_unix
+<camlp4/boot/Camlp4.ml>: package(dynlink)
+<camlp4/Camlp4/Struct/DynLoader.ml>: package(dynlink)
+<camlp4/Camlp4Printers/Camlp4AutoPrinter.ml>: package(unix)
 
 #<**/*.ml*>: warn_error(A-3), warn(-3)
+<**/*.ml*>: package(camlp-streams)
 
 # The tag "camlp4boot" is for preprocessing using camlp4/boot/camlp4boot.byte
 <camlp4/**/*.ml*>: camlp4boot, warn_Z

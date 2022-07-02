@@ -1,4 +1,4 @@
-OB := ocamlbuild -classic-display -no-ocamlfind
+OB := ocamlbuild -classic-display -use-ocamlfind -plugin-tag "package(camlp-streams)"
 DESTDIR=
 
 -include config.sh

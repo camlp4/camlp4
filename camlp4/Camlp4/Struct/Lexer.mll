@@ -102,7 +102,8 @@ module Make (Token : Sig.Camlp4Token)
 
     let to_string x =
       let b = Buffer.create 50 in
-      let () = bprintf b "%a" print x in Buffer.contents b
+      let fmt = formatter_of_buffer b in
+      let () = fprintf fmt "%a" print x in Buffer.contents b
   end;;
 
   let module M = ErrorHandler.Register(Error) in ()
@@ -461,7 +462,7 @@ module Make (Token : Sig.Camlp4Token)
         match Stream.peek s with
         | Some x ->
             Stream.junk s;
-            buff.[n] <- x;
+            Bytes.set buff n x;
             succ n
         | _ -> n
     in
