@@ -89,7 +89,7 @@ module Debug :
         in
           open_out_gen [ Open_wronly; Open_creat; Open_append; Open_text ]
             0o666 f
-      with | Not_found -> Pervasives.stderr
+      with | Not_found -> Stdlib.stderr
       
     module StringSet = Set.Make(String)
       
@@ -3758,7 +3758,8 @@ module Struct =
                   
                 let to_string x =
                   let b = Buffer.create 50 in
-                  let () = bprintf b "%a" print x in Buffer.contents b
+                  let fmt = formatter_of_buffer b in
+                  let () = fprintf fmt "%a" print x in Buffer.contents b
                   
               end
               
@@ -7580,7 +7581,7 @@ module Struct =
                 then n
                 else
                   (match Stream.peek s with
-                   | Some x -> (Stream.junk s; buff.[n] <- x; succ n)
+                   | Some x -> (Stream.junk s; Bytes.set buff n x; succ n)
                    | _ -> n)
               in self 0 s
               
@@ -19359,7 +19360,7 @@ module Struct =
                            (eprintf
                               "<W> Changing associativity of level \"%s\"\n"
                               n;
-                            flush Pervasives.stderr)
+                            flush Stdlib.stderr)
                          else ();
                          a)
                   in
@@ -19370,7 +19371,7 @@ module Struct =
                               !(entry.egram.warning_verbose)
                           then
                             (eprintf "<W> Level label \"%s\" ignored\n" n;
-                             flush Pervasives.stderr)
+                             flush Stdlib.stderr)
                           else ()
                       | None -> ());
                      {
@@ -19394,7 +19395,7 @@ module Struct =
                              (eprintf
                                 "No level labelled \"%s\" in entry \"%s\"\n"
                                 n entry.ename;
-                              flush Pervasives.stderr;
+                              flush Stdlib.stderr;
                               failwith "Grammar.extend")
                          | lev :: levs ->
                              if Tools.is_level_labelled n lev
@@ -19410,7 +19411,7 @@ module Struct =
                              (eprintf
                                 "No level labelled \"%s\" in entry \"%s\"\n"
                                 n entry.ename;
-                              flush Pervasives.stderr;
+                              flush Stdlib.stderr;
                               failwith "Grammar.extend")
                          | lev :: levs ->
                              if Tools.is_level_labelled n lev
@@ -19426,7 +19427,7 @@ module Struct =
                              (eprintf
                                 "No level labelled \"%s\" in entry \"%s\"\n"
                                 n entry.ename;
-                              flush Pervasives.stderr;
+                              flush Stdlib.stderr;
                               failwith "Grammar.extend")
                          | lev :: levs ->
                              if Tools.is_level_labelled n lev
@@ -19450,7 +19451,7 @@ module Struct =
                            "\
   Error: entries \"%s\" and \"%s\" do not belong to the same grammar.\n"
                            entry.ename e.ename;
-                         flush Pervasives.stderr;
+                         flush Stdlib.stderr;
                          failwith "Grammar.extend error")
                       else ()
                   | Snterml (e, _) ->
@@ -19460,7 +19461,7 @@ module Struct =
                            "\
   Error: entries \"%s\" and \"%s\" do not belong to the same grammar.\n"
                            entry.ename e.ename;
-                         flush Pervasives.stderr;
+                         flush Stdlib.stderr;
                          failwith "Grammar.extend error")
                       else ()
                   | Smeta (_, sl, _) -> List.iter (check_gram entry) sl
@@ -19604,7 +19605,7 @@ module Struct =
                     | Dparser _ ->
                         (eprintf "Error: entry not extensible: \"%s\"\n"
                            entry.ename;
-                         flush Pervasives.stderr;
+                         flush Stdlib.stderr;
                          failwith "Grammar.extend")
                   in
                     if rules = []

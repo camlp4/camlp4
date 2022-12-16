@@ -66,7 +66,7 @@ module Make (Structure : Structure.S) = struct
           do {
             if a <> lev.assoc && entry.egram.warning_verbose.val then do {
               eprintf "<W> Changing associativity of level \"%s\"\n" n;
-              flush Pervasives.stderr
+              flush Stdlib.stderr
             }
             else ();
             a
@@ -76,7 +76,7 @@ module Make (Structure : Structure.S) = struct
       match lname with
       [ Some n ->
           if lname <> lev.lname && entry.egram.warning_verbose.val then do {
-            eprintf "<W> Level label \"%s\" ignored\n" n; flush Pervasives.stderr
+            eprintf "<W> Level label \"%s\" ignored\n" n; flush Stdlib.stderr
           }
           else ()
       | None -> () ];
@@ -102,7 +102,7 @@ module Make (Structure : Structure.S) = struct
               do {
                 eprintf "No level labelled \"%s\" in entry \"%s\"\n" n
                   entry.ename;
-                flush Pervasives.stderr;
+                flush Stdlib.stderr;
                 failwith "Grammar.extend"
               }
           | [lev :: levs] ->
@@ -119,7 +119,7 @@ module Make (Structure : Structure.S) = struct
               do {
                 eprintf "No level labelled \"%s\" in entry \"%s\"\n" n
                   entry.ename;
-                flush Pervasives.stderr;
+                flush Stdlib.stderr;
                 failwith "Grammar.extend"
               }
           | [lev :: levs] ->
@@ -136,7 +136,7 @@ module Make (Structure : Structure.S) = struct
               do {
                 eprintf "No level labelled \"%s\" in entry \"%s\"\n" n
                   entry.ename;
-                flush Pervasives.stderr;
+                flush Stdlib.stderr;
                 failwith "Grammar.extend"
               }
           | [lev :: levs] ->
@@ -159,7 +159,7 @@ module Make (Structure : Structure.S) = struct
           eprintf "\
   Error: entries \"%s\" and \"%s\" do not belong to the same grammar.\n"
             entry.ename e.ename;
-          flush Pervasives.stderr;
+          flush Stdlib.stderr;
           failwith "Grammar.extend error"
         }
         else ()
@@ -168,7 +168,7 @@ module Make (Structure : Structure.S) = struct
           eprintf "\
   Error: entries \"%s\" and \"%s\" do not belong to the same grammar.\n"
             entry.ename e.ename;
-          flush Pervasives.stderr;
+          flush Stdlib.stderr;
           failwith "Grammar.extend error"
         }
         else ()
@@ -277,7 +277,7 @@ module Make (Structure : Structure.S) = struct
       | Dparser _ ->
           do {
             eprintf "Error: entry not extensible: \"%s\"\n" entry.ename;
-            flush Pervasives.stderr;
+            flush Stdlib.stderr;
             failwith "Grammar.extend"
           } ]
     in
