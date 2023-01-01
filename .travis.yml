@@ -1,4 +1,8 @@
 language: c
+os: linux
+arch: 
+    - amd64
+    - ppc64le
 script: bash -ex .travis-ci.sh
 env:
   - OCAML_BRANCH=4.12
