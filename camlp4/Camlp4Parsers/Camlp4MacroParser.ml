@@ -189,7 +189,10 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
             expr: LEVEL "simple"
               [ [ UIDENT $x$ -> (new reloc _loc)#expr e ]]
             ;
-            patt: LEVEL "simple"
+            patt: LEVEL "apply"
+            (* in the revised grammar 'UIDENT' only occurs at the level "simple",
+               but in the standard grammar 'patt_constr' is a possible production
+               of the level "apply", and includes 'UIDENT'. *)
               [ [ UIDENT $x$ ->
                     let p = substp _loc [] e
                     in (new reloc _loc)#patt p ]]
@@ -210,7 +213,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
                     else
                       incorrect_number _loc el sl ] ]
             ;
-            patt: LEVEL "simple"
+            patt: LEVEL "apply"
               [ [ UIDENT $x$; param = SELF ->
                     let pl =
                       match param with
