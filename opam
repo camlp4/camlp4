@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "camlp4"
-version: "5.0"
+version: "5.1"
 authors: ["Daniel de Rauglaudre" "Nicolas Pouillard"]
 maintainer: "ygrek@autistici.org"
 homepage: "https://github.com/camlp4/camlp4"
@@ -18,7 +18,7 @@ build: [
   [make "byte"] {!ocaml:native-dynlink}
 ]
 depends: [
-  "ocaml" {>= "5.0" & < "5.1"}
+  "ocaml" {>= "5.1" & < "5.2"}
   "ocamlbuild" {build}
   "ocamlfind" {build}
   "camlp-streams"
