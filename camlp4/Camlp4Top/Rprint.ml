@@ -149,7 +149,7 @@ value pr_present =
 
 value rec print_out_type ppf =
   fun
-  [ Otyp_alias {non_gen; aliased; alias } ->
+  [ Otyp_alias {non_gen=_; aliased; alias } ->
       fprintf ppf "@[%a@ as '%s@]"
         print_out_type aliased alias
   | ty -> print_out_type_1 ppf ty ]
@@ -273,18 +273,18 @@ and print_fields open_row ppf =
   fun
   [ [] ->
       match open_row with
-      [ true -> fprintf ppf ".."
-      | false -> () ]
+      [ True -> fprintf ppf ".."
+      | False -> () ]
   | [(s, t)] ->
       do {
         fprintf ppf "%s : %a" s print_out_type t;
         match open_row with
-        [ true -> fprintf ppf ";@ "
-        | false -> () ];
-        print_fields rest ppf []
+        [ True -> fprintf ppf ";@ "
+        | False -> () ];
+        print_fields open_row ppf []
       }
   | [(s, t) :: l] ->
-      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_fields rest) l ]
+      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_fields open_row) l ]
 and print_row_field ppf (l, opt_amp, tyl) =
   let pr_of ppf =
     if opt_amp then fprintf ppf " of@ &@ "
