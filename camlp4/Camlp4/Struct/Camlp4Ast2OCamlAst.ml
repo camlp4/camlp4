@@ -1057,14 +1057,15 @@ value varify_constructors var_names =
                                 mktyp _loc (Ptyp_poly ampersand_vars ty')))
       in
       let e = mk_newtypes vars in
-      [{pvb_pat=pat; pvb_expr=e; pvb_attributes=[]; pvb_loc = mkloc _loc} :: acc]
+      [{pvb_pat=pat; pvb_expr=e; pvb_attributes=[]; pvb_loc = mkloc _loc; pvb_constraint = None} :: acc]
     | <:binding@_loc< $p$ = ($e$ : ! $vs$ . $ty$) >> ->
         [{pvb_pat=patt <:patt< ($p$ : ! $vs$ . $ty$ ) >>;
           pvb_expr=expr e;
           pvb_attributes=[];
-          pvb_loc=mkloc _loc} :: acc]
+          pvb_loc=mkloc _loc;
+          pvb_constraint = None} :: acc]
     | <:binding@_loc< $p$ = $e$ >> -> [{pvb_pat=patt p; pvb_expr=expr e; pvb_attributes=[];
-                                        pvb_loc=mkloc _loc} :: acc]
+                                        pvb_loc=mkloc _loc; pvb_constraint = None} :: acc]
     | <:binding<>> -> acc
     | _ -> assert False ]
   and match_case x acc =

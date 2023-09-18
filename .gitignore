@@ -1,4 +1,5 @@
 _build/
+_opam/
 config.sh
 myocamlbuild_config.ml
 camlp4/boot/*.old

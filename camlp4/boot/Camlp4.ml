@@ -16655,6 +16655,7 @@ module Struct =
                       pvb_expr = e;
                       pvb_attributes = [];
                       pvb_loc = mkloc _loc;
+                      pvb_constraint = None;
                     } :: acc
               | Ast.BiEq (_loc, p,
                   (Ast.ExTyc (_, e, (Ast.TyPol (_, vs, ty))))) ->
@@ -16664,6 +16665,7 @@ module Struct =
                     pvb_expr = expr e;
                     pvb_attributes = [];
                     pvb_loc = mkloc _loc;
+                    pvb_constraint = None;
                   } :: acc
               | Ast.BiEq (_loc, p, e) ->
                   {
@@ -16671,6 +16673,7 @@ module Struct =
                     pvb_expr = expr e;
                     pvb_attributes = [];
                     pvb_loc = mkloc _loc;
+                    pvb_constraint = None;
                   } :: acc
               | Ast.BiNil _ -> acc
               | _ -> assert false
