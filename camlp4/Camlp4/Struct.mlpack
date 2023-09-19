@@ -6,6 +6,7 @@ CommentFilter
 DynLoader
 EmptyError
 EmptyPrinter
+ErrorHandler
 FreeVars
 Lexer
 Loc
@@ -13,3 +14,4 @@ Quotation
 Token
 Grammar
 DynAst
+Utils
