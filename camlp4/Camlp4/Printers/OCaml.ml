@@ -90,7 +90,7 @@ module Make (Syntax : Sig.Camlp4Syntax) = struct
       in fun s -> StringSet.mem s keywords;
 
   module Lexer = Struct.Lexer.Make Token;
-  let module M = ErrorHandler.Register Lexer.Error in ();
+  let module M = Struct.ErrorHandlerStruct.Register Lexer.Error in ();
   open Sig;
   value lexer s =
     Lexer.from_string ~quotations:Camlp4_config.quotations.val Loc.ghost s;
@@ -1188,22 +1188,22 @@ module MakeMore (Syntax : Sig.Camlp4Syntax)
     if String.contains s '%' then failwith "-sep Format error, % found in string"
     else (Obj.magic (Struct.Token.Eval.string s : string) : sep);
 
-  Options.add "-l" (Arg.Int (fun i -> margin.val := i))
+  Struct.OptionsStruct.add "-l" (Arg.Int (fun i -> margin.val := i))
     "<length> line length for pretty printing.";
 
-  Options.add "-ss" (Arg.Unit (fun () -> semisep.val := ";;"))
+  Struct.OptionsStruct.add "-ss" (Arg.Unit (fun () -> semisep.val := ";;"))
     " Print double semicolons.";
 
-  Options.add "-no_ss" (Arg.Unit (fun () -> semisep.val := ""))
+  Struct.OptionsStruct.add "-no_ss" (Arg.Unit (fun () -> semisep.val := ""))
     " Do not print double semicolons (default).";
 
-  Options.add "-sep" (Arg.String (fun s -> semisep.val := check_sep s))
+  Struct.OptionsStruct.add "-sep" (Arg.String (fun s -> semisep.val := check_sep s))
     " Use this string between phrases.";
 
-  Options.add "-curry-constr" (Arg.Set curry_constr) "Use currified constructors.";
+  Struct.OptionsStruct.add "-curry-constr" (Arg.Set curry_constr) "Use currified constructors.";
 
-  Options.add "-no_comments" (Arg.Clear comments) "Do not add comments.";
+  Struct.OptionsStruct.add "-no_comments" (Arg.Clear comments) "Do not add comments.";
 
-  Options.add "-add_locations" (Arg.Set locations) "Add locations as comment.";
+  Struct.OptionsStruct.add "-add_locations" (Arg.Set locations) "Add locations as comment.";
 
 end;
