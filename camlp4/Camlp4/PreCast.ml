@@ -46,7 +46,7 @@ type camlp4_token = Sig.camlp4_token ==
   | EOI ];
 
 module Loc = Struct.Loc;
-module Ast = Struct.Camlp4Ast.Make Loc;
+module Ast = Camlp4Ast.Make Loc;
 module Token = Struct.Token.Make Loc;
 module Lexer = Struct.Lexer.Make Token;
 module Gram = Struct.Grammar.Static.Make Lexer;

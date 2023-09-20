@@ -113,12 +113,12 @@ module Make (Ast : Sig.Camlp4Ast)
                 "\n(consider setting variable Quotation.dump_file, or using the -QD option)"
           ]
         ]
-      in fprintf ppf "@\n%a@]@." ErrorHandler.print exn;
+      in fprintf ppf "@\n%a@]@." ErrorHandlerStruct.print exn;
 
     value to_string x =
       Format.asprintf "%a" print x;
   end;
-  let module M = ErrorHandler.Register Error in ();
+  let module M = ErrorHandlerStruct.Register Error in ();
   open Error;
 
   value expand_quotation loc expander pos_tag quot =

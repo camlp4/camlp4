@@ -1,1 +1,1 @@
-include Struct.ErrorHandler;
+include Struct.ErrorHandlerStruct;

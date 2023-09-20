@@ -92,7 +92,7 @@ module Make (Loc : Sig.Loc)
     value to_string x =
       Format.asprintf "%a" print x;
   end;
-  let module M = ErrorHandler.Register Error in ();
+  let module M = ErrorHandlerStruct.Register Error in ();
 
   module Filter = struct
     type token_filter = stream_filter t Loc.t;
