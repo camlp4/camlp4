@@ -1,11 +1,11 @@
 AstFilters
-Camlp4Ast
 Camlp4Ast2OCamlAst
 CleanAst
 CommentFilter
 DynLoader
 EmptyError
 EmptyPrinter
+ErrorHandlerStruct
 FreeVars
 Lexer
 Loc
@@ -13,3 +13,5 @@ Quotation
 Token
 Grammar
 DynAst
+UtilsStruct
+OptionsStruct

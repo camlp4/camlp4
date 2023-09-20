@@ -106,7 +106,7 @@ module Make (Token : Sig.Camlp4Token)
       let () = fprintf fmt "%a" print x in Buffer.contents b
   end;;
 
-  let module M = ErrorHandler.Register(Error) in ()
+  let module M = ErrorHandlerStruct.Register(Error) in ()
 
   open Error
 

@@ -149,7 +149,9 @@ value pr_present =
 
 value rec print_out_type ppf =
   fun
-  [ Otyp_alias ty s -> fprintf ppf "@[%a as '%s@]" print_out_type ty s
+  [ Otyp_alias {non_gen=_; aliased; alias } ->
+      fprintf ppf "@[%a@ as '%s@]"
+        print_out_type aliased alias
   | ty -> print_out_type_1 ppf ty ]
 and print_out_type_1 ppf =
   fun
@@ -175,7 +177,7 @@ and print_simple_out_type ppf =
   | Otyp_tuple tyl ->
       fprintf ppf "@[<1>(%a)@]" (print_typlist print_out_type " *") tyl
   | Otyp_stuff s -> fprintf ppf "%s" s
-  | Otyp_variant non_gen row_fields closed tags ->
+  | Otyp_variant (row_fields, closed, tags) ->
       let print_present ppf =
         fun
         [ None | Some [] -> ()
@@ -188,16 +190,16 @@ and print_simple_out_type ppf =
               ppf fields
         | Ovar_typ typ -> print_out_type_2 ppf typ ]
       in
-      fprintf ppf "%s[%s@[<hv>@[<hv>%a@]%a ]@]" (if non_gen then "_" else "")
+      fprintf ppf "[%s@[<hv>@[<hv>%a@]%a ]@]"
         (if closed then if tags = None then "= " else "< "
          else if tags = None then "> "
          else "? ")
         print_fields row_fields
         print_present tags
-  | Otyp_object fields rest ->
-      fprintf ppf "@[<2>< %a >@]" (print_fields rest) fields
-  | Otyp_class ng id tyl ->
-      fprintf ppf "@[%a%s#%a@]" print_typargs tyl (if ng then "_" else "")
+  | Otyp_object {fields; open_row} ->
+      fprintf ppf "@[<2>< %a >@]" (print_fields open_row) fields
+  | Otyp_class (id, tyl) ->
+      fprintf ppf "@[%a#%a@]" print_typargs tyl
         print_ident id
   | Otyp_manifest ty1 ty2 ->
       fprintf ppf "@[<2>%a ==@ %a@]" print_out_type ty1 print_out_type ty2
@@ -220,7 +222,7 @@ and print_simple_out_type ppf =
             fl;
           fprintf ppf ")@]"
       }
-  | Otyp_alias _ _ | Otyp_poly _ _ | Otyp_open
+  | Otyp_alias _ | Otyp_poly _ _ | Otyp_open
   | Otyp_arrow _ _ _ | Otyp_constr _ [_ :: _] as ty ->
       fprintf ppf "@[<1>(%a)@]" print_out_type ty
   | Otyp_attribute (_, _) -> ()]
@@ -267,22 +269,22 @@ and print_out_extension_constructor ppf ext =
     print_extended_type
     (if ext.oext_private = Asttypes.Private then " private" else "")
     print_out_constr {ocstr_name = ext.oext_name; ocstr_args = ext.oext_args; ocstr_return_type = ext.oext_ret_type}
-and print_fields rest ppf =
+and print_fields open_row ppf =
   fun
   [ [] ->
-      match rest with
-      [ Some non_gen -> fprintf ppf "%s.." (if non_gen then "_" else "")
-      | None -> () ]
+      match open_row with
+      [ True -> fprintf ppf ".."
+      | False -> () ]
   | [(s, t)] ->
       do {
         fprintf ppf "%s : %a" s print_out_type t;
-        match rest with
-        [ Some _ -> fprintf ppf ";@ "
-        | None -> () ];
-        print_fields rest ppf []
+        match open_row with
+        [ True -> fprintf ppf ";@ "
+        | False -> () ];
+        print_fields open_row ppf []
       }
   | [(s, t) :: l] ->
-      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_fields rest) l ]
+      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_fields open_row) l ]
 and print_row_field ppf (l, opt_amp, tyl) =
   let pr_of ppf =
     if opt_amp then fprintf ppf " of@ &@ "
