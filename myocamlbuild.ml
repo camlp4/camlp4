@@ -160,6 +160,7 @@ let () =
        of compiler-libs we are using to a local directory. *)
 
     let import = [
+      "format_doc.cmi";
       "warnings.cmi";
       "location.cmi";
       "longident.cmi";

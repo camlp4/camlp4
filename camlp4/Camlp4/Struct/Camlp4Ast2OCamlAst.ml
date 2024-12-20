@@ -107,12 +107,6 @@ module Make (Ast : Sig.Camlp4Ast) = struct
   value mkcf loc d = { pcf_desc = d; pcf_loc = mkloc loc; pcf_attributes = []};
   value mkctf loc d = { pctf_desc = d; pctf_loc = mkloc loc; pctf_attributes = []};
 
-  value mkpolytype t =
-    match t.ptyp_desc with
-    [ Ptyp_poly _ _ -> t
-    | _ -> { (t) with ptyp_desc = Ptyp_poly [] t } ]
-  ;
-
   value mkvirtual = fun
     [ <:virtual_flag< virtual >> -> Virtual
     | <:virtual_flag<>> -> Concrete
@@ -355,7 +349,7 @@ and row_field =
     | <:ctyp< $t1$; $t2$ >> -> meth_list t1 (meth_list t2 acc)
     | <:ctyp@loc< $lid:lab$ : $t$ >> ->
         [{ pof_loc = mkloc loc
-         ; pof_desc = Otag (with_loc lab loc) (mkpolytype (ctyp t))
+         ; pof_desc = Otag (with_loc lab loc) (ctyp t)
          ; pof_attributes = []} :: acc]
     | _ -> assert False ]
 
@@ -400,14 +394,14 @@ and row_field =
     [ <:ctyp@loc< $id:(<:ident@sloc< $lid:s$ >>)$ : mutable $t$ >> ->
       {pld_name=with_loc s sloc;
        pld_mutable=Mutable;
-       pld_type=mkpolytype (ctyp t);
+       pld_type=ctyp t;
        pld_loc=mkloc loc;
        pld_attributes=[];
       }
     | <:ctyp@loc< $id:(<:ident@sloc< $lid:s$ >>)$ : $t$ >> ->
       {pld_name=with_loc s sloc;
        pld_mutable=Immutable;
-       pld_type=mkpolytype (ctyp t);
+       pld_type=ctyp t;
        pld_loc=mkloc loc;
        pld_attributes=[];
       }
@@ -626,20 +620,24 @@ and row_field =
     | f -> (f, al) ]
   ;
 
+  value mkconst loc pconst_desc =
+    {pconst_desc; pconst_loc = mkloc loc}
+  ;
+
   value rec deep_mkrangepat loc c1 c2 =
-    if c1 = c2 then mkghpat loc (Ppat_constant (Pconst_char c1))
+    if c1 = c2 then mkghpat loc (Ppat_constant (mkconst loc (Pconst_char c1)))
     else
       mkghpat loc
-        (Ppat_or (mkghpat loc (Ppat_constant (Pconst_char c1)))
+        (Ppat_or (mkghpat loc (Ppat_constant (mkconst loc (Pconst_char c1))))
           (deep_mkrangepat loc (Char.chr (Char.code c1 + 1)) c2))
   ;
 
   value rec mkrangepat loc c1 c2 =
     if c1 > c2 then mkrangepat loc c2 c1
-    else if c1 = c2 then mkpat loc (Ppat_constant (Pconst_char c1))
+    else if c1 = c2 then mkpat loc (Ppat_constant (mkconst loc (Pconst_char c1)))
     else
       mkpat loc
-        (Ppat_or (mkghpat loc (Ppat_constant (Pconst_char c1)))
+        (Ppat_or (mkghpat loc (Ppat_constant (mkconst loc (Pconst_char c1))))
           (deep_mkrangepat loc (Char.chr (Char.code c1 + 1)) c2))
   ;
 
@@ -685,12 +683,12 @@ and row_field =
               "this is not a constructor, it cannot be applied in a pattern" ]
     | PaArr loc p -> mkpat loc (Ppat_array (List.map patt (list_of_patt p [])))
     | PaChr loc s ->
-        mkpat loc (Ppat_constant (Pconst_char (char_of_char_token loc s)))
-    | PaInt loc s ->   mkpat loc (Ppat_constant (Pconst_integer (s, None)))
-    | PaInt32 loc s -> mkpat loc (Ppat_constant (Pconst_integer (s, Some 'l')))
-    | PaInt64 loc s -> mkpat loc (Ppat_constant (Pconst_integer (s, Some 'L')))
-    | PaNativeInt loc s -> mkpat loc (Ppat_constant (Pconst_integer (s, Some 'n')))
-    | PaFlo loc s -> mkpat loc (Ppat_constant (Pconst_float (remove_underscores s, None)))
+        mkpat loc (Ppat_constant (mkconst loc (Pconst_char (char_of_char_token loc s))))
+    | PaInt loc s ->   mkpat loc (Ppat_constant (mkconst loc (Pconst_integer (s, None))))
+    | PaInt32 loc s -> mkpat loc (Ppat_constant (mkconst loc (Pconst_integer (s, Some 'l'))))
+    | PaInt64 loc s -> mkpat loc (Ppat_constant (mkconst loc (Pconst_integer (s, Some 'L'))))
+    | PaNativeInt loc s -> mkpat loc (Ppat_constant (mkconst loc (Pconst_integer (s, Some 'n'))))
+    | PaFlo loc s -> mkpat loc (Ppat_constant (mkconst loc (Pconst_float (remove_underscores s, None))))
     | PaLab loc _ _ -> error loc "labeled pattern not allowed here"
     | PaOlb loc _ _ | PaOlbi loc _ _ _ -> error loc "labeled pattern not allowed here"
     | PaOrp loc p1 p2 -> mkpat loc (Ppat_or (patt p1) (patt p2))
@@ -708,7 +706,7 @@ and row_field =
         let is_closed = if wildcards = [] then Closed else Open in
         mkpat loc (Ppat_record (List.map mklabpat ps, is_closed))
     | PaStr loc s ->
-        mkpat loc (Ppat_constant (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None))
+        mkpat loc (Ppat_constant (mkconst loc (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None)))
     | <:patt@loc< ($p1$, $p2$) >> ->
          mkpat loc (Ppat_tuple
            (List.map patt (list_of_patt p1 (list_of_patt p2 []))))
@@ -904,14 +902,14 @@ value varify_constructors var_names =
         mkexp loc e
     | ExAsr loc e -> mkexp loc (Pexp_assert (expr e))
     | ExChr loc s ->
-        mkexp loc (Pexp_constant (Pconst_char (char_of_char_token loc s)))
+        mkexp loc (Pexp_constant (mkconst loc (Pconst_char (char_of_char_token loc s))))
     | ExCoe loc e t1 t2 ->
         let t1 =
           match t1 with
           [ <:ctyp<>> -> None
           | t -> Some (ctyp t) ] in
         mkexp loc (Pexp_coerce (expr e) t1 (ctyp t2))
-    | ExFlo loc s -> mkexp loc (Pexp_constant (Pconst_float (remove_underscores s, None)))
+    | ExFlo loc s -> mkexp loc (Pexp_constant (mkconst loc (Pconst_float (remove_underscores s, None))))
     | ExFor loc p e1 e2 df el ->
         let e3 = ExSeq loc el in
         mkexp loc (Pexp_for (patt p) (expr e1) (expr e2) (mkdirection df) (expr e3))
@@ -928,10 +926,10 @@ value varify_constructors var_names =
           (Pexp_function ([], None, Pfunction_cases (match_case a [], mkloc loc, [])))
     | ExIfe loc e1 e2 e3 ->
         mkexp loc (Pexp_ifthenelse (expr e1) (expr e2) (Some (expr e3)))
-    | ExInt loc s ->   mkexp loc (Pexp_constant (Pconst_integer (s, None)))
-    | ExInt32 loc s -> mkexp loc (Pexp_constant (Pconst_integer (s, Some 'l')))
-    | ExInt64 loc s -> mkexp loc (Pexp_constant (Pconst_integer (s, Some 'L')))
-    | ExNativeInt loc s -> mkexp loc (Pexp_constant (Pconst_integer (s, Some 'n')))
+    | ExInt loc s ->   mkexp loc (Pexp_constant (mkconst loc (Pconst_integer (s, None))))
+    | ExInt32 loc s -> mkexp loc (Pexp_constant (mkconst loc (Pconst_integer (s, Some 'l'))))
+    | ExInt64 loc s -> mkexp loc (Pexp_constant (mkconst loc (Pconst_integer (s, Some 'L'))))
+    | ExNativeInt loc s -> mkexp loc (Pexp_constant (mkconst loc (Pconst_integer (s, Some 'n'))))
     | ExLab loc _ _ -> error loc "labeled expression not allowed here"
     | ExLaz loc e -> mkexp loc (Pexp_lazy (expr e))
     | ExLet loc rf bi e ->
@@ -977,7 +975,7 @@ value varify_constructors var_names =
           (Pexp_apply (mkexp loc (Pexp_ident (array_function loc "String" "get")))
             [(Nolabel, expr e1); (Nolabel, expr e2)])
     | ExStr loc s ->
-        mkexp loc (Pexp_constant (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None))
+        mkexp loc (Pexp_constant (mkconst loc (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None)))
     | ExTry loc e a -> mkexp loc (Pexp_try (expr e) (match_case a []))
     | <:expr@loc< ($e1$, $e2$) >> ->
          mkexp loc (Pexp_tuple (List.map expr (list_of_expr e1 (list_of_expr e2 []))))
@@ -1411,11 +1409,11 @@ value varify_constructors var_names =
         class_sig_item csg1 (class_sig_item csg2 l)
     | CgInh loc ct -> [mkctf loc (Pctf_inherit (class_type ct)) :: l]
     | CgMth loc s pf t ->
-        [mkctf loc (Pctf_method (with_loc s loc, mkprivate pf, Concrete, mkpolytype (ctyp t))) :: l]
+        [mkctf loc (Pctf_method (with_loc s loc, mkprivate pf, Concrete, ctyp t)) :: l]
     | CgVal loc s b v t ->
         [mkctf loc (Pctf_val (with_loc s loc, mkmutable b, mkvirtual v, ctyp t)) :: l]
     | CgVir loc s b t ->
-        [mkctf loc (Pctf_method (with_loc s loc, mkprivate b, Virtual, mkpolytype (ctyp t))) :: l]
+        [mkctf loc (Pctf_method (with_loc s loc, mkprivate b, Virtual, ctyp t)) :: l]
     | CgAnt _ _ -> assert False ]
   and class_expr =
     fun
@@ -1472,13 +1470,13 @@ value varify_constructors var_names =
         let t =
           match t with
           [ <:ctyp<>> -> None
-          | t -> Some (mkpolytype (ctyp t)) ] in
+          | t -> Some (ctyp t) ] in
         let e = mkexp loc (Pexp_poly (expr e) t) in
         [mkcf loc (Pcf_method (with_loc s loc, mkprivate pf, Cfk_concrete (override_flag loc ov, e))) :: l]
     | CrVal loc s ov mf e ->
         [mkcf loc (Pcf_val (with_loc s loc, mkmutable mf, Cfk_concrete (override_flag loc ov, expr e))) :: l]
     | CrVir loc s pf t ->
-        [mkcf loc (Pcf_method (with_loc s loc, mkprivate pf, Cfk_virtual (mkpolytype (ctyp t)))) :: l]
+        [mkcf loc (Pcf_method (with_loc s loc, mkprivate pf, Cfk_virtual (ctyp t))) :: l]
     | CrVvr loc s mf t ->
         [mkcf loc (Pcf_val (with_loc s loc, mkmutable mf, Cfk_virtual (ctyp t))) :: l]
     | CrAnt _ _ -> assert False ];
