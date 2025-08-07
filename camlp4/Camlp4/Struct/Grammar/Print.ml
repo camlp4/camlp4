@@ -70,7 +70,7 @@ module Make (Structure : Structure.S) = struct
   and print_rule ppf symbols =
     do {
       fprintf ppf "@[<hov 0>";
-      let _ =
+      let _ : Format.formatter -> unit =
         List.fold_left
           (fun sep symbol ->
             do {
@@ -84,7 +84,7 @@ module Make (Structure : Structure.S) = struct
   and print_level ppf pp_print_space rules =
     do {
       fprintf ppf "@[<hov 0>[ ";
-      let _ =
+      let _ : Format.formatter -> unit =
         List.fold_left
           (fun sep rule ->
             do {
@@ -98,7 +98,7 @@ module Make (Structure : Structure.S) = struct
   ;
 
   value levels ppf elev =
-    let _ =
+    let _ : Format.formatter -> unit =
       List.fold_left
         (fun sep lev ->
           let rules =
@@ -206,7 +206,7 @@ module MakeDump (Structure : Structure.S) = struct
   and print_rule ppf symbols =
     do {
       fprintf ppf "@[<hov 0>";
-      let _ =
+      let _ : Format.formatter -> unit =
         List.fold_left
           (fun sep symbol ->
             do {
@@ -220,7 +220,7 @@ module MakeDump (Structure : Structure.S) = struct
   and print_level ppf pp_print_space rules =
     do {
       fprintf ppf "@[<hov 0>[ ";
-      let _ =
+      let _ : Format.formatter -> unit =
         List.fold_left
           (fun sep rule ->
             do {
@@ -234,7 +234,7 @@ module MakeDump (Structure : Structure.S) = struct
   ;
 
   value levels ppf elev =
-    let _ =
+    let _ : Format.formatter -> unit =
       List.fold_left
         (fun sep lev ->
           do {
