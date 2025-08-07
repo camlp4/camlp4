@@ -15378,12 +15378,12 @@ module Struct =
           struct
             type t =
               Longident.t =
-                | Lident of string | Ldot of t * string | Lapply of t * t
+                | Lident of string | Ldot of t Location.loc * string Location.loc | Lapply of t Location.loc * t Location.loc
 
             let last =
               function
               | Lident s -> s
-              | Ldot (_, s) -> s
+              | Ldot (_, s) -> s.txt
               | Lapply (_, _) -> failwith "Longident.last"
 
           end
@@ -15494,13 +15494,15 @@ module Struct =
               | Ast.DiDownto -> Downto
               | _ -> assert false
 
+            let no_loc x = Location.mkloc x Location.none
+
             let lident s = Lident s
 
             let lident_with_loc s loc = with_loc (Lident s) loc
 
-            let ldot l s = Ldot (l, s)
+            let ldot l s = Ldot (no_loc l, no_loc s)
 
-            let lapply l s = Lapply (l, s)
+            let lapply l s = Lapply (no_loc l, no_loc s)
 
             let conv_con =
               let t = Hashtbl.create 73
@@ -15552,7 +15554,7 @@ module Struct =
                 | Ast.IdAcc (_, i1, i2) -> self i2 (Some (self i1 acc))
                 | Ast.IdApp (_, i1, i2) ->
                     let i' =
-                      Lapply ((fst (self i1 None)), (fst (self i2 None))) in
+                      lapply (fst (self i1 None)) (fst (self i2 None)) in
                     let x =
                       (match acc with
                        | None -> i'
@@ -15595,7 +15597,7 @@ module Struct =
 
             let long_uident_noloc ?(conv_con = fun x -> x) i =
               match ident_tag i with
-              | (Ldot (i, s), `uident) -> ldot i (conv_con s)
+              | (Ldot ({txt=i}, {txt=s}), `uident) -> ldot i (conv_con s)
               | (Lident s, `uident) -> lident (conv_con s)
               | (i, `app) -> i
               | _ -> error (loc_of_ident i) "uppercase identifier expected"
@@ -15608,7 +15610,7 @@ module Struct =
               | Ast.TyId (_, i) -> ident_noloc i
               | Ast.TyApp (_, m1, m2) ->
                   let li1 = ctyp_long_id_prefix m1 in
-                  let li2 = ctyp_long_id_prefix m2 in Lapply (li1, li2)
+                  let li2 = ctyp_long_id_prefix m2 in lapply li1 li2
               | t -> error (loc_of_ctyp t) "invalid module expression"
 
             let ctyp_long_id t =
@@ -15663,8 +15665,8 @@ module Struct =
                   mktyp loc (Ptyp_object ((meth_list fl []), Open))
               | TyCls (loc, id) -> mktyp loc (Ptyp_class ((ident id), []))
               | Ast.TyPkg (loc, pt) ->
-                  let (i, cs) = package_type pt
-                  in mktyp loc (Ptyp_package (i, cs))
+                  let ppt = package_type pt
+                  in mktyp loc (Ptyp_package ppt)
               | TyAtt (loc, s, str, e) ->
                   let e = ctyp e
                   in
@@ -15702,7 +15704,7 @@ module Struct =
               | Ast.TyTup (loc, (Ast.TySta (_, t1, t2))) ->
                   mktyp loc
                     (Ptyp_tuple
-                       (List.map ctyp (list_of_ctyp t1 (list_of_ctyp t2 []))))
+                       (List.map (fun x -> (None, ctyp x)) (list_of_ctyp t1 (list_of_ctyp t2 []))))
               | Ast.TyVrnEq (loc, t) ->
                   mktyp loc (Ptyp_variant ((row_field t), Closed, None))
               | Ast.TyVrnSup (loc, t) ->
@@ -15769,8 +15771,10 @@ module Struct =
             and package_type : module_type -> package_type =
               function
               | Ast.MtWit (_, (Ast.MtId (_, i)), wc) ->
-                  ((long_uident i), (package_type_constraints wc []))
-              | Ast.MtId (_, i) -> ((long_uident i), [])
+                  {ppt_path=long_uident i; ppt_cstrs=package_type_constraints wc [];
+                   ppt_loc=Location.none; ppt_attrs=[]}
+              | Ast.MtId (_, i) -> {ppt_path=long_uident i; ppt_cstrs=[];
+                                    ppt_loc=Location.none; ppt_attrs=[]}
               | mt -> error (loc_of_module_type mt) "unexpected package type"
 
             let mktype loc name tl cl tk tp tm =
@@ -16165,13 +16169,13 @@ module Struct =
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkpat loc (Ppat_tuple al))
+                            | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)))
                          in mkpat loc (Ppat_construct (li, (Some (([], a)))))
                      | Ppat_variant (s, None) ->
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkpat loc (Ppat_tuple al))
+                            | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)))
                          in mkpat loc (Ppat_variant (s, (Some a)))
                      | _ ->
                          error (loc_of_patt f)
@@ -16234,7 +16238,7 @@ module Struct =
               | Ast.PaTup (loc, (Ast.PaCom (_, p1, p2))) ->
                   mkpat loc
                     (Ppat_tuple
-                       (List.map patt (list_of_patt p1 (list_of_patt p2 []))))
+                       (List.map (fun x -> (None, patt x)) (list_of_patt p1 (list_of_patt p2 [])), Closed))
               | Ast.PaTup (loc, _) -> error loc "singleton tuple pattern"
               | PaTyc (loc, p, t) ->
                   mkpat loc (Ppat_constraint ((patt p), (ctyp t)))
@@ -16312,7 +16316,7 @@ module Struct =
                   | Ptyp_var x -> Ptyp_var x
                   | Ptyp_arrow (label, core_type, core_type') ->
                       Ptyp_arrow (label, (loop core_type), (loop core_type'))
-                  | Ptyp_tuple lst -> Ptyp_tuple (List.map loop lst)
+                  | Ptyp_tuple lst -> Ptyp_tuple (List.map (fun (lbl, x) -> (lbl, loop x)) lst)
                   | Ptyp_constr ({ txt = Lident s }, []) when
                       List.exists (fun x -> s = x.txt) var_names ->
                       Ptyp_var ("&" ^ s)
@@ -16330,10 +16334,10 @@ module Struct =
                           lbl_lst_option))
                   | Ptyp_poly (string_lst, core_type) ->
                       Ptyp_poly ((string_lst, (loop core_type)))
-                  | Ptyp_package (longident, lst) ->
+                  | Ptyp_package ({ppt_cstrs=lst} as ppt) ->
                       Ptyp_package
-                        ((longident,
-                          (List.map (fun (n, typ) -> (n, (loop typ))) lst)))
+                        {ppt with
+                         ppt_cstrs = List.map (fun (n, typ) -> (n, (loop typ))) lst}
                   | Ptyp_extension x -> Ptyp_extension x
                   | Ptyp_open ((mod_ident, t)) ->
                       Ptyp_open ((mod_ident, (loop t)))
@@ -16400,14 +16404,14 @@ module Struct =
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkexp loc (Pexp_tuple al))
+                            | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)))
                          in mkexp loc (Pexp_construct (li, (Some a)))
                      | Pexp_variant (s, None) ->
                          let al = List.map snd al in
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkexp loc (Pexp_tuple al))
+                            | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)))
                          in mkexp loc (Pexp_variant (s, (Some a)))
                      | _ -> mkexp loc (Pexp_apply ((expr f), al)))
               | ExAre (loc, e1, e2) ->
@@ -16577,7 +16581,7 @@ module Struct =
               | Ast.ExTup (loc, (Ast.ExCom (_, e1, e2))) ->
                   mkexp loc
                     (Pexp_tuple
-                       (List.map expr (list_of_expr e1 (list_of_expr e2 []))))
+                       (List.map (fun x -> (None, expr x)) (list_of_expr e1 (list_of_expr e2 []))))
               | Ast.ExTup (loc, _) -> error loc "singleton tuple"
               | ExTyc (loc, e, t) ->
                   mkexp loc (Pexp_constraint ((expr e), (ctyp t)))
@@ -16614,9 +16618,9 @@ module Struct =
               | Ast.ExPkg (loc, (Ast.MeTyc (_, me, pt))) ->
                   mkexp loc
                     (Pexp_constraint
-                       (((mkexp loc (Pexp_pack (module_expr me))),
+                       (((mkexp loc (Pexp_pack (module_expr me, None))),
                          (mktyp loc (Ptyp_package (package_type pt))))))
-              | Ast.ExPkg (loc, me) -> mkexp loc (Pexp_pack (module_expr me))
+              | Ast.ExPkg (loc, me) -> mkexp loc (Pexp_pack (module_expr me, None))
               | ExFUN (loc, i, e) ->
                   mkexp loc (Pexp_newtype ((with_loc i loc), (expr e)))
               | Ast.ExCom (loc, _, _) ->
