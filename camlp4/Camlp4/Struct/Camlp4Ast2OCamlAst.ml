@@ -49,12 +49,12 @@ end;
 module Longident = struct
   type t = Longident.t ==
            [ Lident of string
-           | Ldot of t and string
-           | Lapply of t and t ];
+           | Ldot of Location.loc t and Location.loc string
+           | Lapply of Location.loc t and Location.loc t ];
 
   value last = fun
     [ Lident s -> s
-    | Ldot _ s -> s
+    | Ldot _ s -> s.txt
     | Lapply _ _ -> failwith "Longident.last" ];
 end;
 
@@ -117,12 +117,14 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:direction_flag< downto >> -> Downto
     | _ -> assert False ];
 
+  value no_loc x = Location.mkloc x Location.none;
+
   value lident s = Lident s;
   value lident_with_loc s loc = with_loc (Lident s) loc;
 
 
-  value ldot l s = Ldot l s;
-  value lapply l s = Lapply l s;
+  value ldot l s = Ldot (no_loc l) (no_loc s);
+  value lapply l s = Lapply (no_loc l) (no_loc s);
 
   value conv_con =
     let t = Hashtbl.create 73 in
@@ -177,7 +179,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
       [ <:ident< $i1$.$i2$ >> ->
           self i2 (Some (self i1 acc))
       | <:ident< $i1$ $i2$ >> ->
-          let i' = Lapply (fst (self i1 None)) (fst (self i2 None)) in
+          let i' = lapply (fst (self i1 None)) (fst (self i2 None)) in
           let x =
             match acc with
             [ None -> i'
@@ -215,7 +217,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
 
   value long_uident_noloc ?(conv_con = fun x -> x) i =
     match ident_tag i with
-    [ (Ldot i s, `uident) -> ldot i (conv_con s)
+    [ (Ldot i s, `uident) -> ldot i.txt (conv_con s.txt)
     | (Lident s, `uident) -> lident (conv_con s)
     | (i, `app) -> i
     | _ -> error (loc_of_ident i) "uppercase identifier expected" ]
@@ -230,7 +232,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | <:ctyp< $m1$ $m2$ >> ->
         let li1 = ctyp_long_id_prefix m1 in
         let li2 = ctyp_long_id_prefix m2 in
-        Lapply li1 li2
+        lapply li1 li2
     | t -> error (loc_of_ctyp t) "invalid module expression" ]
   ;
 
@@ -285,8 +287,8 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TyCls loc id ->
         mktyp loc (Ptyp_class (ident id) [])
     | <:ctyp@loc< (module $pt$) >> ->
-        let (i, cs) = package_type pt in
-        mktyp loc (Ptyp_package i cs)
+        let ppt = package_type pt in
+        mktyp loc (Ptyp_package ppt)
     | TyAtt loc s str e ->
         let e = ctyp e in
         {(e) with ptyp_attributes = e.ptyp_attributes @ [attribute loc s str]}
@@ -306,7 +308,7 @@ module Make (Ast : Sig.Camlp4Ast) = struct
     | TySem loc _ _ -> error loc "type1 ; type2 not allowed here"
     | TyTypePol loc _ _ -> error loc "locally abstract type not allowed here"
     | <:ctyp@loc< ($t1$ * $t2$) >> ->
-         mktyp loc (Ptyp_tuple (List.map ctyp (list_of_ctyp t1 (list_of_ctyp t2 []))))
+         mktyp loc (Ptyp_tuple (List.map (fun x -> (None, ctyp x)) (list_of_ctyp t1 (list_of_ctyp t2 []))))
     | <:ctyp@loc< [ = $t$ ] >> -> mktyp loc (Ptyp_variant (row_field t) Closed None)
     | <:ctyp@loc< [ > $t$ ] >> -> mktyp loc (Ptyp_variant (row_field t) Open None)
     | <:ctyp@loc< [ < $t$ ] >> -> mktyp loc (Ptyp_variant (row_field t) Closed (Some []))
@@ -365,8 +367,10 @@ and row_field =
   and package_type : module_type -> package_type =
     fun
     [ <:module_type< $id:i$ with $wc$ >> ->
-      (long_uident i, package_type_constraints wc [])
-    | <:module_type< $id:i$ >> -> (long_uident i, [])
+      {ppt_path=long_uident i; ppt_cstrs=package_type_constraints wc [];
+       ppt_loc=Location.none; ppt_attrs=[]}
+    | <:module_type< $id:i$ >> -> {ppt_path=long_uident i; ppt_cstrs=[];
+                                   ppt_loc=Location.none; ppt_attrs=[]}
     | mt -> error (loc_of_module_type mt) "unexpected package type" ]
   ;
 
@@ -669,14 +673,14 @@ and row_field =
               let a =
                 match al with
                 [ [a] -> a
-                | _ -> mkpat loc (Ppat_tuple al) ]
+                | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)) ]
               in
               mkpat loc (Ppat_construct li (Some ([], a)))
         | Ppat_variant s None ->
             let a =
                 match al with
                 [ [a] -> a
-                | _ -> mkpat loc (Ppat_tuple al) ]
+                | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)) ]
             in mkpat loc (Ppat_variant s (Some a))
         | _ ->
             error (loc_of_patt f)
@@ -709,7 +713,7 @@ and row_field =
         mkpat loc (Ppat_constant (mkconst loc (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None)))
     | <:patt@loc< ($p1$, $p2$) >> ->
          mkpat loc (Ppat_tuple
-           (List.map patt (list_of_patt p1 (list_of_patt p2 []))))
+           (List.map (fun x -> (None, patt x)) (list_of_patt p1 (list_of_patt p2 [])), Closed))
     | <:patt@loc< ($tup:_$) >> -> error loc "singleton tuple pattern"
     | PaTyc loc p t -> mkpat loc (Ppat_constraint (patt p) (ctyp t))
     | PaTyp loc i -> mkpat loc (Ppat_type (long_type_ident i))
@@ -780,7 +784,7 @@ value varify_constructors var_names =
       | Ptyp_var x -> Ptyp_var x
       | Ptyp_arrow label core_type core_type' ->
           Ptyp_arrow label (loop core_type) (loop core_type')
-      | Ptyp_tuple lst -> Ptyp_tuple (List.map loop lst)
+      | Ptyp_tuple lst -> Ptyp_tuple (List.map (fun (lbl, x) -> (lbl, loop x)) lst)
       | Ptyp_constr ({ txt = Lident s }) []
           when List.exists (fun x -> s = x.txt) var_names ->
           Ptyp_var ("&" ^ s)
@@ -796,8 +800,8 @@ value varify_constructors var_names =
           Ptyp_variant(List.map loop_row_field row_field_list, flag, lbl_lst_option)
       | Ptyp_poly string_lst core_type ->
           Ptyp_poly(string_lst, loop core_type)
-      | Ptyp_package longident lst ->
-          Ptyp_package(longident,List.map (fun (n,typ) -> (n,loop typ) ) lst)
+      | Ptyp_package ({ppt_cstrs=lst} as ppt) ->
+          Ptyp_package {(ppt) with ppt_cstrs=List.map (fun (n,typ) -> (n,loop typ)) lst}
       | Ptyp_extension x ->
           Ptyp_extension x
       | Ptyp_open (mod_ident, t) ->
@@ -861,7 +865,7 @@ value varify_constructors var_names =
               let a =
                 match al with
                 [ [a] -> a
-                | _ -> mkexp loc (Pexp_tuple al) ]
+                | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)) ]
               in
               mkexp loc (Pexp_construct li (Some a))
         | Pexp_variant s None ->
@@ -869,7 +873,7 @@ value varify_constructors var_names =
             let a =
                 match al with
                 [ [a] -> a
-                | _ -> mkexp loc (Pexp_tuple al) ]
+                | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)) ]
             in mkexp loc (Pexp_variant s (Some a))
         | _ -> mkexp loc (Pexp_apply (expr f) al) ]
     | ExAre loc e1 e2 ->
@@ -978,7 +982,7 @@ value varify_constructors var_names =
         mkexp loc (Pexp_constant (mkconst loc (Pconst_string (string_of_string_token loc s) (Loc.to_ocaml_location loc) None)))
     | ExTry loc e a -> mkexp loc (Pexp_try (expr e) (match_case a []))
     | <:expr@loc< ($e1$, $e2$) >> ->
-         mkexp loc (Pexp_tuple (List.map expr (list_of_expr e1 (list_of_expr e2 []))))
+         mkexp loc (Pexp_tuple (List.map (fun x -> (None, expr x)) (list_of_expr e1 (list_of_expr e2 []))))
     | <:expr@loc< ($tup:_$) >> -> error loc "singleton tuple"
     | ExTyc loc e t -> mkexp loc (Pexp_constraint (expr e) (ctyp t))
     | <:expr@loc< () >> ->
@@ -1002,10 +1006,10 @@ value varify_constructors var_names =
                                            }
                               }, (expr e)))
     | <:expr@loc< (module $me$ : $pt$) >> ->
-        mkexp loc (Pexp_constraint (mkexp loc (Pexp_pack (module_expr me)),
+        mkexp loc (Pexp_constraint (mkexp loc (Pexp_pack (module_expr me, None)),
                     mktyp loc (Ptyp_package (package_type pt))))
     | <:expr@loc< (module $me$) >> ->
-        mkexp loc (Pexp_pack (module_expr me))
+        mkexp loc (Pexp_pack (module_expr me, None))
     | ExFUN loc i e ->
         mkexp loc (Pexp_newtype (with_loc i loc) (expr e))
     | <:expr@loc< $_$,$_$ >> -> error loc "expr, expr: not allowed here"

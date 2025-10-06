@@ -86,8 +86,10 @@ value print_out_value ppf tree =
         end
     | Oval_list tl ->
         fprintf ppf "@[<1>[%a]@]" (print_tree_list print_tree ";") tl
-    | Oval_array tl ->
+    | Oval_array (tl, Asttypes.Mutable) ->
         fprintf ppf "@[<2>[|%a|]@]" (print_tree_list print_tree ";") tl
+    | Oval_array (_, Asttypes.Immutable) ->
+        assert False
     | Oval_constr (Oide_ident { printed_name = "true" }) [] -> fprintf ppf "True"
     | Oval_constr (Oide_ident { printed_name = "false" }) [] -> fprintf ppf "False"
     | Oval_constr name [] -> print_ident ppf name
@@ -96,7 +98,12 @@ value print_out_value ppf tree =
     | Oval_record fel ->
         fprintf ppf "@[<1>{%a}@]" (cautious (print_fields True)) fel
     | Oval_tuple tree_list ->
-        fprintf ppf "@[(%a)@]" (print_tree_list print_tree ",") tree_list
+        let tuple (lbl, x) =
+          match lbl with
+          [ Some _ -> assert False
+          | None -> x ]
+        in
+        fprintf ppf "@[(%a)@]" (print_tree_list print_tree ",") (List.map tuple tree_list)
     | Oval_ellipsis -> raise Ellipsis
     | Oval_printer f -> f ppf
     | tree -> fprintf ppf "@[<1>(%a)@]" (cautious print_tree) tree ]
@@ -176,7 +183,12 @@ and print_simple_out_type ppf =
   [ Otyp_var ng s -> fprintf ppf "'%s%s" (if ng then "_" else "") s
   | Otyp_constr id [] -> fprintf ppf "@[%a@]" print_ident id
   | Otyp_tuple tyl ->
-      fprintf ppf "@[<1>(%a)@]" (print_typlist print_out_type " *") tyl
+      let tuple (lbl, x) =
+        match lbl with
+        [ Some _ -> assert False
+        | None -> x ]
+      in
+      fprintf ppf "@[<1>(%a)@]" (print_typlist print_out_type " *") (List.map tuple tyl)
   | Otyp_stuff s -> fprintf ppf "%s" s
   | Otyp_variant (row_fields, closed, tags) ->
       let print_present ppf =
@@ -211,7 +223,7 @@ and print_simple_out_type ppf =
       fprintf ppf "@[<hv 2>{ %a }@]"
         (print_list print_out_label (fun ppf -> fprintf ppf ";@ ")) lbls
   | Otyp_abstract -> fprintf ppf "<abstract>"
-  | Otyp_module (p, fl) ->
+  | Otyp_module {opack_path=p; opack_cstrs=fl} ->
       do {
           fprintf ppf "@[<1>(module %a" print_ident p;
           let first = ref True in
@@ -324,7 +336,7 @@ value type_parameter ppf (ty, (var, inj)) =
   let open Asttypes in
   fprintf ppf "%s%s%s%s"
     (match inj with [ Injective -> "!" | NoInjectivity -> "" ])
-    (match var with [ Covariant -> "+" | Contravariant -> "-" | NoVariance -> "" ])
+    (match var with [ Covariant -> "+" | Contravariant -> "-" | Bivariant -> "+-" | NoVariance -> "" ])
     (if ty = "_" then "" else "'")
     ty
 ;
