@@ -367,16 +367,16 @@ and row_field =
   and package_type : module_type -> package_type =
     fun
     [ <:module_type< $id:i$ with $wc$ >> ->
-      {ppt_path=long_uident i; ppt_cstrs=package_type_constraints wc [];
+      {ppt_path=long_uident i; ppt_constraints=package_type_constraints wc [];
        ppt_loc=Location.none; ppt_attrs=[]}
-    | <:module_type< $id:i$ >> -> {ppt_path=long_uident i; ppt_cstrs=[];
+    | <:module_type< $id:i$ >> -> {ppt_path=long_uident i; ppt_constraints=[];
                                    ppt_loc=Location.none; ppt_attrs=[]}
     | mt -> error (loc_of_module_type mt) "unexpected package type" ]
   ;
 
   value mktype loc name tl cl tk tp tm =
     {ptype_name = name;
-     ptype_params = tl; ptype_cstrs = cl; ptype_kind = tk;
+     ptype_params = tl; ptype_constraints = cl; ptype_kind = tk;
      ptype_private = tp; ptype_manifest = tm; ptype_loc = mkloc loc;
      ptype_attributes = []}
   ;
@@ -595,7 +595,7 @@ and row_field =
     let (kind, priv, ct) = opt_private_ctyp ct in
     pwith_type id
       { ptype_name = Location.mkloc (Longident.last id.txt) id.loc;
-        ptype_params = tpl; ptype_cstrs = [];
+        ptype_params = tpl; ptype_constraints = [];
         ptype_kind = kind;
         ptype_private = priv;
         ptype_manifest = Some ct;
@@ -719,7 +719,7 @@ and row_field =
     | PaTyp loc i -> mkpat loc (Ppat_type (long_type_ident i))
     | PaVrn loc s -> mkpat loc (Ppat_variant (conv_con s) None)
     | PaLaz loc p -> mkpat loc (Ppat_lazy (patt p))
-    | PaMod loc m -> mkpat loc (Ppat_unpack (with_loc (Some m) loc))
+    | PaMod loc m -> mkpat loc (Ppat_unpack (with_loc (Some m) loc, None))
     | PaExc loc p -> mkpat loc (Ppat_exception (patt p))
     | PaAtt loc s str e ->
         let e = patt e in
@@ -800,15 +800,23 @@ value varify_constructors var_names =
           Ptyp_variant(List.map loop_row_field row_field_list, flag, lbl_lst_option)
       | Ptyp_poly string_lst core_type ->
           Ptyp_poly(string_lst, loop core_type)
-      | Ptyp_package ({ppt_cstrs=lst} as ppt) ->
-          Ptyp_package {(ppt) with ppt_cstrs=List.map (fun (n,typ) -> (n,loop typ)) lst}
+      | Ptyp_package pack ->
+          Ptyp_package (loop_package_type pack)
       | Ptyp_extension x ->
           Ptyp_extension x
       | Ptyp_open (mod_ident, t) ->
           Ptyp_open (mod_ident, loop t)
+      | Ptyp_functor (label, name, pack, ct) ->
+          Ptyp_functor (label, name, loop_package_type pack, loop ct)
 ]
     in
     {(t) with ptyp_desc = desc}
+  and loop_package_type = fun [{ppt_path; ppt_constraints; ppt_loc; ppt_attrs} ->
+    { ppt_path;
+      ppt_constraints = List.map (fun (n, typ) -> (n, (loop typ))) ppt_constraints;
+      ppt_loc;
+      ppt_attrs;
+    }]
   and loop_object_field x =
     let pof_desc =
       match x.pof_desc with
@@ -941,7 +949,17 @@ value varify_constructors var_names =
         match binding bi [] with
         [ [] -> e
         | bi -> mkexp loc (Pexp_let (mkrf rf) bi e) ]
-    | ExLmd loc i me e -> mkexp loc (Pexp_letmodule (with_loc (Some i) loc) (module_expr me) (expr e))
+    | ExLmd loc i me e ->
+      mkexp loc
+        (Pexp_struct_item
+           (mkstr loc
+              (Pstr_module
+                 { pmb_name = with_loc (Some i) loc;
+                   pmb_expr = module_expr me;
+                   pmb_attributes = [];
+                   pmb_loc = mkloc loc;
+                 })
+           , expr e))
     | ExMat loc e a -> mkexp loc (Pexp_match (expr e) (match_case a []))
     | ExNew loc id -> mkexp loc (Pexp_new (long_type_ident id))
     | ExObj loc po cfl ->
@@ -997,14 +1015,17 @@ value varify_constructors var_names =
         mkexp loc (Pexp_while (expr e1) (expr e2))
     | ExOpI loc i ov e ->
         let fresh = override_flag loc ov in
-        mkexp loc (Pexp_open ({popen_loc = mkloc loc
-                              ;popen_override=fresh
-                              ;popen_attributes=[]
-                              ;popen_expr= {pmod_desc = Pmod_ident (long_uident i)
-                                           ;pmod_loc = mkloc loc
-                                           ;pmod_attributes = []
-                                           }
-                              }, (expr e)))
+        mkexp loc
+          (Pexp_struct_item
+             (mkstr loc (Pstr_open
+                           {popen_loc = mkloc loc
+                           ;popen_override=fresh
+                           ;popen_attributes=[]
+                           ;popen_expr= {pmod_desc = Pmod_ident (long_uident i)
+                                        ;pmod_loc = mkloc loc
+                                        ;pmod_attributes = []
+                                        }
+                           }), expr e))
     | <:expr@loc< (module $me$ : $pt$) >> ->
         mkexp loc (Pexp_constraint (mkexp loc (Pexp_pack (module_expr me, None)),
                     mktyp loc (Ptyp_package (package_type pt))))
