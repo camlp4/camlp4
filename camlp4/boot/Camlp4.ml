@@ -15378,7 +15378,9 @@ module Struct =
           struct
             type t =
               Longident.t =
-                | Lident of string | Ldot of t Location.loc * string Location.loc | Lapply of t Location.loc * t Location.loc
+                | Lident of string
+                | Ldot of t Location.loc * string Location.loc
+                | Lapply of t Location.loc * t Location.loc
 
             let last =
               function
@@ -15500,9 +15502,9 @@ module Struct =
 
             let lident_with_loc s loc = with_loc (Lident s) loc
 
-            let ldot l s = Ldot (no_loc l, no_loc s)
+            let ldot l s = Ldot ((no_loc l), (no_loc s))
 
-            let lapply l s = Lapply (no_loc l, no_loc s)
+            let lapply l s = Lapply ((no_loc l), (no_loc s))
 
             let conv_con =
               let t = Hashtbl.create 73
@@ -15597,7 +15599,7 @@ module Struct =
 
             let long_uident_noloc ?(conv_con = fun x -> x) i =
               match ident_tag i with
-              | (Ldot ({txt=i}, {txt=s}), `uident) -> ldot i (conv_con s)
+              | (Ldot (i, s), `uident) -> ldot i.txt (conv_con s.txt)
               | (Lident s, `uident) -> lident (conv_con s)
               | (i, `app) -> i
               | _ -> error (loc_of_ident i) "uppercase identifier expected"
@@ -15665,8 +15667,7 @@ module Struct =
                   mktyp loc (Ptyp_object ((meth_list fl []), Open))
               | TyCls (loc, id) -> mktyp loc (Ptyp_class ((ident id), []))
               | Ast.TyPkg (loc, pt) ->
-                  let ppt = package_type pt
-                  in mktyp loc (Ptyp_package ppt)
+                  let ppt = package_type pt in mktyp loc (Ptyp_package ppt)
               | TyAtt (loc, s, str, e) ->
                   let e = ctyp e
                   in
@@ -15704,7 +15705,8 @@ module Struct =
               | Ast.TyTup (loc, (Ast.TySta (_, t1, t2))) ->
                   mktyp loc
                     (Ptyp_tuple
-                       (List.map (fun x -> (None, ctyp x)) (list_of_ctyp t1 (list_of_ctyp t2 []))))
+                       (List.map (fun x -> (None, (ctyp x)))
+                          (list_of_ctyp t1 (list_of_ctyp t2 []))))
               | Ast.TyVrnEq (loc, t) ->
                   mktyp loc (Ptyp_variant ((row_field t), Closed, None))
               | Ast.TyVrnSup (loc, t) ->
@@ -15771,10 +15773,19 @@ module Struct =
             and package_type : module_type -> package_type =
               function
               | Ast.MtWit (_, (Ast.MtId (_, i)), wc) ->
-                  {ppt_path=long_uident i; ppt_constraints=package_type_constraints wc [];
-                   ppt_loc=Location.none; ppt_attrs=[]}
-              | Ast.MtId (_, i) -> {ppt_path=long_uident i; ppt_constraints=[];
-                                    ppt_loc=Location.none; ppt_attrs=[]}
+                  {
+                    ppt_path = long_uident i;
+                    ppt_constraints = package_type_constraints wc [];
+                    ppt_loc = Location.none;
+                    ppt_attrs = [];
+                  }
+              | Ast.MtId (_, i) ->
+                  {
+                    ppt_path = long_uident i;
+                    ppt_constraints = [];
+                    ppt_loc = Location.none;
+                    ppt_attrs = [];
+                  }
               | mt -> error (loc_of_module_type mt) "unexpected package type"
 
             let mktype loc name tl cl tk tp tm =
@@ -16169,13 +16180,21 @@ module Struct =
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)))
+                            | _ ->
+                                mkpat loc
+                                  (Ppat_tuple
+                                     (((List.map (fun x -> (None, x)) al),
+                                       Closed))))
                          in mkpat loc (Ppat_construct (li, (Some (([], a)))))
                      | Ppat_variant (s, None) ->
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkpat loc (Ppat_tuple (List.map (fun x -> (None, x)) al, Closed)))
+                            | _ ->
+                                mkpat loc
+                                  (Ppat_tuple
+                                     (((List.map (fun x -> (None, x)) al),
+                                       Closed))))
                          in mkpat loc (Ppat_variant (s, (Some a)))
                      | _ ->
                          error (loc_of_patt f)
@@ -16238,7 +16257,9 @@ module Struct =
               | Ast.PaTup (loc, (Ast.PaCom (_, p1, p2))) ->
                   mkpat loc
                     (Ppat_tuple
-                       (List.map (fun x -> (None, patt x)) (list_of_patt p1 (list_of_patt p2 [])), Closed))
+                       (((List.map (fun x -> (None, (patt x)))
+                            (list_of_patt p1 (list_of_patt p2 []))),
+                         Closed)))
               | Ast.PaTup (loc, _) -> error loc "singleton tuple pattern"
               | PaTyc (loc, p, t) ->
                   mkpat loc (Ppat_constraint ((patt p), (ctyp t)))
@@ -16247,7 +16268,7 @@ module Struct =
                   mkpat loc (Ppat_variant ((conv_con s), None))
               | PaLaz (loc, p) -> mkpat loc (Ppat_lazy (patt p))
               | PaMod (loc, m) ->
-                  mkpat loc (Ppat_unpack (with_loc (Some m) loc, None))
+                  mkpat loc (Ppat_unpack (((with_loc (Some m) loc), None)))
               | PaExc (loc, p) -> mkpat loc (Ppat_exception (patt p))
               | PaAtt (loc, s, str, e) ->
                   let e = patt e
@@ -16316,7 +16337,9 @@ module Struct =
                   | Ptyp_var x -> Ptyp_var x
                   | Ptyp_arrow (label, core_type, core_type') ->
                       Ptyp_arrow (label, (loop core_type), (loop core_type'))
-                  | Ptyp_tuple lst -> Ptyp_tuple (List.map (fun (lbl, x) -> (lbl, loop x)) lst)
+                  | Ptyp_tuple lst ->
+                      Ptyp_tuple
+                        (List.map (fun (lbl, x) -> (lbl, (loop x))) lst)
                   | Ptyp_constr ({ txt = Lident s }, []) when
                       List.exists (fun x -> s = x.txt) var_names ->
                       Ptyp_var ("&" ^ s)
@@ -16339,14 +16362,24 @@ module Struct =
                   | Ptyp_extension x -> Ptyp_extension x
                   | Ptyp_open ((mod_ident, t)) ->
                       Ptyp_open ((mod_ident, (loop t)))
-                  | Ptyp_functor (label, name, pack, ct) ->
-                      Ptyp_functor (label, name, loop_package_type pack, loop ct)
+                  | Ptyp_functor ((label, name, pack, ct)) ->
+                      Ptyp_functor
+                        ((label, name, (loop_package_type pack), (loop ct)))
                 in { (t) with ptyp_desc = desc; }
-              and loop_package_type {ppt_path; ppt_constraints; ppt_loc; ppt_attrs} =
-                { ppt_path;
-                  ppt_constraints = List.map (fun (n, typ) -> (n, (loop typ))) ppt_constraints;
-                  ppt_loc;
-                  ppt_attrs;
+              and
+                loop_package_type {
+                                    ppt_path = ppt_path;
+                                    ppt_constraints = ppt_constraints;
+                                    ppt_loc = ppt_loc;
+                                    ppt_attrs = ppt_attrs
+                                  } =
+                {
+                  ppt_path = ppt_path;
+                  ppt_constraints =
+                    List.map (fun (n, typ) -> (n, (loop typ)))
+                      ppt_constraints;
+                  ppt_loc = ppt_loc;
+                  ppt_attrs = ppt_attrs;
                 }
               and loop_object_field x =
                 let pof_desc =
@@ -16410,14 +16443,20 @@ module Struct =
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)))
+                            | _ ->
+                                mkexp loc
+                                  (Pexp_tuple
+                                     (List.map (fun x -> (None, x)) al)))
                          in mkexp loc (Pexp_construct (li, (Some a)))
                      | Pexp_variant (s, None) ->
                          let al = List.map snd al in
                          let a =
                            (match al with
                             | [ a ] -> a
-                            | _ -> mkexp loc (Pexp_tuple (List.map (fun x -> (None, x)) al)))
+                            | _ ->
+                                mkexp loc
+                                  (Pexp_tuple
+                                     (List.map (fun x -> (None, x)) al)))
                          in mkexp loc (Pexp_variant (s, (Some a)))
                      | _ -> mkexp loc (Pexp_apply ((expr f), al)))
               | ExAre (loc, e1, e2) ->
@@ -16534,14 +16573,15 @@ module Struct =
               | ExLmd (loc, i, me, e) ->
                   mkexp loc
                     (Pexp_struct_item
-                       (mkstr loc
-                          (Pstr_module
-                             { pmb_name = with_loc (Some i) loc;
-                               pmb_expr = module_expr me;
-                               pmb_attributes = [];
-                               pmb_loc = mkloc loc;
-                             })
-                       , expr e))
+                       (((mkstr loc
+                            (Pstr_module
+                               {
+                                 pmb_name = with_loc (Some i) loc;
+                                 pmb_expr = module_expr me;
+                                 pmb_attributes = [];
+                                 pmb_loc = mkloc loc;
+                               })),
+                         (expr e))))
               | ExMat (loc, e, a) ->
                   mkexp loc (Pexp_match ((expr e), (match_case a [])))
               | ExNew (loc, id) -> mkexp loc (Pexp_new (long_type_ident id))
@@ -16594,7 +16634,8 @@ module Struct =
               | Ast.ExTup (loc, (Ast.ExCom (_, e1, e2))) ->
                   mkexp loc
                     (Pexp_tuple
-                       (List.map (fun x -> (None, expr x)) (list_of_expr e1 (list_of_expr e2 []))))
+                       (List.map (fun x -> (None, (expr x)))
+                          (list_of_expr e1 (list_of_expr e2 []))))
               | Ast.ExTup (loc, _) -> error loc "singleton tuple"
               | ExTyc (loc, e, t) ->
                   mkexp loc (Pexp_constraint ((expr e), (ctyp t)))
@@ -16617,23 +16658,27 @@ module Struct =
                   in
                     mkexp loc
                       (Pexp_struct_item
-                         (mkstr loc (Pstr_open {
-                             popen_loc = mkloc loc;
-                             popen_override = fresh;
-                             popen_attributes = [];
-                             popen_expr =
-                               {
-                                 pmod_desc = Pmod_ident (long_uident i);
-                                 pmod_loc = mkloc loc;
-                                 pmod_attributes = [];
-                               };
-                           }), expr e))
+                         (((mkstr loc
+                              (Pstr_open
+                                 {
+                                   popen_loc = mkloc loc;
+                                   popen_override = fresh;
+                                   popen_attributes = [];
+                                   popen_expr =
+                                     {
+                                       pmod_desc = Pmod_ident (long_uident i);
+                                       pmod_loc = mkloc loc;
+                                       pmod_attributes = [];
+                                     };
+                                 })),
+                           (expr e))))
               | Ast.ExPkg (loc, (Ast.MeTyc (_, me, pt))) ->
                   mkexp loc
                     (Pexp_constraint
-                       (((mkexp loc (Pexp_pack (module_expr me, None))),
+                       (((mkexp loc (Pexp_pack (((module_expr me), None)))),
                          (mktyp loc (Ptyp_package (package_type pt))))))
-              | Ast.ExPkg (loc, me) -> mkexp loc (Pexp_pack (module_expr me, None))
+              | Ast.ExPkg (loc, me) ->
+                  mkexp loc (Pexp_pack (((module_expr me), None)))
               | ExFUN (loc, i, e) ->
                   mkexp loc (Pexp_newtype ((with_loc i loc), (expr e)))
               | Ast.ExCom (loc, _, _) ->
@@ -18470,43 +18515,46 @@ module Struct =
                 and print_rule ppf symbols =
                   (fprintf ppf "@[<hov 0>";
                    let _ =
-                     List.fold_left
-                       (fun sep symbol ->
-                          (fprintf ppf "%t%a" sep print_symbol symbol;
-                           fun ppf -> fprintf ppf ";@ "))
-                       (fun _ -> ()) symbols
+                     (List.fold_left
+                        (fun sep symbol ->
+                           (fprintf ppf "%t%a" sep print_symbol symbol;
+                            fun ppf -> fprintf ppf ";@ "))
+                        (fun _ -> ()) symbols :
+                       Format.formatter -> unit)
                    in fprintf ppf "@]")
                 and print_level ppf pp_print_space rules =
                   (fprintf ppf "@[<hov 0>[ ";
                    let _ =
-                     List.fold_left
-                       (fun sep rule ->
-                          (fprintf ppf "%t%a" sep print_rule rule;
-                           fun ppf -> fprintf ppf "%a| " pp_print_space ()))
-                       (fun _ -> ()) rules
+                     (List.fold_left
+                        (fun sep rule ->
+                           (fprintf ppf "%t%a" sep print_rule rule;
+                            fun ppf -> fprintf ppf "%a| " pp_print_space ()))
+                        (fun _ -> ()) rules :
+                       Format.formatter -> unit)
                    in fprintf ppf " ]@]")
 
                 let levels ppf elev =
                   let _ =
-                    List.fold_left
-                      (fun sep lev ->
-                         let rules =
-                           (List.map (fun t -> Sself :: t)
-                              (flatten_tree lev.lsuffix))
-                             @ (flatten_tree lev.lprefix)
-                         in
-                           (fprintf ppf "%t@[<hov 2>" sep;
-                            (match lev.lname with
-                             | Some n -> fprintf ppf "%S@;<1 2>" n
-                             | None -> ());
-                            (match lev.assoc with
-                             | LeftA -> fprintf ppf "LEFTA"
-                             | RightA -> fprintf ppf "RIGHTA"
-                             | NonA -> fprintf ppf "NONA");
-                            fprintf ppf "@]@;<1 2>";
-                            print_level ppf pp_force_newline rules;
-                            fun ppf -> fprintf ppf "@,| "))
-                      (fun _ -> ()) elev
+                    (List.fold_left
+                       (fun sep lev ->
+                          let rules =
+                            (List.map (fun t -> Sself :: t)
+                               (flatten_tree lev.lsuffix))
+                              @ (flatten_tree lev.lprefix)
+                          in
+                            (fprintf ppf "%t@[<hov 2>" sep;
+                             (match lev.lname with
+                              | Some n -> fprintf ppf "%S@;<1 2>" n
+                              | None -> ());
+                             (match lev.assoc with
+                              | LeftA -> fprintf ppf "LEFTA"
+                              | RightA -> fprintf ppf "RIGHTA"
+                              | NonA -> fprintf ppf "NONA");
+                             fprintf ppf "@]@;<1 2>";
+                             print_level ppf pp_force_newline rules;
+                             fun ppf -> fprintf ppf "@,| "))
+                       (fun _ -> ()) elev :
+                      Format.formatter -> unit)
                   in ()
 
                 let entry ppf e =
@@ -18612,42 +18660,45 @@ module Struct =
                 and print_rule ppf symbols =
                   (fprintf ppf "@[<hov 0>";
                    let _ =
-                     List.fold_left
-                       (fun sep symbol ->
-                          (fprintf ppf "%t%a" sep print_symbol symbol;
-                           fun ppf -> fprintf ppf ";@ "))
-                       (fun _ -> ()) symbols
+                     (List.fold_left
+                        (fun sep symbol ->
+                           (fprintf ppf "%t%a" sep print_symbol symbol;
+                            fun ppf -> fprintf ppf ";@ "))
+                        (fun _ -> ()) symbols :
+                       Format.formatter -> unit)
                    in fprintf ppf "@]")
                 and print_level ppf pp_print_space rules =
                   (fprintf ppf "@[<hov 0>[ ";
                    let _ =
-                     List.fold_left
-                       (fun sep rule ->
-                          (fprintf ppf "%t%a" sep print_rule rule;
-                           fun ppf -> fprintf ppf "%a| " pp_print_space ()))
-                       (fun _ -> ()) rules
+                     (List.fold_left
+                        (fun sep rule ->
+                           (fprintf ppf "%t%a" sep print_rule rule;
+                            fun ppf -> fprintf ppf "%a| " pp_print_space ()))
+                        (fun _ -> ()) rules :
+                       Format.formatter -> unit)
                    in fprintf ppf " ]@]")
 
                 let levels ppf elev =
                   let _ =
-                    List.fold_left
-                      (fun sep lev ->
-                         (fprintf ppf "%t@[<v2>" sep;
-                          (match lev.lname with
-                           | Some n -> fprintf ppf "%S@;<1 2>" n
-                           | None -> ());
-                          (match lev.assoc with
-                           | LeftA -> fprintf ppf "LEFTA"
-                           | RightA -> fprintf ppf "RIGHTA"
-                           | NonA -> fprintf ppf "NONA");
-                          fprintf ppf "@]@;<1 2>";
-                          fprintf ppf "@[<v2>suffix:@ ";
-                          print_tree ppf lev.lsuffix;
-                          fprintf ppf "@]@ @[<v2>prefix:@ ";
-                          print_tree ppf lev.lprefix;
-                          fprintf ppf "@]";
-                          fun ppf -> fprintf ppf "@,| "))
-                      (fun _ -> ()) elev
+                    (List.fold_left
+                       (fun sep lev ->
+                          (fprintf ppf "%t@[<v2>" sep;
+                           (match lev.lname with
+                            | Some n -> fprintf ppf "%S@;<1 2>" n
+                            | None -> ());
+                           (match lev.assoc with
+                            | LeftA -> fprintf ppf "LEFTA"
+                            | RightA -> fprintf ppf "RIGHTA"
+                            | NonA -> fprintf ppf "NONA");
+                           fprintf ppf "@]@;<1 2>";
+                           fprintf ppf "@[<v2>suffix:@ ";
+                           print_tree ppf lev.lsuffix;
+                           fprintf ppf "@]@ @[<v2>prefix:@ ";
+                           print_tree ppf lev.lprefix;
+                           fprintf ppf "@]";
+                           fun ppf -> fprintf ppf "@,| "))
+                       (fun _ -> ()) elev :
+                      Format.formatter -> unit)
                   in ()
 
                 let entry ppf e =
@@ -23434,3 +23485,5 @@ module Register :
       let module M = Printer(PP.Null.Id)(PP.Null.Make) in ()
 
   end
+
+
