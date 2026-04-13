@@ -209,8 +209,8 @@ and print_simple_out_type ppf =
          else "? ")
         print_fields row_fields
         print_present tags
-  | Otyp_object {fields; open_row} ->
-      fprintf ppf "@[<2>< %a >@]" (print_fields open_row) fields
+  | Otyp_object {fields; row} ->
+      fprintf ppf "@[<2>< %a >@]" (print_object_fields row) fields
   | Otyp_class (id, tyl) ->
       fprintf ppf "@[%a#%a@]" print_typargs tyl
         print_ident id
@@ -223,7 +223,7 @@ and print_simple_out_type ppf =
       fprintf ppf "@[<hv 2>{ %a }@]"
         (print_list print_out_label (fun ppf -> fprintf ppf ";@ ")) lbls
   | Otyp_abstract -> fprintf ppf "<abstract>"
-  | Otyp_module {opack_path=p; opack_cstrs=fl} ->
+  | Otyp_module {opack_path=p; opack_constraints=fl} ->
       do {
           fprintf ppf "@[<1>(module %a" print_ident p;
           let first = ref True in
@@ -238,7 +238,10 @@ and print_simple_out_type ppf =
   | Otyp_alias _ | Otyp_poly _ _ | Otyp_open
   | Otyp_arrow _ _ _ | Otyp_constr _ [_ :: _] as ty ->
       fprintf ppf "@[<1>(%a)@]" print_out_type ty
-  | Otyp_attribute (_, _) -> ()]
+  | Otyp_attribute (_, _) -> ()
+  | Otyp_external _ -> assert False (* No revised syntax support *)
+  | Otyp_functor _ -> assert False (* No revised syntax support *)
+]
   in
   print_tkind ppf
 and print_out_constr ppf constr =
@@ -267,6 +270,7 @@ and print_out_label ppf out_label =
 and print_out_extension_constructor ppf ext =
   let print_extended_type ppf =
     let print_type_parameter ppf ty =
+      let ty = ty.ot_name in
       fprintf ppf "%s"
         (if ty = "_" then ty else "'"^ty)
     in
@@ -287,22 +291,23 @@ and print_out_extension_constructor ppf ext =
     print_extended_type
     (if ext.oext_private = Asttypes.Private then " private" else "")
     print_out_constr {ocstr_name = ext.oext_name; ocstr_args = ext.oext_args; ocstr_return_type = ext.oext_ret_type}
-and print_fields open_row ppf =
+and print_object_fields row ppf =
   fun
   [ [] ->
-      match open_row with
-      [ True -> fprintf ppf ".."
-      | False -> () ]
+      match row with
+      [ Orow_open_anonymous -> fprintf ppf ".."
+      | Orow_open ty -> fprintf ppf ".. as %a" print_out_type ty
+      | Orow_closed -> () ]
   | [(s, t)] ->
       do {
         fprintf ppf "%s : %a" s print_out_type t;
-        match open_row with
-        [ True -> fprintf ppf ";@ "
-        | False -> () ];
-        print_fields open_row ppf []
+        match row with
+        [ Orow_open_anonymous | Orow_open _ -> fprintf ppf ";@ "
+        | Orow_closed -> () ];
+        print_object_fields row ppf []
       }
   | [(s, t) :: l] ->
-      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_fields open_row) l ]
+      fprintf ppf "%s : %a;@ %a" s print_out_type t (print_object_fields row) l ]
 and print_row_field ppf (l, opt_amp, tyl) =
   let pr_of ppf =
     if opt_amp then fprintf ppf " of@ &@ "
@@ -483,7 +488,7 @@ and print_out_type_decl kwd ppf { otype_name    = name
                                 ; otype_params  = args
                                 ; otype_type    = ty
                                 ; otype_private = priv
-                                ; otype_cstrs   = constraints } =
+                                ; otype_constraints = constraints } =
   let constrain ppf (ty, ty') =
     fprintf ppf "@ @[<2>constraint %a =@ %a@]" Toploop.print_out_type.val ty
       Toploop.print_out_type.val ty'
