@@ -59,6 +59,7 @@ rm -f camlp4/boot/Lexer.ml
 
 for t in $TARGETS; do
   echo promote $t
+  sed -i.bak 's/  *$//' "$t"
   if cmp $t $t.old; then
     echo "fixpoint for $t"
   else
