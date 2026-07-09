@@ -21,7 +21,7 @@ all: byte native
 
 .PHONY: install
 install:
-	env DESTDIR=$(DESTDIR) sh ./build/install.sh
+	env DESTDIR=$(DESTDIR) BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) sh ./build/install.sh
 
 .PHONY: install-META
 install-META: camlp4/META
